@@ -3,6 +3,7 @@ package fr.univartois.butinfo.sae.abyss.social.model;
 import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -20,9 +21,9 @@ public class Post {
     @Id
     private ObjectId id;
 
-    /** Identifier of the user who created the post. */
-    @Field("user_id")
-    private ObjectId userId;
+    /** User who creates the post */
+    @DBRef
+    private User user;
 
     /** Main textual content of the post. */
     private String content;
@@ -51,12 +52,10 @@ public class Post {
     /**
      * Builds a post with an author and content.
      *
-     * @param userId  identifier of the author
-     * @param content text content of the post
+     * @param user  The author
      */
-    public Post(ObjectId userId, String content) {
-        this.userId = userId;
-        this.content = content;
+    public Post(User user) {
+        this.user = user;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -68,19 +67,19 @@ public class Post {
     }
 
     /**
-     * @return the identifier of the author
+     * @return the author
      */
-    public ObjectId getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
     /**
-     * Sets the identifier of the author.
+     * Sets the author.
      *
-     * @param userId author identifier
+     * @param user author
      */
-    public void setUserId(ObjectId userId) {
-        this.userId = userId;
+    public void setUserId(User user) {
+        this.user = user;
     }
 
     /**
