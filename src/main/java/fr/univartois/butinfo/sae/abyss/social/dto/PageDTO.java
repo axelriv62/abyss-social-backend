@@ -11,6 +11,9 @@ import java.time.LocalDateTime;
 public record PageDTO (
         ObjectId id,
 
+        @NotNull(message = "User ID cannot be blank")
+        ObjectId userId,
+
         @NotBlank(message = "Page name cannot be blank")
         @Size(min = 3, max = 50, message = "Page name must be between 3 and 50 characters")
         String name,
