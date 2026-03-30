@@ -1,1 +1,1 @@
-rootProject.name = "abyss-explore"
+rootProject.name = "abyss-social"
