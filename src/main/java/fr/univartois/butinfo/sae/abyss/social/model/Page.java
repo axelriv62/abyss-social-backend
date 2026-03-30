@@ -1,8 +1,9 @@
-package fr.univartois.butinfo.sae.abyss.explore.model;
+package fr.univartois.butinfo.sae.abyss.social.model;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +19,12 @@ public class Page {
      */
     @Id
     private ObjectId id;
+
+    /**
+     * The identifier of the user who created the Page.
+     */
+    @Field("user_id")
+    private ObjectId userId;
 
     /**
      * The name or title of the Page.
@@ -37,6 +44,7 @@ public class Page {
     /**
      * The timestamp indicating when the Page was created.
      */
+    @Field("created_at")
     private LocalDateTime createdAt;
 
     /**
@@ -151,5 +159,23 @@ public class Page {
      */
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    /**
+     * Gets the identifier of the user who created the Page.
+     *
+     * @return The ObjectId of the user who created the Page.
+     */
+    public ObjectId getUserId() {
+        return userId;
+    }
+
+    /**
+     * Sets the identifier of the user who created the Page.
+     *
+     * @param userId The ObjectId of the user to set.
+     */
+    public void setUserId(ObjectId userId) {
+        this.userId = userId;
     }
 }
