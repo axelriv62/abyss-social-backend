@@ -1,5 +1,6 @@
 package fr.univartois.butinfo.sae.abyss.social.model;
 
+import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -25,6 +26,9 @@ public class Post {
 
     /** Main textual content of the post. */
     private String content;
+
+    /** Image of the post */
+    private Binary image;
 
     /** Identifiers of comments attached to this post. */
     private ObjectId[] comments = new ObjectId[0];
@@ -94,6 +98,21 @@ public class Post {
     public void setContent(String content) {
         this.content = content;
     }
+
+    /**
+     * @return the image of the post
+     */
+
+    public Binary getImage() {
+        return image;
+    }
+
+    /**
+     * Updates the post image.
+     *
+     * @param image new image
+     */
+    public void setImage(Binary image) {}
 
     /**
      * @return comment identifiers linked to this post
