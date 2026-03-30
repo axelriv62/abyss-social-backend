@@ -1,8 +1,5 @@
 package fr.univartois.butinfo.sae.abyss.social.model;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -12,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 
 @Document(collection = "Posts")
+
 /**
  * MongoDB document representing a social post.
  */
