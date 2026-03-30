@@ -2,6 +2,7 @@ package fr.univartois.butinfo.sae.abyss.social.model;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -21,10 +22,10 @@ public class Page {
     private ObjectId id;
 
     /**
-     * The identifier of the user who created the Page.
+     * The user who created the Page, referenced as a DBRef to the User collection.
      */
-    @Field("user_id")
-    private ObjectId userId;
+    @DBRef
+    private User user;
 
     /**
      * The name or title of the Page.
@@ -46,6 +47,13 @@ public class Page {
      */
     @Field("created_at")
     private LocalDateTime createdAt;
+
+    /**
+     * Default constructor for MongoDB deserialization.
+     */
+    public Page() {
+        // Default constructor for MongoDB deserialization
+    }
 
     /**
      * Constructor to create a Page with a name.
@@ -162,20 +170,20 @@ public class Page {
     }
 
     /**
-     * Gets the identifier of the user who created the Page.
-     *
-     * @return The ObjectId of the user who created the Page.
-     */
-    public ObjectId getUserId() {
-        return userId;
+    * Gets the user who created the Page.
+    *
+    * @return The User who created the Page.
+    */
+    public User getUser() {
+        return user;
     }
 
     /**
-     * Sets the identifier of the user who created the Page.
+     * Sets the user who created the Page.
      *
-     * @param userId The ObjectId of the user to set.
+     * @param user The User to set as the creator of the Page.
      */
-    public void setUserId(ObjectId userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 }
