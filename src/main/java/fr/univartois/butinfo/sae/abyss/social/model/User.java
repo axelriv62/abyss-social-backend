@@ -73,6 +73,14 @@ public class User {
     }
 
     /**
+     * Default constructor for User.
+     * This is required by Spring Data MongoDB to create instances of the User class when retrieving data from the database.
+     */
+    public User() {
+
+    }
+
+    /**
      * Constructs a new User with the specified username.
      *
      * @param username The username of the user.
