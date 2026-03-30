@@ -28,7 +28,6 @@ public record UserDTO(
         String email,
 
         // The role of the user
-        @NotNull(message = "Role cannot be null")
         ROLES role,
 
         // The profile picture of the user, stored as binary data
