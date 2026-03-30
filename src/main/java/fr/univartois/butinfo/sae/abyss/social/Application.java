@@ -1,4 +1,4 @@
-package fr.univartois.butinfo.sae.abyss.explore;
+package fr.univartois.butinfo.sae.abyss.social;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
