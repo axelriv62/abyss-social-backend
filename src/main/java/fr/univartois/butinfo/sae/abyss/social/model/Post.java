@@ -21,24 +21,19 @@ public class Post {
     private ObjectId id;
 
     /** Identifier of the user who created the post. */
-    @NotNull
     @Field("user_id")
     private ObjectId userId;
 
     /** Main textual content of the post. */
-    @NotBlank
     private String content;
 
     /** Identifiers of comments attached to this post. */
-    @NotNull
     private ObjectId[] comments = new ObjectId[0];
 
-    /** Number of likes, always non-negative. */
-    @Min(0)
+    /** Number of likes */
     private int like = 0;
 
-    /** Number of dislikes, always non-negative. */
-    @Min(0)
+    /** Number of dislikes */
     private int dislike = 0;
 
     /** Timestamp of post creation. */
