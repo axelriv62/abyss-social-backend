@@ -68,6 +68,10 @@ public class User {
      */
     private LocalDateTime createdAt;
 
+    public User(){
+
+    }
+
     /**
      * Constructs a new User with the specified username.
      *
