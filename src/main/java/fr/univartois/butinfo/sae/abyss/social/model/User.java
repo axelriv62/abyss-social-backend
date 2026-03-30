@@ -68,10 +68,6 @@ public class User {
      */
     private LocalDateTime createdAt;
 
-    public User(){
-
-    }
-
     /**
      * Default constructor for User.
      * This is required by Spring Data MongoDB to create instances of the User class when retrieving data from the database.
