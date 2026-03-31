@@ -61,6 +61,27 @@ public class GroupController {
         return ResponseEntity.status(HttpStatus.CREATED).body(groupMapper.toDTO(savedGroup));
     }
 
+    /**
+     * Handles the update of an existing Group by its ID.
+     * @param id The ObjectId of the Group to be updated.
+     * @param groupDTO The GroupDTO containing the updated data for the Group.
+     * @return A ResponseEntity containing the updated GroupDTO if the update was successful, or a 404 (Not Found) status if the Group does not exist.
+     */
+    @Operation(summary = "Update a group", description = "Update the group with the specified ID. If the group does not exist, a 404 Not Found response is returned.")
+    @ApiResponse(responseCode = "", description = "Group successfully updated")
+    @ApiResponse(responseCode = "404", description = "Group not found")
+    @PutMapping("/{id}")
+    public ResponseEntity<GroupDTO> updateGroup(@PathVariable("id") ObjectId id, @Valid @RequestBody GroupDTO groupDTO) {
+        return groupService.findById(id)
+                .map(existingGroup -> {
+                    // Apply incoming DTO values to the existing entity
+                    Group toSave = groupMapper.toEntity(groupDTO);
+                    toSave.setId(id); // ensure the ID is the path id
+                    Group updatedGroup = groupService.updateGroup(id, toSave); // adjust service to return updated entity
+                    return ResponseEntity.ok(groupMapper.toDTO(updatedGroup));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
 
     /**
      * Handles the deletion of a Group by its ID.

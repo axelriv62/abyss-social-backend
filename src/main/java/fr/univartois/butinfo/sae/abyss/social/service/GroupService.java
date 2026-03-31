@@ -12,43 +12,60 @@ import java.util.Optional;
 
 @Service
 public class GroupService {
-
-    // Repository used to persist Group entities in MongoDB
     private final GroupRepository groupRepository;
 
-    /*
-     // Constructor injection of required dependencies.
-     // Keep constructor minimal so Spring can autowire only what is needed.
+    /**
+     * Constructor for GroupService.
+     * @param groupRepository The repository used to persist Group entities.
+     *
     */
     public GroupService(GroupRepository groupRepository, GroupMapper groupMapper) {
         this.groupRepository = groupRepository;
     }
 
+    /**
+     * Find a group by its id in the database and return it.
+     * @param id the id of the group to find
+     * @return the group
+     */
     public Optional<Group> findById(ObjectId id) {
         return groupRepository.findById(id);
     }
 
-    public Optional<Group> addTagToGroup(ObjectId id, String tag_to_add) {
+    /**
+     * Update a group by its id in the database and return the updated group.
+     * @param id the id of the group to update
+     * @param body the new body
+     * @return the updated group
+     * @throws IllegalArgumentException if group not found
+     */
+    public Group updateGroup(ObjectId id, Group body) {
         return groupRepository.findById(id).map(group -> {
-            String[] current_tags = group.getTags();
-            String[] new_tags = new String[current_tags.length + 1];
-            System.arraycopy(current_tags, 0, new_tags, 0, current_tags.length);
-            new_tags[current_tags.length] = tag_to_add;
-            group.setTags(new_tags);
+            group.setName(body.getName());
+            group.setTags(body.getTags());
             return groupRepository.save(group);
-        });
+        }).orElseThrow(() -> new IllegalArgumentException("Group not found: " + id));
     }
 
+
+
+
+    /**
+     * Saves a Group entity to the database.
+     * @param group The Group entity to save.
+     * @return The saved Group entity.
+     */
     public Group save(Group group) {
         if (group.getCreatedAt() == null) {
             group.setCreatedAt(LocalDateTime.now());
         }
         return groupRepository.save(group);
     }
+
     /**
-     * Deletes a Page entity by its ID.
-     * @param id The ObjectId of the Page to be deleted.
-     * @return true if the Page was successfully deleted, false if the Page does not exist.
+     * Deletes a Group entity by its ID.
+     * @param id The ObjectId of the Group to be deleted.
+     * @return true if the Group was successfully deleted, false if the Page does not exist.
      */
     public boolean deleteById(ObjectId id) {
         if (groupRepository.existsById(id)) {
