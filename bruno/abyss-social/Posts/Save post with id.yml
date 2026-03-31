@@ -10,8 +10,8 @@ http:
     type: json
     data: |-
       {
-        "userId": "69cb84f043ea96fd7e4e3e2a",
-        "content": "try45",
+        "userId": "69cb907a30ff12f3b65b2557",
+        "content": "Essai mardi matin",
         "comments": [],
         "like": 0,
         "dislike": 0

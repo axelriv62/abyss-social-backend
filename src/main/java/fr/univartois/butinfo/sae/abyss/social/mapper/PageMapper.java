@@ -31,6 +31,7 @@ public interface PageMapper {
      * @return the mapped page entity.
      */
     @Mapping(source = "userId", target = "user")
+    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     Page toEntity(PageDTO pageDTO);
 
     /**

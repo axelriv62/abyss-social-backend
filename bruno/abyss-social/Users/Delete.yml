@@ -5,7 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: "{{URL}}/users/69caadcc4f0a00f06e7fbb0e"
+  url: "{{URL}}/users/69cb90cc30ff12f3b65b2559"
   body:
     type: multipart-form
   auth: inherit
