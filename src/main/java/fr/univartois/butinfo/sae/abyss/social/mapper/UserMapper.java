@@ -33,7 +33,7 @@ public interface UserMapper {
     @Mapping(target = "friends", defaultExpression = "java(new java.util.ArrayList<>())")
     @Mapping(target = "usersBanned", defaultExpression = "java(new java.util.ArrayList<>())")
     @Mapping(target = "groups", defaultExpression = "java(new java.util.ArrayList<>())")
-    @Mapping(target = "pages", ignore = true)
+    @Mapping(target = "pages", defaultExpression = "java(new java.util.ArrayList<>())")
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     User toEntity(UserDTO userDTO);
 

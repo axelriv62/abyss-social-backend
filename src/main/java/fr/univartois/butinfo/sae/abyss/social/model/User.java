@@ -4,6 +4,7 @@ import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class User {
     /**
      * The profile picture of the user, stored as binary data.
      */
+    @Field("profile_picture")
     private Binary profilePicture;
 
     /**
@@ -51,6 +53,7 @@ public class User {
     /**
      * A list of ObjectIds representing the users banned by this user.
      */
+    @Field("users_banned")
     private List<ObjectId> usersBanned;
 
     /**
@@ -66,6 +69,7 @@ public class User {
     /**
      * The date and time when the user was created.
      */
+    @Field("created_at")
     private LocalDateTime createdAt;
 
     /**

@@ -1,0 +1,17 @@
+info:
+  name: Delete
+  type: http
+  seq: 2
+
+http:
+  method: DELETE
+  url: "{{URL}}/users/69caadcc4f0a00f06e7fbb0e"
+  body:
+    type: multipart-form
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

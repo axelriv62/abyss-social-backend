@@ -42,6 +42,9 @@ public record UserDTO(
         // List of group ObjectIds the user belongs to
         List<ObjectId> groups,
 
+        // List of pages ObjectIds the user belongs to
+        List<ObjectId> pages,
+
         // The timestamp when the user was created
         @PastOrPresent(message = "Creation date cannot be in the future")
         LocalDateTime createdAt
