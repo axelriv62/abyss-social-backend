@@ -52,6 +52,20 @@ public class PageService {
     }
 
     /**
+     * Updates an existing Page entity with the specified ID using the provided Page data.
+     * @param id The ObjectId of the Page to be updated.
+     * @param body The Page object containing the updated data for the Page entity.
+     * @return The updated Page entity after saving it to the database.
+     */
+    public Page updatePage(ObjectId id, Page body) {
+        return pageRepository.findById(id).map(page -> {
+            page.setName(body.getName());
+            page.setTags(body.getTags());
+            return pageRepository.save(page);
+        }).orElseThrow(() -> new IllegalArgumentException("Page not found: " + id));
+    }
+
+    /**
      * Deletes a Page entity by its ID.
      * @param id The ObjectId of the Page to be deleted.
      * @return true if the Page was successfully deleted, false if the Page does not exist.
