@@ -21,11 +21,11 @@ public record PostDTO (
         @NotNull(message = "Comments tab cannot be null")
         ObjectId[] comments,
 
-        @Min(value=0, message="Like count cannot be negative")
-        int like,
+        @NotNull(message = "Likes tab cannot be null")
+        ObjectId[] likes,
 
-        @Min(value=0, message="Dislike count cannot be negative")
-        int dislike,
+        @NotNull(message = "Dislikes tab cannot be null")
+        ObjectId[] dislikes,
 
         @PastOrPresent(message="Creation date cannot be in the future")
         LocalDateTime createdAt

@@ -45,5 +45,43 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
-}
+    @Operation(summary = "Like a post", description = "Registers a like from the provided user on the selected post.")
+    @ApiResponse(responseCode = "200", description = "Post liked")
+    @ApiResponse(responseCode = "400", description = "Invalid identifiers")
+    @ApiResponse(responseCode = "404", description = "Post or user not found")
+    @PostMapping("/{postId}/likes")
+    public ResponseEntity<PostDTO> likePost(@PathVariable ObjectId postId, @RequestParam ObjectId userId) {
+        Post updated = postService.likePost(postId, userId);
+        return ResponseEntity.ok(postMapper.toDTO(updated));
+    }
 
+    @Operation(summary = "Remove a like", description = "Removes the like previously set by the provided user on this post.")
+    @ApiResponse(responseCode = "200", description = "Like removed")
+    @ApiResponse(responseCode = "400", description = "Invalid identifiers")
+    @ApiResponse(responseCode = "404", description = "Post or user not found")
+    @DeleteMapping("/{postId}/likes")
+    public ResponseEntity<PostDTO> unlikePost(@PathVariable ObjectId postId, @RequestParam ObjectId userId) {
+        Post updated = postService.unlikePost(postId, userId);
+        return ResponseEntity.ok(postMapper.toDTO(updated));
+    }
+
+    @Operation(summary = "Dislike a post", description = "Registers a dislike from the provided user on the selected post.")
+    @ApiResponse(responseCode = "200", description = "Post disliked")
+    @ApiResponse(responseCode = "400", description = "Invalid identifiers")
+    @ApiResponse(responseCode = "404", description = "Post or user not found")
+    @PostMapping("/{postId}/dislikes")
+    public ResponseEntity<PostDTO> dislikePost(@PathVariable ObjectId postId, @RequestParam ObjectId userId) {
+        Post updated = postService.dislikePost(postId, userId);
+        return ResponseEntity.ok(postMapper.toDTO(updated));
+    }
+
+    @Operation(summary = "Remove a dislike", description = "Removes the dislike previously set by the provided user on this post.")
+    @ApiResponse(responseCode = "200", description = "Dislike removed")
+    @ApiResponse(responseCode = "400", description = "Invalid identifiers")
+    @ApiResponse(responseCode = "404", description = "Post or user not found")
+    @DeleteMapping("/{postId}/dislikes")
+    public ResponseEntity<PostDTO> undislikePost(@PathVariable ObjectId postId, @RequestParam ObjectId userId) {
+        Post updated = postService.undislikePost(postId, userId);
+        return ResponseEntity.ok(postMapper.toDTO(updated));
+    }
+}
