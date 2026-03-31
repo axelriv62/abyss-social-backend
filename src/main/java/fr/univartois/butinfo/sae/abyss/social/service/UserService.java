@@ -3,7 +3,9 @@ package fr.univartois.butinfo.sae.abyss.social.service;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 import org.bson.types.ObjectId;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Service class for managing User entities, providing business logic for user-related operations.
@@ -38,6 +40,9 @@ public class UserService {
      * @param id The unique identifier of the user to be deleted
      */
     public void deleteById(ObjectId id) {
+        if (!userRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
         userRepository.deleteById(id);
     }
 }
