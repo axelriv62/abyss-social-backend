@@ -46,6 +46,9 @@ public class GroupService {
      */
     public Group updateGroup(ObjectId id, Group body) {
         return groupRepository.findById(id).map(group -> {
+            if (group.getCreatedAt() == null) {
+                group.setCreatedAt(LocalDateTime.now());
+            }
             if (body.getName() != null) {
                 group.setName(body.getName());
             }
@@ -75,6 +78,7 @@ public class GroupService {
         if (!userRepository.existsById(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found for userId=" + userId.toHexString());
         }
+        group.setCreatedAt(LocalDateTime.now());
         return groupRepository.save(group);
     }
 
