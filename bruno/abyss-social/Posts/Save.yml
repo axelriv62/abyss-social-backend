@@ -1,17 +1,19 @@
 info:
-  name: Save user
+  name: Save
   type: http
   seq: 1
 
 http:
   method: POST
-  url: "{{URL}}/users"
+  url: "{{URL}}/posts"
   body:
     type: json
     data: |
       {
-        "username": "robert_duchmol",
-        "email": "robertduchmol@example.com",
+        "content": "Post test",
+        "comments": [],
+        "like": 0,
+        "dislike": 0
       }
   auth: inherit
 

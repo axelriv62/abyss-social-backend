@@ -1,0 +1,24 @@
+info:
+  name: Save
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{URL}}/pages"
+  body:
+    type: json
+    data: |
+      {
+        "userId": "652d1f9e8f1b2c3d4e5f6a7b",
+        "name": "My Page",
+        "tags": ["tag1", "tag2"],
+        "posts": []
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
