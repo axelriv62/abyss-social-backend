@@ -50,7 +50,7 @@ public class Post {
 
     /** Default constructor required by Spring Data. */
     public Post() {
-
+        // No initialization needed here, as fields are set to default values.
     }
 
     /**
