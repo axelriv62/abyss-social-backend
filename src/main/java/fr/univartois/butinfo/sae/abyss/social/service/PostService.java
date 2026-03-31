@@ -20,7 +20,6 @@ public class PostService {
     }
 
     public Post save(Post post) {
-        //ObjectId userId = post.getUser() != null ? post.getUser().getId() : null;
         // Extract the user's ObjectId from the post if a user is associated, otherwise leave it as null.
         ObjectId userId;
         if (post.getUser() != null) {
