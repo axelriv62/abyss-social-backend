@@ -67,4 +67,25 @@ public class PageController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    /**
+     * Handles the update of an existing Page by its ID.
+     * @param id The ObjectId of the Page to be updated.
+     * @param pageDTO The PageDTO containing the updated details of the page. The request body must contain a valid PageDTO object. If the page does not exist, a 404 Not Found response is returned.
+     * @return A ResponseEntity containing the updated PageDTO and HTTP status 200 (OK) if the update was successful, or 404 (Not Found) if the Page does not exist.
+     */
+    @Operation(summary = "Update a page", description = "Updates the page with the specified ID using the provided details. The request body must contain a valid PageDTO object. If the page does not exist, a 404 Not Found response is returned.")
+    @ApiResponse(responseCode = "200", description = "Page successfully updated")
+    @ApiResponse(responseCode = "400", description = "Invalid data")
+    @PutMapping("/{id}")
+    public ResponseEntity<PageDTO> updatePage(@PathVariable ObjectId id, @Valid @RequestBody PageDTO pageDTO) {
+        return pageService.findById(id)
+                .map(existingPage -> {
+                    Page page = pageMapper.toEntity(pageDTO);
+                    page.setId(id);
+                    Page updatedPage = pageService.updatePage(id, page);
+                    return ResponseEntity.ok(pageMapper.toDTO(updatedPage));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
