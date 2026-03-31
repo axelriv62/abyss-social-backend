@@ -1,5 +1,6 @@
 package fr.univartois.butinfo.sae.abyss.social.model;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,16 +12,13 @@ import java.time.LocalDateTime;
 public class Group {
 
     @Id
-    private String id;
-
-    @DBRef
-    private User user;
+    private ObjectId id;
 
     private String name;
 
     private String[] tags;
 
-    private String[] posts;
+    private ObjectId[] posts;
 
     @Field("created_at")
     private LocalDateTime createdAt;
@@ -38,11 +36,8 @@ public class Group {
         this.createdAt = LocalDateTime.now();
     }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public ObjectId getId() { return id; }
+    public void setId(ObjectId id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -50,8 +45,8 @@ public class Group {
     public String[] getTags() { return tags; }
     public void setTags(String[] tags) { this.tags = tags; }
 
-    public String[] getPosts() { return posts; }
-    public void setPosts(String[] posts) { this.posts = posts; }
+    public ObjectId[] getPosts() { return posts; }
+    public void setPosts(ObjectId[] posts) { this.posts = posts; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

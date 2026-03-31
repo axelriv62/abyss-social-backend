@@ -2,32 +2,15 @@ package fr.univartois.butinfo.sae.abyss.social.mapper;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.GroupDTO;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
 
-@Component
-public class GroupMapper {
+import java.util.List;
 
-    public GroupDTO toDTO(Group group) {
-        if (group == null) return null;
+@Mapper(componentModel = "spring")
+public interface GroupMapper {
+    GroupDTO toDTO(Group group);
 
-        GroupDTO dto = new GroupDTO();
-        dto.setId(group.getId());
-        dto.setName(group.getName());
-        dto.setTags(group.getTags());
-        dto.setPosts(group.getPosts());
-        dto.setCreatedAt(group.getCreatedAt());
-        return dto;
-    }
+    Group toEntity(GroupDTO GroupDTO);
 
-    public Group toEntity(GroupDTO dto) {
-        if (dto == null) return null;
-
-        Group group = new Group();
-        group.setId(dto.getId());
-        group.setName(dto.getName());
-        group.setTags(dto.getTags());
-        group.setPosts(dto.getPosts());
-        group.setCreatedAt(dto.getCreatedAt());
-        return group;
-    }
+    List<GroupDTO> toDTOList(List<Group> groups);
 }
