@@ -8,7 +8,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.ArrayList;
 
 @Mapper(componentModel = "spring")
 public interface GroupMapper {
@@ -20,18 +20,25 @@ public interface GroupMapper {
 
     default ObjectId[] toObjectIdArray(String[] ids) {
         if (ids == null) return null;
-        return Arrays.stream(ids)
+        List<String> invalid = new ArrayList<>();
+        ObjectId[] result = Arrays.stream(ids)
                 .filter(Objects::nonNull)
                 .map(String::trim)
-                .flatMap(s -> {
+                .map(s -> {
                     try {
-                        return Stream.of(new ObjectId(s));
+                        return new ObjectId(s);
                     } catch (IllegalArgumentException ex) {
-                        // invalid hex string -> ignore this id
-                        return Stream.empty();
+                        invalid.add(s);
+                        return null;
                     }
                 })
+                .filter(Objects::nonNull)
                 .toArray(ObjectId[]::new);
+
+        if (!invalid.isEmpty()) {
+            throw new IllegalArgumentException("Invalid ObjectId hex string(s) in posts: " + String.join(", ", invalid));
+        }
+        return result;
     }
 
     default String[] toStringArray(ObjectId[] ids) {

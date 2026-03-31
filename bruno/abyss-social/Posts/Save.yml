@@ -10,7 +10,7 @@ http:
     type: json
     data: |
       {
-        "content": "Post test",
+        "content": "Post test23",
         "comments": [],
         "like": 0,
         "dislike": 0

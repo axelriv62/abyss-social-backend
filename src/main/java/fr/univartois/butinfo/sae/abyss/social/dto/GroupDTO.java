@@ -1,6 +1,5 @@
 package fr.univartois.butinfo.sae.abyss.social.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import org.bson.types.ObjectId;
 
@@ -24,4 +23,4 @@ public record GroupDTO (
 
         @PastOrPresent(message = "Creation date cannot be in the future")
         LocalDateTime createdAt
-    ) {}
+) {}

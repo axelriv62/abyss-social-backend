@@ -21,7 +21,7 @@ public class Group {
 
     private String[] tags;
 
-    private String[] posts;
+    private ObjectId[] posts;
 
     @Field("created_at")
     private LocalDateTime createdAt;
@@ -48,8 +48,8 @@ public class Group {
     public String[] getTags() { return tags; }
     public void setTags(String[] tags) { this.tags = tags; }
 
-    public String[] getPosts() { return posts; }
-    public void setPosts(String[] posts) { this.posts = posts; }
+    public ObjectId[] getPosts() { return posts; }
+    public void setPosts(ObjectId[] posts) { this.posts = posts; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
