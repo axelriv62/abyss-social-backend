@@ -12,17 +12,34 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST controller exposing CRUD and reaction endpoints for posts.
+ */
 @RestController
 @RequestMapping("/posts")
 public class PostController {
+    /** Service handling business logic for posts. */
     private final PostService postService;
+    /** Mapper converting between Post entities and DTOs. */
     private final PostMapper postMapper;
 
+    /**
+     * Builds the controller with required collaborators.
+     *
+     * @param postService service managing posts
+     * @param postMapper mapper converting Post ↔ PostDTO
+     */
     public PostController(PostService postService, PostMapper postMapper) {
         this.postService = postService;
         this.postMapper = postMapper;
     }
 
+    /**
+     * Creates a post from the provided payload.
+     *
+     * @param postDTO payload describing the post to create
+     * @return the persisted post DTO
+     */
     @Operation(summary = "Create a new post", description = "Create a new post with the provided data")
     @ApiResponse(responseCode = "200", description = "Post successfully created")
     @ApiResponse(responseCode = "400", description = "Invalid data")
@@ -36,6 +53,12 @@ public class PostController {
 
     }
 
+    /**
+     * Deletes an existing post using its identifier.
+     *
+     * @param id identifier of the post to delete
+     * @return empty response when deletion succeeds
+     */
     @Operation(summary = "Delete a post", description = "Delete a post with the specified ID")
     @ApiResponse(responseCode = "204", description = "Post successfully deleted")
     @ApiResponse(responseCode = "400", description = "Post don't exist")
@@ -45,6 +68,9 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Registers a like from the provided user on the selected post.
+     */
     @Operation(summary = "Like a post", description = "Registers a like from the provided user on the selected post.")
     @ApiResponse(responseCode = "200", description = "Post liked")
     @ApiResponse(responseCode = "400", description = "Invalid identifiers")
@@ -55,6 +81,9 @@ public class PostController {
         return ResponseEntity.ok(postMapper.toDTO(updated));
     }
 
+    /**
+     * Removes the like previously set by the user on this post.
+     */
     @Operation(summary = "Remove a like", description = "Removes the like previously set by the provided user on this post.")
     @ApiResponse(responseCode = "200", description = "Like removed")
     @ApiResponse(responseCode = "400", description = "Invalid identifiers")
@@ -65,6 +94,9 @@ public class PostController {
         return ResponseEntity.ok(postMapper.toDTO(updated));
     }
 
+    /**
+     * Registers a dislike from the provided user on the selected post.
+     */
     @Operation(summary = "Dislike a post", description = "Registers a dislike from the provided user on the selected post.")
     @ApiResponse(responseCode = "200", description = "Post disliked")
     @ApiResponse(responseCode = "400", description = "Invalid identifiers")
@@ -75,6 +107,9 @@ public class PostController {
         return ResponseEntity.ok(postMapper.toDTO(updated));
     }
 
+    /**
+     * Removes the dislike previously set by the user on this post.
+     */
     @Operation(summary = "Remove a dislike", description = "Removes the dislike previously set by the provided user on this post.")
     @ApiResponse(responseCode = "200", description = "Dislike removed")
     @ApiResponse(responseCode = "400", description = "Invalid identifiers")

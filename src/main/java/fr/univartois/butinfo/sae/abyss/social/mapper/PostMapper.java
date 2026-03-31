@@ -20,7 +20,6 @@ public interface PostMapper {
     @Mapping(source = "user", target = "userId")
     PostDTO toDTO(Post post);
 
-    //@Mapping(source = "userId", target = "user")
     List<PostDTO> toDTOs(List<Post> posts);
 
     @Mapping(target = "likes", expression = "java(mapIdsToUsers(postDTO.likes()))")
