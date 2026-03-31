@@ -12,10 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-/*
- // REST controller for Group resources.
- // Uses GroupService for business logic and GroupMapper to convert between DTO and entity.
- // The service is responsible for setting server-side fields (e.g. createdAt) before persistence.
+/**
+  *REST controller for Group resources.
+  *Uses GroupService for business logic and GroupMapper to convert between DTO and entity.
+  *The service is responsible for setting server-side fields (e.g. createdAt) before persistence.
 */
 @RestController
 @RequestMapping("/groups")

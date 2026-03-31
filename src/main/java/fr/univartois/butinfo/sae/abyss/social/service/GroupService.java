@@ -10,8 +10,13 @@ import java.time.LocalDateTime;
 @Service
 public class GroupService {
 
+    // Repository used to persist Group entities in MongoDB
     private final GroupRepository groupRepository;
 
+    /*
+     // Constructor injection of required dependencies.
+     // Keep constructor minimal so Spring can autowire only what is needed.
+    */
     public GroupService(GroupRepository groupRepository, GroupMapper groupMapper) {
         this.groupRepository = groupRepository;
     }
