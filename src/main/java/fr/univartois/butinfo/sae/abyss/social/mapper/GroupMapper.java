@@ -31,13 +31,6 @@ public interface GroupMapper {
     GroupDTO toDTO(Group group);
 
     Group toEntity(GroupDTO groupDTO);
-    /**
-     * Convert a {@link GroupDTO} to a {@link Group} entity.
-     *
-     * @param GroupDTO the DTO to convert; may be null
-     * @return an entity built from the DTO, or null if the input was null
-     */
-    Group toEntity(GroupDTO GroupDTO);
 
     /**
      * Convert a list of {@link Group} entities to a list of {@link GroupDTO}.
@@ -71,7 +64,7 @@ public interface GroupMapper {
     }
 
     default String[] toStringArray(ObjectId[] ids) {
-        if (ids == null) return null;
+        if (ids == null) return new String[0];
         return Arrays.stream(ids)
                 .map(ObjectId::toHexString)
                 .toArray(String[]::new);
