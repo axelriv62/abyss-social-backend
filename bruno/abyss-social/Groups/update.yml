@@ -1,0 +1,32 @@
+info:
+  name: update
+  type: http
+  seq: 3
+
+http:
+  method: put
+  url: "{{URL}}/groups/69cbc0719b5d6acf5f215560"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "CA MARCHE l'heure",
+        "tags": [
+          "tag1",
+          "tag202011",
+          "MonSuperTag",
+          "Axeltropbeau",
+          "parfait"
+        ],
+        "posts": ["178576adf7552155sd", "8784512784512aedasd", "8741856"]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: false
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
