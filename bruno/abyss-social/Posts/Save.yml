@@ -1,0 +1,24 @@
+info:
+  name: Save
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{URL}}/posts"
+  body:
+    type: json
+    data: |
+      {
+        "content": "Post test23",
+        "comments": [],
+        "like": 0,
+        "dislike": 0
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

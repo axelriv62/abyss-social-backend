@@ -1,0 +1,4 @@
+name: abyss-social
+variables:
+  - name: URL
+    value: http://localhost:8080

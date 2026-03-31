@@ -1,0 +1,15 @@
+info:
+  name: Delete group
+  type: http
+  seq: 2
+
+http:
+  method: DELETE
+  url: "{{URL}}/groups/69cb929c30ff12f3b65b255c"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
