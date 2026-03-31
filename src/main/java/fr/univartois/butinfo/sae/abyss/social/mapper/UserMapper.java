@@ -1,6 +1,7 @@
 package fr.univartois.butinfo.sae.abyss.social.mapper;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.UserDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.UserResponseDTO;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -20,6 +21,7 @@ public interface UserMapper {
      * @param user The User entity to be converted to a UserDTO
      * @return A UserDTO object containing the data from the User entity, suitable for transfer between layers of the application
      */
+    @Mapping(target = "password", ignore = true)
     UserDTO toDTO(User user);
 
     /**

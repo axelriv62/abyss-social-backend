@@ -1,4 +1,4 @@
-package fr.univartois.butinfo.sae.abyss.social.swagger;
+package fr.univartois.butinfo.sae.abyss.social.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;

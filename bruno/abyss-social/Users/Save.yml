@@ -13,7 +13,6 @@ http:
         "username": "robert_duchmol2",
         "email": "robertduchmol@example.com"
       }
-  auth: inherit
 
 settings:
   encodeUrl: true
