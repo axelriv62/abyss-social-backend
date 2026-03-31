@@ -2,6 +2,7 @@ package fr.univartois.butinfo.sae.abyss.social.service;
 
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 /**
@@ -30,5 +31,13 @@ public class UserService {
      */
     public User save(User user) {
         return userRepository.save(user);
+    }
+
+    /**
+     * Delete a user by their unique identifier. This method uses the UserRepository to delete the user with the specified ID from the database.
+     * @param id The unique identifier of the user to be deleted
+     */
+    public void deleteById(ObjectId id) {
+        userRepository.deleteById(id);
     }
 }
