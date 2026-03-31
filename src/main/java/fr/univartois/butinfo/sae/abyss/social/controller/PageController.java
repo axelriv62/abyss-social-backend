@@ -61,7 +61,7 @@ public class PageController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePage(@PathVariable ObjectId id) {
         return pageService.findById(id)
-                .map(league -> {
+                .map(page -> {
                     pageService.deleteById(id);
                     return ResponseEntity.noContent().<Void>build();
                 })
