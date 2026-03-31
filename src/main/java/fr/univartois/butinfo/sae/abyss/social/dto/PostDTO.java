@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 public record PostDTO (
         ObjectId id,
 
-        //@NotNull(message= "UserID cannot be null")
-        //ObjectId userId,
+        @NotNull(message= "UserID cannot be null")
+        ObjectId userId,
 
         @NotBlank(message= "Content cannot be empty")
         @Size(max = 500, message = "Content cannot exceed 500 characters")
