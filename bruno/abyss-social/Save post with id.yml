@@ -1,0 +1,26 @@
+info:
+  name: Save post with id
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{URL}}/posts"
+  body:
+    type: json
+    data: |-
+      {
+        "userId": "69cb766395ff08bedd332e07",
+        "content": "Post de test numéro 4781",
+        "comments": [],
+        "like": 0,
+        "dislike": 0,
+        "createdAt": "2026-03-10T12:00:00"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

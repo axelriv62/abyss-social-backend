@@ -1,6 +1,7 @@
 package fr.univartois.butinfo.sae.abyss.social.repository;
 
 import fr.univartois.butinfo.sae.abyss.social.model.Page;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
@@ -8,7 +9,7 @@ import java.util.List;
  * The PageRepository interface provides methods for performing CRUD operations on Page entities.
  * It extends the MongoRepository interface to interact with the MongoDB database.
  */
-public interface PageRepository extends MongoRepository<Page, Long> {
+public interface PageRepository extends MongoRepository<Page, ObjectId> {
 
     /**
      * Finds a list of Page entities by their name.
