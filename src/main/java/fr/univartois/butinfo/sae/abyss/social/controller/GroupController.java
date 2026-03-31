@@ -74,10 +74,9 @@ public class GroupController {
     public ResponseEntity<GroupDTO> updateGroup(@PathVariable("id") ObjectId id, @Valid @RequestBody GroupDTO groupDTO) {
         return groupService.findById(id)
                 .map(existingGroup -> {
-                    // Apply incoming DTO values to the existing entity
                     Group toSave = groupMapper.toEntity(groupDTO);
-                    toSave.setId(id); // ensure the ID is the path id
-                    Group updatedGroup = groupService.updateGroup(id, toSave); // adjust service to return updated entity
+                    toSave.setId(id);
+                    Group updatedGroup = groupService.updateGroup(id, toSave);
                     return ResponseEntity.ok(groupMapper.toDTO(updatedGroup));
                 })
                 .orElse(ResponseEntity.notFound().build());

@@ -13,9 +13,10 @@ http:
     type: json
     data: |
       {
-        "name": "Camarche",
-        "tags": ["tag1", "tag2"],
-        "posts": []
+        "userId": "69cab182f9aa8f8710d001e8",
+        "name": "Camarcheapeupres",
+        "tags": ["tag1", "tag5"],
+        "posts": ["69cab182f9aa8f8710d001e3"]
       }
   auth: inherit
 
