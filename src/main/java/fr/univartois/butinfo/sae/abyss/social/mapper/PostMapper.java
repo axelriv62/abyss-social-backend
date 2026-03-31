@@ -8,17 +8,22 @@ import org.bson.types.ObjectId;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Mapper(componentModel = "spring")
 public interface PostMapper {
 
+    @Mapping(target = "likes", expression = "java(mapUsersToIds(post.getLikes()))")
+    @Mapping(target = "dislikes", expression = "java(mapUsersToIds(post.getDislikes()))")
     @Mapping(source = "user", target = "userId")
     PostDTO toDTO(Post post);
 
-    @Mapping(source = "userId", target = "user")
     List<PostDTO> toDTOs(List<Post> posts);
 
+    @Mapping(target = "likes", expression = "java(mapIdsToUsers(postDTO.likes()))")
+    @Mapping(target = "dislikes", expression = "java(mapIdsToUsers(postDTO.dislikes()))")
     @Mapping(source = "userId", target = "user")
     Post toEntity(@Valid PostDTO postDTO);
 
@@ -47,6 +52,31 @@ public interface PostMapper {
         return user;
     }
 
+    default ObjectId[] mapUsersToIds(List<User> users) {
+        if (users == null || users.isEmpty()) {
+            return new ObjectId[0];
+        }
+        return users.stream()
+                .map(this::map)
+                .filter(Objects::nonNull)
+                .toArray(ObjectId[]::new);
+    }
+
+    default List<User> mapIdsToUsers(ObjectId[] ids) {
+        List<User> users = new ArrayList<>();
+        if (ids == null) {
+            return users;
+        }
+        for (ObjectId id : ids) {
+            User user = map(id);
+            if (user != null) {
+                users.add(user);
+            }
+        }
+        return users;
+    }
+
 
 
 }
+

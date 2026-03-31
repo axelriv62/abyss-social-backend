@@ -1,11 +1,11 @@
 info:
-  name: Delete post by id
+  name: Delete group
   type: http
-  seq: 3
+  seq: 2
 
 http:
   method: DELETE
-  url: "{{URL}}/posts/69cb910130ff12f3b65b255a"
+  url: "{{URL}}/groups/69cb929c30ff12f3b65b255c"
   auth: inherit
 
 settings:
