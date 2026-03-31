@@ -4,7 +4,6 @@ import fr.univartois.butinfo.sae.abyss.social.mapper.GroupMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
 import fr.univartois.butinfo.sae.abyss.social.repository.GroupRepository;
 import org.bson.types.ObjectId;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
@@ -16,6 +15,16 @@ import java.util.Optional;
 /**
  * Service class for managing Group entities, providing business logic for group-related operations.
  * We can : find by id, update, save, delete
+ */
+/**
+ * Service responsible for business rules and persistence operations for {@link Group}.
+ *
+ * Primary responsibilities:
+ * - Persist Group entities via {@link GroupRepository}.
+ * - Enforce server-side rules such as setting {@code createdAt} when missing.
+ *
+ * This service is a thin layer: validation is expected to be handled by DTO validation
+ * and mapping is performed by a {@link GroupMapper} before persistence.
  */
 @Service
 public class GroupService {

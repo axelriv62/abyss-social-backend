@@ -8,6 +8,21 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 
+/**
+ * Domain model representing a Group stored in MongoDB.
+ *
+ * Mapping details:
+ * - Stored in the "Groups" collection (see {@link Document}).
+ * - {@code id} is the MongoDB identifier represented as an {@link ObjectId}.
+ * - {@code createdAt} is mapped to the document field "created_at" using {@link Field}.
+ *
+ * Field descriptions:
+ * - id: unique identifier assigned by MongoDB.
+ * - name: human-readable name of the group.
+ * - tags: optional short tags categorising the group.
+ * - posts: optional array of ObjectId references to posts belonging to the group.
+ * - createdAt: timestamp of when the group was created; populated at construction or by service layer.
+ */
 @Document(collection = "Groups")
 public class Group {
 
