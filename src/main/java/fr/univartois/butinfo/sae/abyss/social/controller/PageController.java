@@ -4,13 +4,13 @@ import fr.univartois.butinfo.sae.abyss.social.dto.PageDTO;
 import fr.univartois.butinfo.sae.abyss.social.mapper.PageMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.service.PageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * The PageController class handles HTTP requests related to the Page entity.
@@ -40,10 +40,31 @@ public class PageController {
      * @param pageDTO The PageDTO containing the details of the page to be created.
      * @return A ResponseEntity containing the created PageDTO and HTTP status 201 (Created).
      */
+    @Operation(summary = "Create a new page", description = "Creates a new page with the provided details. The request body must contain a valid PageDTO object. The userId field in the PageDTO must correspond to an existing user in the database.")
+    @ApiResponse(responseCode = "200", description = "Page successfully created")
+    @ApiResponse(responseCode = "400", description = "Invalid data")
     @PostMapping
     public ResponseEntity<PageDTO> createPage(@Valid @RequestBody PageDTO pageDTO) {
         Page page = pageMapper.toEntity(pageDTO);
         Page savedPage = pageService.save(page);
         return ResponseEntity.status(HttpStatus.CREATED).body(pageMapper.toDTO(savedPage));
+    }
+
+    /**
+     * Handles the deletion of a Page by its ID.
+     * @param id The ObjectId of the Page to be deleted.
+     * @return A ResponseEntity with HTTP status 204 (No Content) if the deletion was successful, or 404 (Not Found) if the Page does not exist.
+     */
+    @Operation(summary = "Delete a page", description = "Deletes the page with the specified ID. If the page does not exist, a 404 Not Found response is returned.")
+    @ApiResponse(responseCode = "204", description = "Page successfully deleted")
+    @ApiResponse(responseCode = "404", description = "Page not found")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePage(@PathVariable ObjectId id) {
+        return pageService.findById(id)
+                .map(league -> {
+                    pageService.deleteById(id);
+                    return ResponseEntity.noContent().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }
