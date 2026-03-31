@@ -9,6 +9,20 @@ import org.bson.types.ObjectId;
 
 import java.time.LocalDateTime;
 
+/**
+ * Data Transfer Object for Group.
+ *
+ * This immutable record represents the data exchanged with clients for Group resources.
+ * Validation annotations ensure incoming payloads respect business rules before mapping
+ * to the domain entity.
+ *
+ * Field contracts:
+ * - id: optional MongoDB ObjectId when present (read-only for creation).
+ * - name: required, non-blank, between 3 and 50 characters.
+ * - tags: required array, up to 10 tags.
+ * - posts: required array of ObjectId representing post references (can be empty).
+ * - createdAt: optional creation timestamp; if provided it must not be in the future.
+ */
 public record GroupDTO (
         ObjectId id,
 

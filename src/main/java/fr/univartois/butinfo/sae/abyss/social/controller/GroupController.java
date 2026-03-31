@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.*;
 
 
 /**
-  *REST controller for Group resources.
-  *Uses GroupService for business logic and GroupMapper to convert between DTO and entity.
-  *The service is responsible for setting server-side fields (e.g. createdAt) before persistence.
+  * REST controller for Group resources.
+  * Uses {@link GroupService} for business logic and {@link GroupMapper} to convert between DTO and entity.
+  * The controller exposes endpoints under the "/groups" path and is responsible for HTTP-level concerns
+  * (request mapping, validation, response codes). Domain rules such as populating {@code createdAt}
+  * are enforced in the service layer.
 */
 @RestController
 @RequestMapping("/groups")
