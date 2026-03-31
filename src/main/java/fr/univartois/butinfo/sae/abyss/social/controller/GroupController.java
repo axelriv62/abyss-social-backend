@@ -7,6 +7,7 @@ import fr.univartois.butinfo.sae.abyss.social.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -60,4 +61,22 @@ public class GroupController {
         return ResponseEntity.status(HttpStatus.CREATED).body(groupMapper.toDTO(savedGroup));
     }
 
+
+    /**
+     * Handles the deletion of a Group by its ID.
+     * @param id The ObjectId of the Group to be deleted.
+     * @return A ResponseEntity with HTTP status 204 (No Content) if the deletion was successful, or 404 (Not Found) if the Group does not exist.
+     */
+    @Operation(summary = "Delete a Group", description = "Deletes the Group with the specified ID. If the Group does not exist, a 404 Not Found response is returned.")
+    @ApiResponse(responseCode = "204", description = "Group successfully deleted")
+    @ApiResponse(responseCode = "404", description = "Group not found")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGroup(@PathVariable ObjectId id) {
+        return groupService.findById(id)
+                .map(Group -> {
+                    groupService.deleteById(id);
+                    return ResponseEntity.noContent().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
