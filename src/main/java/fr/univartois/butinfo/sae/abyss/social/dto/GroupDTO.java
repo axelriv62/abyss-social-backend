@@ -5,6 +5,16 @@ import org.bson.types.ObjectId;
 
 import java.time.LocalDateTime;
 
+/**
+ * Data Transfer Object for Group entity, used for transferring data between layers (e.g. controller and service).
+ * Contains validation annotations to ensure data integrity when creating or updating a Group.
+ * @param id
+ * @param userId
+ * @param name
+ * @param tags
+ * @param posts
+ * @param createdAt
+ */
 public record GroupDTO (
         ObjectId id,
 
