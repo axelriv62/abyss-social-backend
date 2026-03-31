@@ -4,6 +4,7 @@ import fr.univartois.butinfo.sae.abyss.social.mapper.GroupMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
 import fr.univartois.butinfo.sae.abyss.social.repository.GroupRepository;
 import org.bson.types.ObjectId;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;

@@ -1,7 +1,6 @@
 package fr.univartois.butinfo.sae.abyss.social.mapper;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.UserDTO;
-import fr.univartois.butinfo.sae.abyss.social.dto.UserResponseDTO;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
