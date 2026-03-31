@@ -10,12 +10,11 @@ http:
     type: json
     data: |-
       {
-        "userId": "69cb766395ff08bedd332e07",
-        "content": "Post de test numéro 4781",
+        "userId": "69cb907a30ff12f3b65b2557",
+        "content": "Essai mardi matin",
         "comments": [],
         "like": 0,
-        "dislike": 0,
-        "createdAt": "2026-03-10T12:00:00"
+        "dislike": 0
       }
   auth: inherit
 

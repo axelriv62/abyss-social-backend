@@ -25,7 +25,6 @@ public record PageDTO (
         @NotNull(message = "Posts cannot be null")
         ObjectId[] posts,
 
-        @NotNull(message = "Creation date cannot be null")
         @PastOrPresent(message = "Creation date cannot be in the future")
         LocalDateTime createdAt
 )

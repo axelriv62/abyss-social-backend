@@ -8,7 +8,9 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * MongoDB document representing a social post.
@@ -34,11 +36,13 @@ public class Post {
     /** Identifiers of comments attached to this post. */
     private ObjectId[] comments = new ObjectId[0];
 
-    /** Number of likes */
-    private int like = 0;
+    /** Users who liked this post. */
+    @DBRef
+    private List<User> likes = new ArrayList<>();
 
-    /** Number of dislikes */
-    private int dislike = 0;
+    /** Users who disliked this post. */
+    @DBRef
+    private List<User> dislikes = new ArrayList<>();
 
     /** Timestamp of post creation. */
     @Field("created_at")
@@ -131,35 +135,59 @@ public class Post {
     }
 
     /**
-     * @return current like count
+     * @return current users who like this post
      */
-    public int getLike() {
-        return like;
+    public List<User> getLikes() {
+        return likes;
     }
 
     /**
-     * Sets the like count, clamped to a non-negative value.
+     * @return current like counter
+     */
+    public int getNumbersOfLikes() {
+        return likes.size();
+    }
+
+    /**
+     * @return current users who dislike this post
+     */
+    public List<User> getDislikes() {
+        return dislikes;
+    }
+
+    /**
+     * @return current dislike counter
+     */
+    public int getNumbersOfDislikes() {
+        return dislikes.size();
+    }
+
+
+
+    /**
+     * Sets the like tab
      *
-     * @param like new like count
+     * @param likes new like tab
      */
-    public void setLike(int like) {
-        this.like = Math.max(0, like);
+    public void setLikes(List<User> likes) {
+        if (likes == null) {
+            this.likes = new ArrayList<>();
+        } else {
+            this.likes = likes;
+        }
     }
 
     /**
-     * @return current dislike count
-     */
-    public int getDislike() {
-        return dislike;
-    }
-
-    /**
-     * Sets the dislike count, clamped to a non-negative value.
+     * Sets the dislike tab
      *
-     * @param dislike new dislike count
+     * @param dislikes new dislike tab
      */
-    public void setDislike(int dislike) {
-        this.dislike = Math.max(0, dislike);
+    public void setDislikes(List<User> dislikes) {
+        if (dislikes == null) {
+            this.dislikes = new ArrayList<>();
+        } else {
+            this.dislikes = dislikes;
+        }
     }
 
     /**
@@ -194,24 +222,5 @@ public class Post {
         comments[nextIndex] = commentId;
     }
 
-    /** Increments the like counter by one. */
-    public void incrementLike() {
-        like++;
-    }
-
-    /** Decrements the like counter by one. */
-    public void decrementLike() {
-        like--;
-    }
-
-    /** Increments the dislike counter by one. */
-    public void incrementDislike() {
-        dislike++;
-    }
-
-    /** Decrements the dislike counter by one. */
-    public void decrementDislike() {
-        dislike++;
-    }
 
 }

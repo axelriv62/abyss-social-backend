@@ -3,10 +3,19 @@ package fr.univartois.butinfo.sae.abyss.social.service;
 import fr.univartois.butinfo.sae.abyss.social.mapper.GroupMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
 import fr.univartois.butinfo.sae.abyss.social.repository.GroupRepository;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
+
+/**
+ * Service class for managing Group entities, providing business logic for group-related operations.
+ * We can : find by id, update, save, delete
+ */
 /**
  * Service responsible for business rules and persistence operations for {@link Group}.
  *
@@ -19,33 +28,76 @@ import java.time.LocalDateTime;
  */
 @Service
 public class GroupService {
-
-    // Repository used to persist Group entities in MongoDB
     private final GroupRepository groupRepository;
+    private final UserRepository userRepository;
 
-    /*
-     // Constructor injection of required dependencies.
-     // Keep constructor minimal so Spring can autowire only what is needed.
-    */
-    public GroupService(GroupRepository groupRepository, GroupMapper groupMapper) {
+    public GroupService(GroupRepository groupRepository, GroupMapper groupMapper, UserRepository userRepository) {
         this.groupRepository = groupRepository;
+        this.userRepository = userRepository;
     }
 
     /**
-     * Save a Group entity.
-     *
-     * Contract:
-     * - If the entity's {@code createdAt} is null, it will be set to the current server time.
-     * - The method delegates actual persistence to {@link GroupRepository#save(Object)}.
-     *
-     * @param group the entity to save; must not be null
-     * @return the saved entity as returned by the repository
+     * Find a group with his ID
+     * @param id The ID of the group to find
+     * @return The group if found, null otherwise
+     */
+    public Optional<Group> findById(ObjectId id) {
+        return groupRepository.findById(id);
+    }
+
+    /**
+     * Update a group by its ID and the updated fields.
+     * @param id The ID of the group to update.
+     * @param body The Group object containing the fields to update. Only non-null fields will be updated.
+     * @return The updated Group object.
+     */
+    public Group updateGroup(ObjectId id, Group body) {
+        return groupRepository.findById(id).map(group -> {
+            // Update only the fields that are present in the request body
+            if (body.getName() != null) {
+                group.setName(body.getName());
+            }
+            if (body.getTags() != null) {
+                group.setTags(body.getTags());
+            }
+            if (body.getPosts() != null) {
+                group.setPosts(body.getPosts());
+            }
+            return groupRepository.save(group);
+            // return exception if not found
+        }).orElseThrow(() -> new IllegalArgumentException("Group not found: " + id));
+    }
+
+    /**
+     * Save a group. This method is used for both creating a new group and updating an existing one.
+     * @param group The group to save.
+     * @return The saved group.
      */
     public Group save(Group group) {
+        ObjectId userId = group.getUser() != null ? group.getUser().getId() : null;
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "userId is required");
+        }
+        if (!userRepository.existsById(userId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found for userId=" + userId.toHexString());
+        }
         if (group.getCreatedAt() == null) {
             group.setCreatedAt(LocalDateTime.now());
         }
         return groupRepository.save(group);
     }
 
+
+    /**
+     * Delete the group with the given ID.
+     * @param id The ID of the group to delete.
+     * @return true if the group was deleted, false otherwise.
+     */
+    public boolean deleteById(ObjectId id) {
+        if (groupRepository.existsById(id)) {
+            groupRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 }
