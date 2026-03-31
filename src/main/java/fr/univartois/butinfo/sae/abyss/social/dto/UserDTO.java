@@ -27,6 +27,10 @@ public record UserDTO(
         @Email(message = "Email must be a valid email address")
         String email,
 
+        // The password of the user
+        @Size(min = 8, message = "Password must be at least 8 characters long")
+        String password,
+
         // The role of the user
         ROLES role,
 
@@ -48,4 +52,50 @@ public record UserDTO(
         // The timestamp when the user was created
         @PastOrPresent(message = "Creation date cannot be in the future")
         LocalDateTime createdAt
-) { }
+
+) {
+        @Override
+        public List<ObjectId> pages() {
+                return pages;
+        }
+
+        @Override
+        public List<ObjectId> groups() {
+                return groups;
+        }
+
+        @Override
+        public List<ObjectId> usersBanned() {
+                return usersBanned;
+        }
+
+        @Override
+        public List<ObjectId> friends() {
+                return friends;
+        }
+
+        @Override
+        public Binary profilePicture() {
+                return profilePicture;
+        }
+
+        @Override
+        public ROLES role() {
+                return role;
+        }
+
+        @Override
+        public String password() {
+                return password;
+        }
+
+        @Override
+        public String email() {
+                return email;
+        }
+
+        @Override
+        public String username() {
+                return username;
+        }
+}

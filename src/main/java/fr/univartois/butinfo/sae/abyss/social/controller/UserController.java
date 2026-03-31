@@ -48,7 +48,7 @@ public class UserController {
     @Operation(summary = "Create a new user", description = "Create a new user with the provided data")
     @ApiResponse(responseCode = "200", description = "User successfully created")
     @ApiResponse(responseCode = "400", description = "Invalid data")
-    public ResponseEntity<UserDTO> save(@Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<UserDTO> create(@Valid @RequestBody UserDTO userDTO) {
         User user = userMapper.toEntity(userDTO);
         User savedUser = userService.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDTO(savedUser));
