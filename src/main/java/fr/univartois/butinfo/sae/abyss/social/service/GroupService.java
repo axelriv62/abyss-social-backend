@@ -2,10 +2,13 @@ package fr.univartois.butinfo.sae.abyss.social.service;
 
 import fr.univartois.butinfo.sae.abyss.social.mapper.GroupMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
+import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.repository.GroupRepository;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class GroupService {
@@ -21,11 +24,26 @@ public class GroupService {
         this.groupRepository = groupRepository;
     }
 
+    public Optional<Group> findById(ObjectId id) {
+        return groupRepository.findById(id);
+    }
+
     public Group save(Group group) {
         if (group.getCreatedAt() == null) {
             group.setCreatedAt(LocalDateTime.now());
         }
         return groupRepository.save(group);
     }
-
+    /**
+     * Deletes a Page entity by its ID.
+     * @param id The ObjectId of the Page to be deleted.
+     * @return true if the Page was successfully deleted, false if the Page does not exist.
+     */
+    public boolean deleteById(ObjectId id) {
+        if (groupRepository.existsById(id)) {
+            groupRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 }
