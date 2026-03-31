@@ -1,4 +1,3 @@
-// java
 package fr.univartois.butinfo.sae.abyss.social.service;
 
 import fr.univartois.butinfo.sae.abyss.social.mapper.GroupMapper;
