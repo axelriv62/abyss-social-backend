@@ -28,6 +28,17 @@ public class GroupService {
         return groupRepository.findById(id);
     }
 
+    public Optional<Group> addTagToGroup(ObjectId id, String tag_to_add) {
+        return groupRepository.findById(id).map(group -> {
+            String[] current_tags = group.getTags();
+            String[] new_tags = new String[current_tags.length + 1];
+            System.arraycopy(current_tags, 0, new_tags, 0, current_tags.length);
+            new_tags[current_tags.length] = tag_to_add;
+            group.setTags(new_tags);
+            return groupRepository.save(group);
+        });
+    }
+
     public Group save(Group group) {
         if (group.getCreatedAt() == null) {
             group.setCreatedAt(LocalDateTime.now());
