@@ -59,8 +59,12 @@ public class PageService {
      */
     public Page updatePage(ObjectId id, Page body) {
         return pageRepository.findById(id).map(page -> {
-            page.setName(body.getName());
-            page.setTags(body.getTags());
+            if (body.getName() != null) {
+                page.setName(body.getName());
+            }
+            if (body.getTags() != null) {
+                page.setTags(body.getTags());
+            }
             return pageRepository.save(page);
         }).orElseThrow(() -> new IllegalArgumentException("Page not found: " + id));
     }
