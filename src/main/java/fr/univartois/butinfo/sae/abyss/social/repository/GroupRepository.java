@@ -12,8 +12,8 @@ public interface GroupRepository extends MongoRepository<Group, ObjectId> {
     /**
      * Finds a list of Groups entities by their name.
      *
-     * @param name The name of the group to find.
+     * @param nameFragment The name of the group to find.
      * @return A list of Group entities with the specified name.
      */
-    List<Group> findByName(String name);
+    List<Group> findByNameContainingIgnoreCase(String nameFragment);
 }

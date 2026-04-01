@@ -1,11 +1,11 @@
 info:
-  name: delete
+  name: Show
   type: http
-  seq: 2
+  seq: 6
 
 http:
-  method: DELETE
-  url: "{{URL}}/groups/69ccf93df9275425163bb072"
+  method: GET
+  url: "{{URL}}/pages/69cd06c9e28abf155dabf093"
   auth:
     type: bearer
     token: "{{TOKEN}}"

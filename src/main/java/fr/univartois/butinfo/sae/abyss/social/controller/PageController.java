@@ -16,6 +16,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 /**
  * The PageController class handles HTTP requests related to the Page entity.
  * It provides endpoints for creating and managing pages.
@@ -155,5 +157,34 @@ public class PageController {
         Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
         userService.removePageFromUser(currentUser.getId(), page.getId());
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Handles the retrieval of a Page by its ID. This method allows clients to retrieve the details of a page by providing its ID in the URL path. If the page exists, a 200 OK response is returned with the PageDTO in the response body. If the page does not exist, a 404 Not Found response is returned.
+     * @param id The ObjectId of the page to be retrieved.
+     * @return A ResponseEntity containing the PageDTO of the requested page and HTTP status 200 (OK) if the page is found, or HTTP status 404 (Not Found) if the page does not exist.
+     */
+    @GetMapping("/{id}")
+    @Operation(summary = "Get page details", description = "Retrieve the details of a page by its ID.")
+    @ApiResponse(responseCode = "200", description = "Page details retrieved successfully")
+    @ApiResponse(responseCode = "404", description = "Page not found")
+    public ResponseEntity<PageDTO> getPageById(@PathVariable ObjectId id) {
+        Page page = pageService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+        return ResponseEntity.ok(pageMapper.toDTO(page));
+    }
+
+    /**
+     * Handles the search for pages by name. This method allows clients to search for pages whose name contains a specified query string, case-insensitively. The query string is provided as a request parameter named "query". If the search is successful, a 200 OK response is returned with a list of matching PageDTOs in the response body. If the query parameter is invalid (e.g., empty), a 400 Bad Request response is returned.
+     * @param query The query string to search for in page names. This parameter is required and should not be empty.
+     * @return A ResponseEntity containing a list of PageDTOs that match the search criteria and HTTP status 200 (OK) if the search is successful, or HTTP status 400 (Bad Request) if the query parameter is invalid.
+     */
+    @GetMapping("/search")
+    @Operation(summary = "Search pages by name", description = "Lists pages whose name contains the provided fragment, case-insensitively.")
+    @ApiResponse(responseCode = "200", description = "Search completed")
+    @ApiResponse(responseCode = "400", description = "Query is invalid")
+    public ResponseEntity<List<PageDTO>> searchPagesByName(@RequestParam("query") String query) {
+        List<Page> matches = pageService.searchByName(query);
+        return ResponseEntity.ok(pageMapper.toDTOList(matches));
     }
 }
