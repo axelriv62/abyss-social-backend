@@ -10,13 +10,14 @@ http:
     type: json
     data: |-
       {
-        "userId": "69cb907a30ff12f3b65b2557",
-        "content": "Essai mardi matin",
+        "content": "Essai pour les commentaires",
         "comments": [],
-        "like": 0,
-        "dislike": 0
+        "likes": [],
+        "dislikes": []
       }
-  auth: inherit
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
 
 settings:
   encodeUrl: true

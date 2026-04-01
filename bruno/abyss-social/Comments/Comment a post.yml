@@ -1,0 +1,15 @@
+info:
+  name: Comment a post
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: /posts/69cd15cb0da939397e030aee/comments
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
