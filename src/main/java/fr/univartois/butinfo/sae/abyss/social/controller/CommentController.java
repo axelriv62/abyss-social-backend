@@ -43,7 +43,7 @@ public class CommentController {
         Comment comment = commentMapper.toEntity(request);
         comment.setPostId(postId);
         comment.setUser(currentUser);
-        Comment saved = commentService.create(comment);
+        Comment saved = commentService.save(comment);
         return ResponseEntity.status(HttpStatus.CREATED).body(commentMapper.toDTO(saved));
     }
 

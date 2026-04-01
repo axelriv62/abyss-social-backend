@@ -28,7 +28,7 @@ public class CommentService {
         this.userRepository = userRepository;
     }
 
-    public Comment create(Comment comment) {
+    public Comment save(Comment comment) {
         ObjectId postId = comment.getPostId();
         if (postId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "postId is required");
