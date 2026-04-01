@@ -10,12 +10,13 @@ http:
     type: json
     data: |
       {
-        "userId": "69cb907a30ff12f3b65b2557",
         "name": "My Page",
         "tags": ["tag1", "tag2"],
         "posts": []
       }
-  auth: inherit
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
 
 settings:
   encodeUrl: true
