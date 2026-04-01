@@ -112,7 +112,7 @@ public class AuthService {
         );
 
         User user = userRepository.findByEmail(loginDTO.email())
-                .orElseThrow(() -> new RuntimeException("User not found with email"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email"));
 
         String token = jwtService.generateToken(user);
         UserResponseDTO userResponseDTO = this.userMapper.toResponseDTO(user);
