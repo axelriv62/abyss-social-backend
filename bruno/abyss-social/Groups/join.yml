@@ -1,0 +1,17 @@
+info:
+  name: join
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{URL}}/groups/69cbc24b2bb138cc28af4bd2/join"
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJheGVsQGdtYWlsLmNvbSIsImlhdCI6MTc3NTAzMTc2MCwiZXhwIjoxNzc1MDM1MzYwfQ.kyaYIku7y0lHXhV4YgmahRIgRYEOWlSOm2P_wf-Oz5BuaS8Eqt-4MBCJW3PBdV-p
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
