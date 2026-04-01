@@ -78,7 +78,7 @@ public class GroupController {
      * @return A ResponseEntity containing the updated GroupDTO if the update was successful, or a 404 (Not Found) status if the Group does not exist.
      */
     @Operation(summary = "Update a group", description = "Update the group with the specified ID. If the group does not exist, a 404 Not Found response is returned.")
-    @ApiResponse(responseCode = "", description = "Group successfully updated")
+    @ApiResponse(responseCode = "200", description = "Group successfully updated")
     @ApiResponse(responseCode = "404", description = "Group not found")
     @PutMapping("/{id}")
     public ResponseEntity<GroupDTO> updatePage(@PathVariable ObjectId id, @Valid @RequestBody GroupDTO groupDTO, @AuthenticationPrincipal User currentUser) {
@@ -131,7 +131,7 @@ public class GroupController {
      */
     @PatchMapping("/{id}/follow")
     @Operation(summary = "Unfollow a group", description = "Allows the authenticated user to follow a group by its ID.")
-    @ApiResponse(responseCode = "200", description = "User successfully followed the group")
+    @ApiResponse(responseCode = "204", description = "User successfully followed the group")
     @ApiResponse(responseCode = "404", description = "Group not found")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     public ResponseEntity<Void> followGroup(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
@@ -141,7 +141,7 @@ public class GroupController {
 
         Group page = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
         userService.addGroupToUser(currentUser.getId(), page.getId());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     /**
@@ -152,7 +152,7 @@ public class GroupController {
      */
     @PatchMapping("/{id}/unfollow")
     @Operation(summary = "Unfollow a group", description = "Allows the authenticated user to unfollow a group by its ID.")
-    @ApiResponse(responseCode = "200", description = "User successfully unfollowed the group")
+    @ApiResponse(responseCode = "204", description = "User successfully unfollowed the group")
     @ApiResponse(responseCode = "404", description = "Group not found")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     public ResponseEntity<Void> unfollowGroup(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
@@ -162,7 +162,7 @@ public class GroupController {
 
         Group page = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
         userService.removeGroupFromUser(currentUser.getId(), page.getId());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 }
