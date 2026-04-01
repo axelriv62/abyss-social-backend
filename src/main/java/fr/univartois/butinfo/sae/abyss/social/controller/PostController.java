@@ -91,8 +91,12 @@ public class PostController {
     @Operation(summary = "Search posts", description = "Lists posts whose content contains the provided fragment, case-insensitively.")
     @ApiResponse(responseCode = "200", description = "Search completed")
     @ApiResponse(responseCode = "400", description = "Query is invalid")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
     @GetMapping("/search")
-    public ResponseEntity<List<PostDTO>> searchPosts(@RequestParam("query") String query) {
+    public ResponseEntity<List<PostDTO>> searchPosts(@RequestParam("query") String query, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         List<Post> matches = postService.searchByContent(query);
         return ResponseEntity.ok(postMapper.toDTOs(matches));
     }
@@ -103,10 +107,30 @@ public class PostController {
     @Operation(summary = "Search posts by date", description = "Lists posts created on the provided date, ignoring time.")
     @ApiResponse(responseCode = "200", description = "Search completed")
     @ApiResponse(responseCode = "400", description = "Date is invalid")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
     @GetMapping("/search/by-date")
     public ResponseEntity<List<PostDTO>> searchPostsByDate(
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         List<Post> matches = postService.searchByCreationDate(date);
+        return ResponseEntity.ok(postMapper.toDTOs(matches));
+    }
+
+    /**
+     * Searches posts authored by the provided username.
+     */
+    @Operation(summary = "Search posts by creator", description = "Lists posts created by the provided username, ignoring case.")
+    @ApiResponse(responseCode = "200", description = "Search completed")
+    @ApiResponse(responseCode = "400", description = "Username is invalid")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @GetMapping("/search/by-creator")
+    public ResponseEntity<List<PostDTO>> searchPostsByCreator(@RequestParam("username") String username, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<Post> matches = postService.searchByCreatorUsername(username);
         return ResponseEntity.ok(postMapper.toDTOs(matches));
     }
 
