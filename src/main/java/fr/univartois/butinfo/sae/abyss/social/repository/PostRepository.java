@@ -12,4 +12,6 @@ public interface PostRepository extends MongoRepository<Post, ObjectId> {
     List<Post> findByContentContainingIgnoreCase(String contentFragment);
 
     List<Post> findByCreatedAtBetween(LocalDateTime startInclusive, LocalDateTime endInclusive);
+
+    List<Post> findByUser_Id(ObjectId userId);
 }

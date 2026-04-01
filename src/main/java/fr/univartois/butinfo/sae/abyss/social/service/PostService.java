@@ -91,9 +91,31 @@ public class PostService {
      * @return posts whose creation timestamp falls within that day
      */
     public List<Post> searchByCreationDate(LocalDate date) {
+        if (date == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "date is required");
+        }
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
         return postRepository.findByCreatedAtBetween(startOfDay, endOfDay);
+    }
+
+    /**
+     * Finds posts authored by the specified username, case-insensitively.
+     *
+     * @param username creator username fragment to match exactly
+     * @return posts authored by the given username
+     */
+    public List<Post> searchByCreatorUsername(String username) {
+        if (username == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "username is required");
+        }
+        String trimmed = username.trim();
+        if (trimmed.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "username cannot be blank");
+        }
+        User creator = userRepository.findByUsernameIgnoreCase(trimmed)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found for username=" + trimmed));
+        return postRepository.findByUser_Id(creator.getId());
     }
 
     /**

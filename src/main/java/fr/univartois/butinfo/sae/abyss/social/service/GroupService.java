@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -99,4 +100,18 @@ public class GroupService {
         }
         return false;
     }
+
+    /**
+     * Searches for Group entities whose names contain the specified fragment, ignoring case.
+     * @param nameFragment The fragment of the name to search for in Group entities.
+     * @return A list of Group entities whose names contain the specified fragment, ignoring case.
+     */
+    public List<Group> searchByName(String nameFragment) {
+        String trimmed = nameFragment.trim();
+        if (trimmed.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Query cannot be blank");
+        }
+        return groupRepository.findByNameContainingIgnoreCase(trimmed);
+    }
+
 }

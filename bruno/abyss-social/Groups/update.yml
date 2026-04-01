@@ -5,7 +5,7 @@ info:
 
 http:
   method: put
-  url: "{{URL}}/groups/69cbc0719b5d6acf5f215560"
+  url: "{{URL}}/groups/69ccf2e615852ad1e8d5b0a5"
   headers:
     - name: Content-Type
       value: application/json
@@ -13,7 +13,7 @@ http:
     type: json
     data: |-
       {
-        "name": "CA MARCHE l'heure",
+        "name": "ERREEEUURRR",
         "tags": [
           "tag1",
           "tag202011",
@@ -21,9 +21,11 @@ http:
           "Axeltropbeau",
           "parfait"
         ],
-        "posts": ["178576adf7552155sd", "8784512784512aedasd", "8741856"]
+        "posts": ["69ccf2e615852ad1e8d5b0a6"]
       }
-  auth: inherit
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
 
 settings:
   encodeUrl: false

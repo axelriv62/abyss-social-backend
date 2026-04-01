@@ -1,14 +1,14 @@
 info:
-  name: Search by date
+  name: Search
   type: http
-  seq: 9
+  seq: 7
 
 http:
   method: GET
-  url: "{{URL}}/posts/search/by-date?date=2026-04-01"
+  url: "{{URL}}/pages/search?query=Page"
   params:
-    - name: date
-      value: 2026-04-01
+    - name: query
+      value: Page
       type: query
   auth:
     type: bearer
