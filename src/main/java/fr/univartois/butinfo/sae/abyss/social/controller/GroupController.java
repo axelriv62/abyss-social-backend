@@ -115,6 +115,7 @@ public class GroupController {
     @Operation(summary = "Add a group to a user", description = "Adds the specified group to the user's list of groups. If the user or group does not exist, a 404 Not Found response is returned.")
     @ApiResponse(responseCode = "200", description = "Group successfully added to user")
     @ApiResponse(responseCode = "404", description = "User or group not found")
+    @ApiResponse(responseCode = "409", description = "User is already following this group")
     @PostMapping("/{groupId}/join")
     public ResponseEntity<Void> addGroupToUser(@PathVariable ObjectId groupId, @AuthenticationPrincipal User currentUser) {
         groupService.addGroupToUser(currentUser.getId(), groupId);
@@ -129,6 +130,7 @@ public class GroupController {
     @Operation(summary = "Remove a group from a user", description = "Removes the specified group from the user's list of groups. If the user or group does not exist, a 404 Not Found response is returned.")
     @ApiResponse(responseCode = "200", description = "Group successfully removed from user")
     @ApiResponse(responseCode = "404", description = "User or group not found")
+    @ApiResponse(responseCode = "409", description = "User is not following this group")
     @DeleteMapping("/{groupId}/leave")
     public ResponseEntity<Void> removeGroupFromUser(@PathVariable ObjectId groupId, @AuthenticationPrincipal User currentUser) {
         groupService.removeGroupFromUser(currentUser.getId(), groupId);

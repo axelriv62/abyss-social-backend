@@ -109,11 +109,21 @@ public class GroupService {
      * @param groupId The unique identifier of the group to add in the list of groups
      */
     public void addGroupToUser(ObjectId id, ObjectId groupId) {
+        if (!groupRepository.existsById(groupId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found: " + groupId);
+        }
+
+        if (!userRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + id);
+        }
         userRepository.findById(id).map(user -> {
+            if (user.getGroups().contains(groupId)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "User already member of group: " + groupId);
+            }
             user.getGroups().add(groupId);
             userRepository.save(user);
-            return groupRepository.findById(groupId).orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupId));
-        }).orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
+            return  String.format("Group %s added from user %s", groupId.toHexString(), id.toHexString());
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + id));
     }
 
     /**
@@ -123,10 +133,21 @@ public class GroupService {
      * @param groupId The unique identifier of the group to remove from the list of groups
      */
     public void removeGroupFromUser(ObjectId id, ObjectId groupId) {
+        if (!groupRepository.existsById(groupId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found: " + groupId);
+        }
+
+        if (!userRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + id);
+        }
+
         userRepository.findById(id).map(user -> {
+            if (!user.getGroups().contains(groupId)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "User is not a member of group: " + groupId);
+            }
             user.getGroups().remove(groupId);
             userRepository.save(user);
-            return groupRepository.findById(groupId).orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupId));
-        }).orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
+            return  String.format("Group %s removed from user %s", groupId.toHexString(), id.toHexString());
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + id));
     }
 }
