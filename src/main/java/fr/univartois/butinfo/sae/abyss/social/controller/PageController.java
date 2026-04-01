@@ -100,6 +100,12 @@ public class PageController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Handles the following of a page by the authenticated user. This method allows the user to follow a page by its ID. If the user is not authenticated, a 401 Unauthorized response is returned. If the page does not exist, a 404 Not Found response is returned. If the operation is successful, a 200 OK response is returned.
+     * @param id The ObjectId of the page to be followed.
+     * @param currentUser The currently authenticated user, injected by Spring Security. If the user is not authenticated, this parameter will be null.
+     * @return A ResponseEntity with HTTP status 200 (OK) if the user successfully followed the page, 404 (Not Found) if the page does not exist, or 401 (Unauthorized) if the user is not authenticated.
+     */
     @PatchMapping("/{id}/follow")
     @Operation(summary = "Follow a page", description = "Allows the authenticated user to follow a page by its ID.")
     @ApiResponse(responseCode = "200", description = "User successfully followed the page")
@@ -115,6 +121,12 @@ public class PageController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Handles the unfollowing of a page by the authenticated user. This method allows the user to unfollow a page by its ID. If the user is not authenticated, a 401 Unauthorized response is returned. If the page does not exist, a 404 Not Found response is returned. If the operation is successful, a 200 OK response is returned.
+     * @param id The ObjectId of the page to be unfollowed.
+     * @param currentUser The currently authenticated user, injected by Spring Security. If the user is not authenticated, this parameter will be null.
+     * @return A ResponseEntity with HTTP status 200 (OK) if the user successfully unfollowed the page, 404 (Not Found) if the page does not exist, or 401 (Unauthorized) if the user is not authenticated.
+     */
     @PatchMapping("/{id}/unfollow")
     @Operation(summary = "Unfollow a page", description = "Allows the authenticated user to unfollow a page by its ID.")
     @ApiResponse(responseCode = "200", description = "User successfully unfollowed the page")
