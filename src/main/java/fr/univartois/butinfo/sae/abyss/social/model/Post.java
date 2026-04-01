@@ -54,7 +54,7 @@ public class Post {
     }
 
     /**
-     * Builds a post with an author and content.
+     * Builds a post with an author.
      *
      * @param user  The author
      */
@@ -223,4 +223,7 @@ public class Post {
     }
 
 
+    public void setId(ObjectId postId) {
+        this.id = postId;
+    }
 }
