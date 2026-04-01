@@ -8,9 +8,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import org.bson.types.ObjectId;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 /**
  * REST controller exposing CRUD and reaction endpoints for posts.
@@ -66,6 +70,34 @@ public class PostController {
     public ResponseEntity<Void> deleteMovieById(@PathVariable ObjectId id) {
         postService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Searches posts containing the provided text fragment in their content.
+     *
+     * @param query fragment to search for
+     * @return list of matching posts
+     */
+    @Operation(summary = "Search posts", description = "Lists posts whose content contains the provided fragment, case-insensitively.")
+    @ApiResponse(responseCode = "200", description = "Search completed")
+    @ApiResponse(responseCode = "400", description = "Query is invalid")
+    @GetMapping("/search")
+    public ResponseEntity<List<PostDTO>> searchPosts(@RequestParam("query") String query) {
+        List<Post> matches = postService.searchByContent(query);
+        return ResponseEntity.ok(postMapper.toDTOs(matches));
+    }
+
+    /**
+     * Searches posts created on the provided date.
+     */
+    @Operation(summary = "Search posts by date", description = "Lists posts created on the provided date, ignoring time.")
+    @ApiResponse(responseCode = "200", description = "Search completed")
+    @ApiResponse(responseCode = "400", description = "Date is invalid")
+    @GetMapping("/search/by-date")
+    public ResponseEntity<List<PostDTO>> searchPostsByDate(
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        List<Post> matches = postService.searchByCreationDate(date);
+        return ResponseEntity.ok(postMapper.toDTOs(matches));
     }
 
     /**

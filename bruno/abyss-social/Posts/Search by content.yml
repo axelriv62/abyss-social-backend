@@ -1,0 +1,15 @@
+info:
+  name: Search by content
+  type: http
+  seq: 8
+
+http:
+  method: GET
+  url: "{{URL}}/search"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

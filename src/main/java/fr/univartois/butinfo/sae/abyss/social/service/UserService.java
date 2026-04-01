@@ -67,6 +67,38 @@ public class UserService implements UserDetailsService {
     }
 
     /**
+     * Adds a page to a user's list of pages. This method retrieves the user by their unique identifier, checks if the page is already associated with the user, and if not, adds the page ID to the user's list of pages and saves the updated user back to the database.
+     * @param userId The unique identifier of the user to whom the page will be added
+     * @param pageId The unique identifier of the page to be added to the user's list of pages
+     */
+    public void addPageToUser(ObjectId userId, ObjectId pageId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if (!user.getPages().contains(pageId)) {
+            user.getPages().add(pageId);
+            userRepository.save(user);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page already associated with user");
+        }
+    }
+
+    /**
+     * Removes a page from a user's list of pages. This method retrieves the user by their unique identifier, checks if the page is currently associated with the user, and if so, removes the page ID from the user's list of pages and saves the updated user back to the database.
+     * @param userId The unique identifier of the user from whom the page will be removed
+     * @param pageId The unique identifier of the page to be removed from the user's list of pages
+     */
+    public void removePageFromUser(ObjectId userId, ObjectId pageId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if (user.getPages().contains(pageId)) {
+            user.getPages().remove(pageId);
+            userRepository.save(user);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page not associated with user");
+        }
+    }
+
+    /**
      * Adds a group to a user's list of groups. This method retrieves the user by their unique identifier, checks if the group is already associated with the user, and if not, adds the group ID to the user's list of groups and saves the updated user back to the database.
      * @param userId The unique identifier of the user to whom the group will be added
      * @param groupId The unique identifier of the group to be added to the user's list of groups
