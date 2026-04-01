@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 /**
@@ -65,6 +68,32 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         postRepository.deleteById(id);
+    }
+
+    /**
+     * Finds posts whose content contains the provided fragment, case-insensitively.
+     *
+     * @param contentFragment substring to search for
+     * @return posts matching the fragment
+     */
+    public List<Post> searchByContent(String contentFragment) {
+        String trimmed = contentFragment.trim();
+        if (trimmed.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "query cannot be blank");
+        }
+        return postRepository.findByContentContainingIgnoreCase(trimmed);
+    }
+
+    /**
+     * Finds posts created on the provided date, ignoring the time component.
+     *
+     * @param date creation date to match
+     * @return posts whose creation timestamp falls within that day
+     */
+    public List<Post> searchByCreationDate(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+        return postRepository.findByCreatedAtBetween(startOfDay, endOfDay);
     }
 
     /**

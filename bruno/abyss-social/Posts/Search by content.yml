@@ -1,11 +1,11 @@
 info:
-  name: Delete group
+  name: Search by content
   type: http
-  seq: 2
+  seq: 8
 
 http:
-  method: DELETE
-  url: "{{URL}}/groups/69cb929c30ff12f3b65b255c"
+  method: GET
+  url: "{{URL}}/search"
   auth: inherit
 
 settings:

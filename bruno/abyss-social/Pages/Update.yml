@@ -5,17 +5,18 @@ info:
 
 http:
   method: PUT
-  url: "{{URL}}/pages/69cbb22df9f317ac295bd28f"
+  url: "{{URL}}/pages/69ccde3322041a8709bb509"
   body:
     type: json
     data: |-
       {
-        "userId": "69cbb22df9f317ac295bd28f",
         "name": "My Page 3",
         "tags": ["tag2", "tag3"],
         "posts": []
       }
-  auth: inherit
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
 
 settings:
   encodeUrl: true

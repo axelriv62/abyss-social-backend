@@ -1,11 +1,11 @@
 info:
-  name: Delete
+  name: Unfollow
   type: http
-  seq: 2
+  seq: 5
 
 http:
-  method: DELETE
-  url: "{{URL}}/users"
+  method: PATCH
+  url: "{{URL}}/pages/69ccd073cf09ad5e083dfdfa/unfollow"
   auth:
     type: bearer
     token: "{{TOKEN}}"
