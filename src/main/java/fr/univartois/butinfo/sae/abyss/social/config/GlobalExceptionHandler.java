@@ -43,4 +43,17 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
+
+    /**
+     * Handles IllegalArgumentException, which can be thrown when a method receives an argument that is not valid or appropriate.
+     * This method returns a 400 Bad Request response with a JSON body containing the error message from the exception.
+     * @param exception The IllegalArgumentException instance that was thrown when a method received an invalid argument, such as when trying to delete a user that does not exist.
+     * @return ResponseEntity containing a JSON object with an "error" key and the message from the IllegalArgumentException, with an HTTP status of 400 Bad Request.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(IllegalArgumentException exception) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("error", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
 }
