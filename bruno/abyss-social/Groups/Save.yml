@@ -14,7 +14,7 @@ http:
     data: |
       {
         "name": "Groupe de Bylel Longelin",
-        "tags": ["tag1", "tag5", "tag7777"], ["tag84"],
+        "tags": ["tag1", "tag5", "tag7777", "tag87"],
         "posts": ["69cab182f9aa8f8710d001e3"]
       }
   auth:
