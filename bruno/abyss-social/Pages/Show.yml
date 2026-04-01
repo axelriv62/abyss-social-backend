@@ -1,0 +1,17 @@
+info:
+  name: Show
+  type: http
+  seq: 6
+
+http:
+  method: GET
+  url: "{{URL}}/pages/69cd06c9e28abf155dabf093"
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

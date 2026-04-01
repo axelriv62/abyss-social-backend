@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -80,5 +81,18 @@ public class PageService {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Searches for Page entities whose names contain the specified fragment, ignoring case.
+     * @param nameFragment The fragment of the name to search for in Page entities.
+     * @return A list of Page entities whose names contain the specified fragment, ignoring case.
+     */
+    public List<Page> searchByName(String nameFragment) {
+        String trimmed = nameFragment.trim();
+        if (trimmed.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Query cannot be blank");
+        }
+        return pageRepository.findByNameContainingIgnoreCase(trimmed);
     }
 }

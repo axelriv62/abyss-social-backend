@@ -10,12 +10,10 @@ import java.util.List;
  * It extends the MongoRepository interface to interact with the MongoDB database.
  */
 public interface PageRepository extends MongoRepository<Page, ObjectId> {
-
     /**
-     * Finds a list of Page entities by their name.
-     *
-     * @param name The name of the pages to find.
-     * @return A list of Page entities with the specified name.
+     * Finds a list of Page entities whose names contain the specified fragment, ignoring case.
+     * @param nameFragment
+     * @return a list of Page entities matching the search criteria
      */
-    List<Page> findByName(String name);
+    List<Page> findByNameContainingIgnoreCase(String nameFragment);
 }
