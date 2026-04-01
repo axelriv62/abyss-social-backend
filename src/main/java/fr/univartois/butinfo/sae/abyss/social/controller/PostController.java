@@ -3,7 +3,9 @@ package fr.univartois.butinfo.sae.abyss.social.controller;
 import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
 import fr.univartois.butinfo.sae.abyss.social.mapper.PostMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Post;
+import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.PostService;
+import fr.univartois.butinfo.sae.abyss.social.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
@@ -11,6 +13,7 @@ import org.bson.types.ObjectId;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -22,8 +25,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/posts")
 public class PostController {
-    /** Service handling business logic for posts. */
+    /** Service handling business logic for posts and users. */
     private final PostService postService;
+    private final UserService userService;
     /** Mapper converting between Post entities and DTOs. */
     private final PostMapper postMapper;
 
@@ -33,8 +37,9 @@ public class PostController {
      * @param postService service managing posts
      * @param postMapper mapper converting Post ↔ PostDTO
      */
-    public PostController(PostService postService, PostMapper postMapper) {
+    public PostController(PostService postService, UserService userService, PostMapper postMapper) {
         this.postService = postService;
+        this.userService = userService;
         this.postMapper = postMapper;
     }
 
@@ -48,9 +53,14 @@ public class PostController {
     @ApiResponse(responseCode = "200", description = "Post successfully created")
     @ApiResponse(responseCode = "400", description = "Invalid data")
     @ApiResponse(responseCode = "404", description = "User don't exist")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
     @PostMapping
-    public ResponseEntity<PostDTO> createPost(@Valid @RequestBody PostDTO postDTO) {
+    public ResponseEntity<PostDTO> createPost(@Valid @RequestBody PostDTO postDTO, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         Post post = postMapper.toEntity(postDTO);
+        post.setUser(currentUser);
         Post savedPost = postService.save(post);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(postMapper.toDTO(savedPost));

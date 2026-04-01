@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 public record PostDTO (
         ObjectId id,
 
-        @NotNull(message= "UserID cannot be null")
         ObjectId userId,
 
         @NotBlank(message= "Content cannot be empty")
