@@ -20,6 +20,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 
 /**
   *REST controller for Group resources.
@@ -163,6 +165,39 @@ public class GroupController {
         Group page = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
         userService.removeGroupFromUser(currentUser.getId(), page.getId());
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Handles the search of a group with a given ID, in the URL.
+     * @param id The ObjectId of the group to be searched.
+     * @return A ResponseEntity containing the GroupDTO if the group is found, a 404 (Not Found) status if the group does not exist or a 401 if user is not logged in.
+     */
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a group by ID", description = "Retrieves a group by its ID. If the group does not exist, a 404 Not Found response is returned.")
+    @ApiResponse(responseCode = "200", description = "Group successfully retrieved")
+    @ApiResponse(responseCode = "404", description = "Group not found")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    public ResponseEntity<GroupDTO> getGroupById(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Group group = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+        return ResponseEntity.ok(groupMapper.toDTO(group));
+    }
+
+    /**
+     * Handles the search for Groups by name. This method allows clients to search for groups whose name contains a specified query string, case-insensitively. The query string is provided as a request parameter named "query". If the search is successful, a 200 OK response is returned with a list of matching GroupDTOs in the response body. If the query parameter is invalid (e.g., empty), a 400 Bad Request response is returned.
+     * @param query The query string to search for in group names. This parameter is required and should not be empty.
+     * @return A ResponseEntity containing a list of GroupDTOs that match the search criteria and HTTP status 200 (OK) if the search is successful, or HTTP status 400 (Bad Request) if the query parameter is invalid.
+     */
+    @GetMapping("/search")
+    @Operation(summary = "Search groups by name", description = "Lists groups whose name contains the provided fragment, case-insensitively.")
+    @ApiResponse(responseCode = "200", description = "Search completed")
+    @ApiResponse(responseCode = "400", description = "Query is invalid")
+    public ResponseEntity<List<GroupDTO>> searchPagesByName(@RequestParam("query") String query) {
+        List<Group> matches = groupService.searchByName(query);
+        return ResponseEntity.ok(groupMapper.toDTOList(matches));
     }
 
 }
