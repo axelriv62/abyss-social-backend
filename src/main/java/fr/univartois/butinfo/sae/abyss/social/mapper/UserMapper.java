@@ -1,6 +1,7 @@
 package fr.univartois.butinfo.sae.abyss.social.mapper;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.UserDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.UserResponseDTO;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -44,5 +45,12 @@ public interface UserMapper {
      * @return A list of UserDTO objects containing the data from the list of User entities, suitable for transfer between layers of the application
      */
     List<UserDTO> toDTOList(List<User> users);
+
+    /**
+     * Converts a User entity to a UserResponseDTO. This method maps the fields of the User entity to the corresponding fields in the UserResponseDTO, allowing for data transfer between layers of the application while excluding sensitive information such as the password.
+     * @param user The User entity to be converted to a UserResponseDTO. This method maps the fields of the User entity to the corresponding fields in the UserResponseDTO, while ignoring sensitive information such as the password, resulting in a UserResponseDTO that can be used for data transfer between layers of the application without exposing sensitive information.
+     * @return A UserResponseDTO object containing the data from the User entity, suitable for transfer between layers of the application while excluding sensitive information such as the password
+     */
+    UserResponseDTO toResponseDTO(User user);
 }
 

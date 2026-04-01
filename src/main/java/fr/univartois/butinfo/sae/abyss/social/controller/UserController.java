@@ -7,9 +7,10 @@ import fr.univartois.butinfo.sae.abyss.social.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
-import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -55,16 +56,27 @@ public class UserController {
     }
 
     /**
-     * Endpoint for deleting a user by their unique identifier. This method accepts a user ID as a path variable, deletes the corresponding user using the UserService, and returns an appropriate HTTP status code in the response.
-     * @param id The unique identifier of the user to be deleted, provided as a path variable
-     * @return A ResponseEntity with an HTTP status of 204 if the user is successfully deleted, or 404 if the user with the specified ID is not found
+     * Endpoint for deleting a user by their unique identifier.
+     * This method retrieves the currently authenticated user from the security context, checks if the user is authenticated, and if so, deletes the user with the specified ID using the UserService.
+     * It returns a 204 No Content response if the deletion is successful, or a 401 Unauthorized response if the user is not authenticated.
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping
     @Operation(summary = "Delete a user by ID", description = "Delete a user with the specified ID")
     @ApiResponse(responseCode = "204", description = "User successfully deleted")
     @ApiResponse(responseCode = "404", description = "User not found")
-    public ResponseEntity<Void> deleteById(@PathVariable ObjectId id) {
-        userService.deleteById(id);
+    public ResponseEntity<Void> deleteById() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User currentUser = (User) auth.getPrincipal();
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        userService.deleteById(currentUser.getId());
         return ResponseEntity.noContent().build();
     }
+
 }

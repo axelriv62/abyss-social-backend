@@ -3,6 +3,7 @@ package fr.univartois.butinfo.sae.abyss.social.service;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 import org.bson.types.ObjectId;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -51,8 +52,13 @@ public class UserService implements UserDetailsService {
         userRepository.deleteById(id);
     }
 
+    /**
+     * Loads a user by their username (in this case, email) for authentication purposes. This method is required by the UserDetailsService interface and is used by Spring Security to retrieve user details during the authentication process.
+     * @param username the username identifying the user whose data is required (in this implementation, the email is used as the username)
+     * @return
+     */
     @Override
-    public UserDetails loadUserByUsername(String username) {
+    public UserDetails loadUserByUsername(@NonNull String username) {
         Optional<User> userOptional = userRepository.findByEmail(username);
         if (userOptional.isEmpty()) {
             throw new UsernameNotFoundException("User not found with email: " + username);

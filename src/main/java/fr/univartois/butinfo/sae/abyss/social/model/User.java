@@ -91,11 +91,13 @@ public class User implements UserDetails {
      * Constructs a new User with the specified username.
      *
      * @param username The username of the user.
+     * @param email The email address of the user.
+     * @param password The password of the user.
      */
-    public User(String username, String email) {
+    public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
-        this.password = null;
+        this.password = password;
         this.role = ROLES.USER;
         this.profilePicture = null;
         this.friends = new ArrayList<>();
@@ -106,18 +108,19 @@ public class User implements UserDetails {
     }
 
     /**
-     * Constructs a new User with the specified username, email, and role.
+     * Constructs a new User with the specified username, email, and profile picture.
      *
      * @param username The username of the user.
      * @param email The email address of the user.
-     * @param role The role of the user.
+     * @param password The password of the user.
+     * @param profilePicture The profile picture of the user.
      */
-    public User(String username, String email, ROLES role) {
+    public User(String username, String email, String password, Binary profilePicture) {
         this.username = username;
         this.email = email;
-        this.password = null;
-        this.role = role;
-        this.profilePicture = null;
+        this.password = password;
+        this.role = ROLES.USER;
+        this.profilePicture = profilePicture;
         this.friends = new ArrayList<>();
         this.usersBanned = new ArrayList<>();
         this.groups = new ArrayList<>();
