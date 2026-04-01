@@ -1,6 +1,9 @@
 package fr.univartois.butinfo.sae.abyss.social.controller;
 
+import fr.univartois.butinfo.sae.abyss.social.dto.MessageResponseDTO;
 import fr.univartois.butinfo.sae.abyss.social.dto.UserDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.UserResponseDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.UserUpdateRequestDTO;
 import fr.univartois.butinfo.sae.abyss.social.mapper.UserMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.UserService;
@@ -50,10 +53,10 @@ public class UserController {
     @Operation(summary = "Create a new user", description = "Create a new user with the provided data")
     @ApiResponse(responseCode = "200", description = "User successfully created")
     @ApiResponse(responseCode = "400", description = "Invalid data")
-    public ResponseEntity<UserDTO> create(@Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<UserResponseDTO> create(@Valid @RequestBody UserDTO userDTO) {
         User user = userMapper.toEntity(userDTO);
         User savedUser = userService.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDTO(savedUser));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toResponseDTO(savedUser));
     }
 
     /**
@@ -62,7 +65,7 @@ public class UserController {
      * It returns a 204 No Content response if the deletion is successful, or a 401 Unauthorized response if the user is not authenticated.
      */
     @DeleteMapping
-    @Operation(summary = "Delete a user by ID", description = "Delete a user with the specified ID")
+    @Operation(summary = "Delete user account", description = "Delete user account")
     @ApiResponse(responseCode = "204", description = "User successfully deleted")
     @ApiResponse(responseCode = "404", description = "User not found")
     public ResponseEntity<Void> deleteById(@AuthenticationPrincipal User currentUser) {
@@ -72,4 +75,32 @@ public class UserController {
         userService.deleteById(currentUser.getId());
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * Endpoint for updating the current user's profile information (username and profile picture).
+     * Only these non-sensitive fields can be updated through this endpoint.
+     *
+     * @param currentUser The currently authenticated user
+     * @param updateDTO The DTO containing the new username and profile picture
+     * @return ResponseEntity with the updated user information
+     */
+    @PatchMapping
+    @Operation(summary = "Update current user profile", description = "Update username and profile picture of the authenticated user")
+    @ApiResponse(responseCode = "200", description = "User profile successfully updated")
+    @ApiResponse(responseCode = "400", description = "Username already in use or invalid data")
+    @ApiResponse(responseCode = "401", description = "User not authenticated")
+    public ResponseEntity<MessageResponseDTO> updateProfile(@AuthenticationPrincipal User currentUser, @Valid @RequestBody UserUpdateRequestDTO updateDTO) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        userService.updateProfile(
+                currentUser.getId(),
+                updateDTO.username(),
+                updateDTO.profilePicture()
+        );
+
+        return ResponseEntity.ok(new MessageResponseDTO("User successfully updated"));
+    }
+
 }
