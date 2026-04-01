@@ -16,8 +16,8 @@ public class Comment {
     @DBRef
     private User user;
 
-    @DBRef
-    private Post post;
+    @Field("post_id")
+    private ObjectId postId;
 
     private String text;
 
@@ -49,12 +49,12 @@ public class Comment {
         this.user = user;
     }
 
-    public Post getPost() {
-        return post;
+    public ObjectId getPostId() {
+        return postId;
     }
 
-    public void setPost(Post post) {
-        this.post = post;
+    public void setPostId(ObjectId postId) {
+        this.postId = postId;
     }
 
     public String getText() {
