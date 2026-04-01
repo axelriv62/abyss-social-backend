@@ -2,6 +2,7 @@ package fr.univartois.butinfo.sae.abyss.social.service;
 
 import fr.univartois.butinfo.sae.abyss.social.mapper.GroupMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
+import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.repository.GroupRepository;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
@@ -54,7 +55,6 @@ public class GroupService {
      */
     public Group updateGroup(ObjectId id, Group body) {
         return groupRepository.findById(id).map(group -> {
-            // Update only the fields that are present in the request body
             if (body.getName() != null) {
                 group.setName(body.getName());
             }
@@ -65,10 +65,8 @@ public class GroupService {
                 group.setPosts(body.getPosts());
             }
             return groupRepository.save(group);
-            // return exception if not found
         }).orElseThrow(() -> new IllegalArgumentException("Group not found: " + id));
     }
-
     /**
      * Save a group. This method is used for both creating a new group and updating an existing one.
      * @param group The group to save.
