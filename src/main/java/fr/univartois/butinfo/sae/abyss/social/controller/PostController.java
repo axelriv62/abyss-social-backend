@@ -8,10 +8,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import org.bson.types.ObjectId;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -82,6 +84,19 @@ public class PostController {
     @GetMapping("/search")
     public ResponseEntity<List<PostDTO>> searchPosts(@RequestParam("query") String query) {
         List<Post> matches = postService.searchByContent(query);
+        return ResponseEntity.ok(postMapper.toDTOs(matches));
+    }
+
+    /**
+     * Searches posts created on the provided date.
+     */
+    @Operation(summary = "Search posts by date", description = "Lists posts created on the provided date, ignoring time.")
+    @ApiResponse(responseCode = "200", description = "Search completed")
+    @ApiResponse(responseCode = "400", description = "Date is invalid")
+    @GetMapping("/search/by-date")
+    public ResponseEntity<List<PostDTO>> searchPostsByDate(
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        List<Post> matches = postService.searchByCreationDate(date);
         return ResponseEntity.ok(postMapper.toDTOs(matches));
     }
 
