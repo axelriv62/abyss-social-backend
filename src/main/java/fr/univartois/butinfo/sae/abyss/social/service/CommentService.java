@@ -37,7 +37,12 @@ public class CommentService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found for id=" + postId.toHexString());
         }
         User author = comment.getUser();
-        ObjectId userId = author != null ? author.getId() : null;
+        ObjectId userId;
+        if (author != null) {
+            userId = author.getId();
+        } else {
+            userId = null;
+        }
         if (userId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "userId is required");
         }
