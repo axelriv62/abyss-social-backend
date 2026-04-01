@@ -1,19 +1,17 @@
 info:
-  name: Save post with id
+  name: Comment a post
   type: http
-  seq: 2
+  seq: 1
 
 http:
   method: POST
-  url: "{{URL}}/posts"
+  url: "{{URL}}/posts/69cd1b0f772d9b831ad8f4ce/comments"
   body:
     type: json
     data: |-
       {
-        "content": "Première plongée de l'année effectuée à Roeux",
-        "comments": [],
-        "likes": [],
-        "dislikes": []
+        "text" : "Super ! Qu'en as-tu pensé ?",
+        "postId": "69cd1b0f772d9b831ad8f4ce"
       }
   auth:
     type: bearer
