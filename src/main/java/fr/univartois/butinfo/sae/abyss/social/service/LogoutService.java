@@ -51,5 +51,6 @@ public class LogoutService implements LogoutHandler {
         token.ifPresent(value -> {
             value.setRevoked(true);
             tokenRepository.save(value);
-        });    }
+        });
+    }
 }

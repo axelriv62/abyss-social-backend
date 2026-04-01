@@ -2,6 +2,7 @@ package fr.univartois.butinfo.sae.abyss.social.service;
 
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
+import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
@@ -50,6 +51,29 @@ public class UserService implements UserDetailsService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         userRepository.deleteById(id);
+    }
+
+    /**
+     * Updates a user's profile information (username and profile picture).
+     * This method safely updates only non-sensitive user data.
+     * Verifies that the username is not already taken by another user.
+     *
+     * @param userId         The ID of the user to update
+     * @param username       The new username
+     * @param profilePicture The new profile picture (can be null)
+     * @throws ResponseStatusException if username is already in use or user not found
+     */
+    public void updateProfile(ObjectId userId, String username, Binary profilePicture) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (!user.getUsername().equals(username) && userRepository.findByUsername(username).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already in use");
+        }
+
+        user.setUsername(username);
+        user.setProfilePicture(profilePicture);
+        userRepository.save(user);
     }
 
     /**
