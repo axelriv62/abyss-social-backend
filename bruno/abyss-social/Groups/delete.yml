@@ -5,8 +5,10 @@ info:
 
 http:
   method: DELETE
-  url: "{{URL}}/groups/69cab182f9aa8f8710d001e2"
-  auth: inherit
+  url: "{{URL}}/groups/69ccf93df9275425163bb072"
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
 
 settings:
   encodeUrl: true

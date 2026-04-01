@@ -165,4 +165,22 @@ public class GroupController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Handles the search of a group with a given ID, in the URL.
+     * @param id The ObjectId of the group to be searched.
+     * @return A ResponseEntity containing the GroupDTO if the group is found, a 404 (Not Found) status if the group does not exist or a 401 if user is not logged in.
+     */
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a group by ID", description = "Retrieves a group by its ID. If the group does not exist, a 404 Not Found response is returned.")
+    @ApiResponse(responseCode = "200", description = "Group successfully retrieved")
+    @ApiResponse(responseCode = "404", description = "Group not found")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    public ResponseEntity<GroupDTO> getGroupById(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Group group = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+        return ResponseEntity.ok(groupMapper.toDTO(group));
+    }
 }
