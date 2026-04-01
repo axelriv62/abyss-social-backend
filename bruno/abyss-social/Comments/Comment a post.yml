@@ -5,8 +5,17 @@ info:
 
 http:
   method: POST
-  url: /posts/69cd15cb0da939397e030aee/comments
-  auth: inherit
+  url: "{{URL}}/posts/69cd1b0f772d9b831ad8f4ce/comments"
+  body:
+    type: json
+    data: |-
+      {
+        "text" : "Super ! Qu'en as-tu pensé ?",
+        "postId": "69cd1b0f772d9b831ad8f4ce"
+      }
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
 
 settings:
   encodeUrl: true

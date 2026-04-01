@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "content": "Essai pour les commentaires",
+        "content": "Première plongée de l'année effectuée à Roeux",
         "comments": [],
         "likes": [],
         "dislikes": []

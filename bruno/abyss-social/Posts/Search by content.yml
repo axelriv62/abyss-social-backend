@@ -5,8 +5,14 @@ info:
 
 http:
   method: GET
-  url: "{{URL}}/search"
-  auth: inherit
+  url: "{{URL}}/posts/search?query=plongée"
+  params:
+    - name: query
+      value: plongée
+      type: query
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
 
 settings:
   encodeUrl: true
