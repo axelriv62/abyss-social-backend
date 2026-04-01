@@ -65,7 +65,7 @@ public class GroupService {
                 group.setPosts(body.getPosts());
             }
             return groupRepository.save(group);
-        }).orElseThrow(() -> new IllegalArgumentException("Page not found: " + id));
+        }).orElseThrow(() -> new IllegalArgumentException("Group not found: " + id));
     }
     /**
      * Save a group. This method is used for both creating a new group and updating an existing one.
