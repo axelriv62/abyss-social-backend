@@ -3,6 +3,7 @@ package fr.univartois.butinfo.sae.abyss.social.controller;
 import fr.univartois.butinfo.sae.abyss.social.dto.GroupDTO;
 import fr.univartois.butinfo.sae.abyss.social.mapper.GroupMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
+import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,6 +11,9 @@ import jakarta.validation.Valid;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -101,5 +105,19 @@ public class GroupController {
                     return ResponseEntity.noContent().<Void>build();
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Handles the addition of a group in a user's list of groups.
+     * @param groupId The ObjectId of the group to be added.
+     * @return A ResponseEntity with HTTP status 200 (OK) if the addition was successful, or 404 (Not Found) if the user or group does not exist.
+     */
+    @Operation(summary = "Add a group to a user", description = "Adds the specified group to the user's list of groups. If the user or group does not exist, a 404 Not Found response is returned.")
+    @ApiResponse(responseCode = "200", description = "Group successfully added to user")
+    @ApiResponse(responseCode = "404", description = "User or group not found")
+    @PostMapping("/{groupId}/join")
+    public ResponseEntity<Void> addGroupToUser(@PathVariable ObjectId groupId, @AuthenticationPrincipal User currentUser) {
+        groupService.addGroupToUser(currentUser.getId(), groupId);
+        return ResponseEntity.ok().build();
     }
 }
