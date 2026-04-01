@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 public record PageDTO (
         ObjectId id,
 
-        @NotNull(message = "User ID cannot be blank")
         ObjectId userId,
 
         @NotBlank(message = "Page name cannot be blank")
