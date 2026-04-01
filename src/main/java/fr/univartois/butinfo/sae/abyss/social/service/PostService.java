@@ -68,6 +68,20 @@ public class PostService {
     }
 
     /**
+     * Finds posts whose content contains the provided fragment, case-insensitively.
+     *
+     * @param contentFragment substring to search for
+     * @return posts matching the fragment
+     */
+    public List<Post> searchByContent(String contentFragment) {
+        String trimmed = contentFragment.trim();
+        if (trimmed.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "query cannot be blank");
+        }
+        return postRepository.findByContentContainingIgnoreCase(trimmed);
+    }
+
+    /**
      * Adds a like for the given user, removing any existing dislike first.
      *
      * @param postId identifier of the post
