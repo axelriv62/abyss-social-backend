@@ -4,9 +4,11 @@ info:
   seq: 6
 
 http:
-  method: POST
-  url: "{{URL}}/groups/groupID/leave"
-  auth: inherit
+  method: DELETE
+  url: "{{URL}}/groups/69cbc24b2bb138cc28af4bd2/leave"
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJieWxlbEBnbWFpbC5jb20iLCJpYXQiOjE3NzUwMzExNzksImV4cCI6MTc3NTAzNDc3OX0.WHRsswhtcJSGNwYJA8ua1wnnBBmbWHfZDRkR2RshRK7wGd4g3tloM-xrBn9ORkr3
 
 settings:
   encodeUrl: true

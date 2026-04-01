@@ -120,4 +120,18 @@ public class GroupController {
         groupService.addGroupToUser(currentUser.getId(), groupId);
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * Handles the removal of a group in a user's list of groups.
+     * @param groupId The ObjectId of the group to be removed.
+     * @return A ResponseEntity with HTTP status 200 (OK) if the removal was successful, or 404 (Not Found) if the user or group does not exist.
+     */
+    @Operation(summary = "Remove a group from a user", description = "Removes the specified group from the user's list of groups. If the user or group does not exist, a 404 Not Found response is returned.")
+    @ApiResponse(responseCode = "200", description = "Group successfully removed from user")
+    @ApiResponse(responseCode = "404", description = "User or group not found")
+    @DeleteMapping("/{groupId}/leave")
+    public ResponseEntity<Void> removeGroupFromUser(@PathVariable ObjectId groupId, @AuthenticationPrincipal User currentUser) {
+        groupService.removeGroupFromUser(currentUser.getId(), groupId);
+        return ResponseEntity.ok().build();
+    }
 }

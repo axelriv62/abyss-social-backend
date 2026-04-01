@@ -8,7 +8,7 @@ http:
   url: "{{URL}}/groups/69cbc24b2bb138cc28af4bd2/join"
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyb2JlcnRkdWNobW9sQGdtYWlsLmNvbSIsImlhdCI6MTc3NTAzMDc1OSwiZXhwIjoxNzc1MDM0MzU5fQ.zPR3yDGyftY4NRVNHZPYP83Axk7qTBBTTTjNJF5QbsIgpJmcMhcwhCZjhZxXKUnB
+    token: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJieWxlbEBnbWFpbC5jb20iLCJpYXQiOjE3NzUwMzExNzksImV4cCI6MTc3NTAzNDc3OX0.WHRsswhtcJSGNwYJA8ua1wnnBBmbWHfZDRkR2RshRK7wGd4g3tloM-xrBn9ORkr3
 
 settings:
   encodeUrl: true

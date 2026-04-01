@@ -104,13 +104,27 @@ public class GroupService {
 
     /**
      * Add a ObjectId to the ObjectId list for Groups of the user with the specified ID
-     * @param id The unique identifier of the user whose joining the group
+     *
+     * @param id      The unique identifier of the user whose joining the group
      * @param groupId The unique identifier of the group to add in the list of groups
-     * @return The updated User object after adding the group ID to the user's list of groups
      */
-    public Group addGroupToUser(ObjectId id, ObjectId groupId) {
-        return userRepository.findById(id).map(user -> {
+    public void addGroupToUser(ObjectId id, ObjectId groupId) {
+        userRepository.findById(id).map(user -> {
             user.getGroups().add(groupId);
+            userRepository.save(user);
+            return groupRepository.findById(groupId).orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupId));
+        }).orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
+    }
+
+    /**
+     * Remove a ObjectId from the ObjectId list for Groups of the user with the specified ID
+     *
+     * @param id      The unique identifier of the user whose leaving the group
+     * @param groupId The unique identifier of the group to remove from the list of groups
+     */
+    public void removeGroupFromUser(ObjectId id, ObjectId groupId) {
+        userRepository.findById(id).map(user -> {
+            user.getGroups().remove(groupId);
             userRepository.save(user);
             return groupRepository.findById(groupId).orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupId));
         }).orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
