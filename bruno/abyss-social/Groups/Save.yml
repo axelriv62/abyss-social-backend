@@ -13,12 +13,13 @@ http:
     type: json
     data: |
       {
-        "userId": "69cbc2222bb138cc28af4bd1",
-        "name": "zak",
+        "name": "Groupe de Bylel Longelin",
         "tags": ["tag1", "tag5", "tag7777"],
         "posts": ["69cab182f9aa8f8710d001e3"]
       }
-  auth: inherit
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
 
 settings:
   encodeUrl: false

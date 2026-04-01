@@ -1,8 +1,10 @@
 package fr.univartois.butinfo.sae.abyss.social.controller;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.GroupDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.PageDTO;
 import fr.univartois.butinfo.sae.abyss.social.mapper.GroupMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
+import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.GroupService;
 import fr.univartois.butinfo.sae.abyss.social.service.UserService;
@@ -52,21 +54,20 @@ public class GroupController {
     /**
      * Create a new Group, with the provided data.
      * @param groupDTO The GroupDTO containing the data for the new Group.
+     * @param currentUser The currently authenticated user, injected by Spring Security. If the user is not authenticated, this parameter will be null.
      * @return A ResponseEntity containing the created GroupDTO with HTTP status 201 (Created). 400 (Bad Request) if the provided data is invalid.
      */
     @PostMapping
     @Operation(summary = "Create a new Group", description = "Create a new Group with the provided data")
     @ApiResponse(responseCode = "200", description = "User successfully created")
     @ApiResponse(responseCode = "400", description = "Invalid data")
-    public ResponseEntity<GroupDTO> createGroup(@Valid @RequestBody GroupDTO groupDTO) {
-
-        // Convert incoming DTO to entity for persistence
+    public ResponseEntity<GroupDTO> createGroup(@Valid @RequestBody GroupDTO groupDTO, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         Group group = groupMapper.toEntity(groupDTO);
-
-        // Save the entity; GroupService ensures createdAt is set when missing
+        group.setUser(currentUser);
         Group savedGroup = groupService.save(group);
-
-        // Convert saved entity back to DTO and return with 201 status
         return ResponseEntity.status(HttpStatus.CREATED).body(groupMapper.toDTO(savedGroup));
     }
 
@@ -80,17 +81,19 @@ public class GroupController {
     @ApiResponse(responseCode = "", description = "Group successfully updated")
     @ApiResponse(responseCode = "404", description = "Group not found")
     @PutMapping("/{id}")
-    public ResponseEntity<GroupDTO> updateGroup(@PathVariable("id") ObjectId id, @Valid @RequestBody GroupDTO groupDTO) {
-        return groupService.findById(id)
-                .map(existingGroup -> {
-                    // Convert incoming DTO
-                    Group toSave = groupMapper.toEntity(groupDTO);
-                    // Update the existing
-                    Group updatedGroup = groupService.updateGroup(id, toSave);
-                    // Return the updated group
-                    return ResponseEntity.ok(groupMapper.toDTO(updatedGroup));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<GroupDTO> updatePage(@PathVariable ObjectId id, @Valid @RequestBody GroupDTO groupDTO, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Group group = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+
+        if (!group.getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        Group updatedGroup = groupService.updateGroup(id, groupMapper.toEntity(groupDTO));
+        return ResponseEntity.ok(groupMapper.toDTO(updatedGroup));
     }
 
     /**
@@ -101,15 +104,24 @@ public class GroupController {
     @Operation(summary = "Delete a Group", description = "Deletes the Group with the specified ID. If the Group does not exist, a 404 Not Found response is returned.")
     @ApiResponse(responseCode = "204", description = "Group successfully deleted")
     @ApiResponse(responseCode = "404", description = "Group not found")
+    @ApiResponse(responseCode = "403", description = "You are not the creator of this group")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteGroup(@PathVariable ObjectId id) {
-        return groupService.findById(id)
-                .map(group -> {
-                    groupService.deleteById(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Void> deleteGroup(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Group group = groupService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+
+        if (!group.getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        groupService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
+
 
     /**
      * Handles the following of a group by the authenticated user. This method allows the user to follow a group by its ID. If the user is not authenticated, a 401 Unauthorized response is returned. If the group does not exist, a 404 Not Found response is returned. If the operation is successful, a 200 OK response is returned.
