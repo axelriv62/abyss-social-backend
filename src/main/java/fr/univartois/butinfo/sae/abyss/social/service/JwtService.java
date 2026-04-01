@@ -1,16 +1,20 @@
 package fr.univartois.butinfo.sae.abyss.social.service;
 
+import fr.univartois.butinfo.sae.abyss.social.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
+import fr.univartois.butinfo.sae.abyss.social.model.Token;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -31,6 +35,18 @@ public class JwtService {
      */
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
+
+    /**
+     * TokenRepository instance for managing authentication tokens. This repository is injected via the constructor and is used to find and validate tokens during the token validation process, ensuring that only valid tokens are accepted for authentication.
+     */
+    private final TokenRepository tokenRepository;
+
+    /**
+     * Constructor for JwtService, injecting the TokenRepository dependency.
+     */
+    public JwtService(TokenRepository tokenRepository) {
+        this.tokenRepository = tokenRepository;
+    }
 
     /**
      * Generates a JWT token for the given UserDetails.
@@ -72,15 +88,34 @@ public class JwtService {
     }
 
     /**
-     * Validates the given JWT token against the provided UserDetails.
-     * This method extracts the username from the token and checks if it matches the username in the UserDetails, and also checks if the token has expired. If the token is valid (i.e., the username matches and the token is not expired), it returns true; otherwise, it returns false.
-     * @param token The JWT token to be validated, which is typically extracted from the Authorization header of an incoming HTTP request. This token is parsed to extract the username and expiration information for validation purposes.
-     * @param userDetails The UserDetails object containing the user's information, which is used to compare the username extracted from the token with the username in the UserDetails, and to ensure that the token is valid for the authenticated user.
-     * @return
+     * Saves the given JWT token value and associated user ID in the TokenRepository.
+     * This method creates a new Token entity with the provided token value and user ID, and then saves it to the repository for later validation during authentication processes.
+     * @param tokenValue The JWT token value to be saved, which is typically generated during the authentication process and will be stored in the TokenRepository for later validation when the token is used in subsequent requests.
+     * @param userId The unique identifier of the user associated with the JWT token, which is used to link the token to a specific user in the TokenRepository. This allows for efficient validation of the token against the user's information during authentication processes.
      */
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        String username = extractUsername(token);
-        return !isTokenExpired(token) && (username.equals(userDetails.getUsername()));
+    public void saveToken(String tokenValue, ObjectId userId) {
+        Token token = new Token(tokenValue, userId);
+        tokenRepository.save(token);
+    }
+
+    /**
+     * Validates the given JWT token against the provided UserDetails.
+     * This method checks if the token exists in the TokenRepository, extracts the username from the token, and compares it with the username from the UserDetails. It also checks if the token has expired. If all checks pass, it returns true, indicating that the token is valid; otherwise, it returns false.
+     * @param jwt The JWT token to be validated, which is typically extracted from the Authorization header of an incoming HTTP request. This token is checked against the TokenRepository to ensure it exists, and its claims are validated against the provided UserDetails to confirm its authenticity and validity for authentication purposes.
+     * @param userDetails The UserDetails object containing the user's information, which is used to validate the claims in the JWT token, such as the username (subject) and to check if the token has expired. This information is crucial for determining if the token is valid for authentication and authorization purposes in the application.
+     * @return A boolean value indicating whether the JWT token is valid (true) or not (false), based on the presence of the token in the TokenRepository, the validity of its claims
+     */
+    public boolean isTokenValid(String jwt, UserDetails userDetails) {
+        Optional<Token> token = tokenRepository.findByToken(jwt);
+        if (token.isPresent()) {
+            Token tokenEntity = token.get();
+            if (tokenEntity.isRevoked() || tokenEntity.isExpired()) {
+                return false;
+            }
+            String username = extractUsername(jwt);
+            return (username.equals(userDetails.getUsername())) && !isTokenExpired(jwt);
+        }
+        return false;
     }
 
     /**

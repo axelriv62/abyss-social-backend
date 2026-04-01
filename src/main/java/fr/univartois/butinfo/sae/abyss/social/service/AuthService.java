@@ -91,6 +91,8 @@ public class AuthService {
 
         User result = userRepository.save(user);
         String token = jwtService.generateToken(result);
+        jwtService.saveToken(token, result.getId());
+
         UserResponseDTO userResponseDTO = userMapper.toResponseDTO(result);
         return new AuthResponseDTO(userResponseDTO, token, "Bearer");
     }
@@ -115,6 +117,7 @@ public class AuthService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email"));
 
         String token = jwtService.generateToken(user);
+        jwtService.saveToken(token, user.getId());
         UserResponseDTO userResponseDTO = this.userMapper.toResponseDTO(user);
         return new AuthResponseDTO(userResponseDTO, token, "Bearer");
     }
