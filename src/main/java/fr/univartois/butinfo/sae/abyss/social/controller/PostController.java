@@ -185,4 +185,33 @@ public class PostController {
         Post updated = postService.undislikePost(postId, userId);
         return ResponseEntity.ok(postMapper.toDTO(updated));
     }
+
+    /**
+     * Retrieves the feed for the authenticated user.
+     * Returns all posts from the user's friends, groups, pages, and their own posts.
+     * Posts are sorted by creation date (most recent first).
+     *
+     * @param currentUser The authenticated user, injected by Spring Security
+     * @return ResponseEntity containing list of PostDTOs representing the user's feed
+     */
+    @GetMapping("/feed")
+    @Operation(summary = "Get user's feed", description = "Retrieves all posts from friends, groups, pages and own posts")
+    @ApiResponse(responseCode = "200", description = "Feed retrieved successfully")
+    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
+    @ApiResponse(responseCode = "404", description = "User not found")
+    public ResponseEntity<List<PostDTO>> getUserFeed(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            List<Post> posts = postService.findAllForUser(currentUser);
+            List<PostDTO> postDTOs = posts.stream()
+                    .map(postMapper::toDTO)
+                    .toList();
+            return ResponseEntity.ok(postDTOs);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

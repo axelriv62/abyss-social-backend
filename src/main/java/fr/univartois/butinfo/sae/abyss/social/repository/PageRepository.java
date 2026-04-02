@@ -16,4 +16,6 @@ public interface PageRepository extends MongoRepository<Page, ObjectId> {
      * @return a list of Page entities matching the search criteria
      */
     List<Page> findByNameContainingIgnoreCase(String nameFragment);
+
+    List<Page> findAllById(Iterable<ObjectId> ids);
 }

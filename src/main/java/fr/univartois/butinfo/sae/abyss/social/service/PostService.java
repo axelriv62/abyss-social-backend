@@ -1,7 +1,11 @@
 package fr.univartois.butinfo.sae.abyss.social.service;
 
+import fr.univartois.butinfo.sae.abyss.social.model.Group;
+import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.model.Post;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
+import fr.univartois.butinfo.sae.abyss.social.repository.GroupRepository;
+import fr.univartois.butinfo.sae.abyss.social.repository.PageRepository;
 import fr.univartois.butinfo.sae.abyss.social.repository.PostRepository;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 import org.bson.types.ObjectId;
@@ -12,6 +16,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -23,8 +29,13 @@ public class PostService {
 
     /** Repository managing persistence of posts. */
     private PostRepository postRepository;
+
     /** Repository used to validate and load users referenced by posts. */
     private UserRepository userRepository;
+
+    private GroupRepository groupRepository;
+
+    private PageRepository pageRepository;
 
     /**
      * Builds the service with required repositories.
@@ -32,9 +43,11 @@ public class PostService {
      * @param postRepository repository handling Post entities
      * @param userRepository repository handling User entities
      */
-    public PostService(PostRepository postRepository, UserRepository userRepository) {
+    public PostService(PostRepository postRepository, UserRepository userRepository, GroupRepository groupRepository, PageRepository pageRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.groupRepository = groupRepository;
+        this.pageRepository = pageRepository;
     }
 
     /**
@@ -234,5 +247,55 @@ public class PostService {
     private boolean isSameUser(User user, ObjectId userId) {
         return user != null && user.getId() != null && user.getId().equals(userId);
     }
+
+    /**
+     * Retrieves the complete feed for a user.
+     * Returns posts from: friends, groups, pages, and own posts.
+     * Posts are sorted by creation date (most recent first) and deduplicated.
+     */
+    public List<Post> findAllForUser(User user) {
+        if (user == null || user.getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is required");
+        }
+
+        // Check if user exists
+        if (!userRepository.existsById(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        List<Post> posts = new ArrayList<>();
+
+        // 1. Get friends' posts (friends are stored as ObjectId list, posts are linked to users by userId)
+        if (user.getFriends() != null && !user.getFriends().isEmpty()) {
+            posts.addAll(postRepository.findByUser_IdIn(user.getFriends()));
+        }
+
+        // 2. Get groups' posts (groups store ObjectId[] of posts)
+        if (user.getGroups() != null && !user.getGroups().isEmpty()) {
+            List<Group> userGroups = groupRepository.findAllById(user.getGroups());
+            for (Group group : userGroups) {
+                if (group.getPosts() != null && group.getPosts().length > 0) {
+                    posts.addAll(postRepository.findAllById(Arrays.asList(group.getPosts())));
+                }
+            }
+        }
+
+        // 3. Get pages' posts (pages store ObjectId[] of posts)
+        if (user.getPages() != null && !user.getPages().isEmpty()) {
+            List<Page> userPages = pageRepository.findAllById(user.getPages());
+            for (Page page : userPages) {
+                if (page.getPosts() != null && page.getPosts().length > 0) {
+                    posts.addAll(postRepository.findAllById(Arrays.asList(page.getPosts())));
+                }
+            }
+        }
+
+        // Sort by date (most recent first) and remove duplicates
+        return posts.stream()
+                .distinct()
+                .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
+                .toList();
+    }
+
 }
 
