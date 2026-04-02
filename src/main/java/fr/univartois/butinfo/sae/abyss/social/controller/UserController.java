@@ -1,9 +1,6 @@
 package fr.univartois.butinfo.sae.abyss.social.controller;
 
-import fr.univartois.butinfo.sae.abyss.social.dto.MessageResponseDTO;
-import fr.univartois.butinfo.sae.abyss.social.dto.UserDTO;
-import fr.univartois.butinfo.sae.abyss.social.dto.UserResponseDTO;
-import fr.univartois.butinfo.sae.abyss.social.dto.UserUpdateRequestDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.*;
 import fr.univartois.butinfo.sae.abyss.social.mapper.UserMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.UserService;
@@ -15,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * REST controller for managing User entities, providing endpoints for user-related operations.
@@ -67,7 +66,7 @@ public class UserController {
      */
     @DeleteMapping
     @Operation(summary = "Delete user account", description = "Delete user account")
-    @ApiResponse(responseCode = "204", description = "User successfully deleted")
+    @ApiResponse(responseCode = "204", description = "Profile successfully deleted")
     @ApiResponse(responseCode = "404", description = "User not found")
     public ResponseEntity<Void> deleteById(@AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
@@ -87,21 +86,35 @@ public class UserController {
      */
     @PatchMapping
     @Operation(summary = "Update current user profile", description = "Update username and profile picture of the authenticated user")
-    @ApiResponse(responseCode = "200", description = "User profile successfully updated")
+    @ApiResponse(responseCode = "204", description = "Profile successfully updated")
     @ApiResponse(responseCode = "400", description = "Username already in use or invalid data")
     @ApiResponse(responseCode = "401", description = "User not authenticated")
     public ResponseEntity<MessageResponseDTO> updateProfile(@AuthenticationPrincipal User currentUser, @Valid @RequestBody UserUpdateRequestDTO updateDTO) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        userService.updateProfile(
-                currentUser.getId(),
-                updateDTO.username(),
-                updateDTO.profilePicture()
+        userService.updateProfile(currentUser.getId(), updateDTO.username(), updateDTO.profilePicture()
         );
+        return ResponseEntity.noContent().build();
+    }
 
-        return ResponseEntity.ok(new MessageResponseDTO("User successfully updated"));
+    /**
+     * Endpoint for searching users by username.
+     *
+     * @param username The username fragment to search for. This string is trimmed and validated to ensure it is not blank before performing the search.
+     * @return A ResponseEntity containing a list of UserDTO objects whose usernames contain the specified fragment, ignoring case. If the input string is blank after trimming, a ResponseEntity with a 400 Bad Request status is returned. If the user is not authenticated, a ResponseEntity with a 401 Unauthorized status is returned.
+     */
+    @Operation(summary = "Search posts by username", description = "Lists posts created on the provided username.")
+    @ApiResponse(responseCode = "200", description = "Search completed")
+    @ApiResponse(responseCode = "400", description = "Username fragment invalid")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @GetMapping("/search")
+    public ResponseEntity<List<UserResponseDTO>> searchUserByUsername(@RequestParam("username") String username, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<User> matches = userService.searchByUsername(username);
+        return ResponseEntity.ok(userMapper.toResponseDTOs(matches));
     }
 
     /**

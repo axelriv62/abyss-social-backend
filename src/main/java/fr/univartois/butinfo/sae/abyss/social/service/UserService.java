@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.ArrayList;
 
@@ -59,8 +60,8 @@ public class UserService implements UserDetailsService {
      * This method safely updates only non-sensitive user data.
      * Verifies that the username is not already taken by another user.
      *
-     * @param userId         The ID of the user to update
-     * @param username       The new username
+     * @param userId The ID of the user to update
+     * @param username The new username (can be null)
      * @param profilePicture The new profile picture (can be null)
      * @throws ResponseStatusException if username is already in use or user not found
      */
@@ -78,6 +79,20 @@ public class UserService implements UserDetailsService {
     }
 
     /**
+     * Searches for users whose usernames contain the specified fragment, ignoring case.
+     * This method trims the input string to remove leading and trailing whitespace, checks if the resulting string is empty, and if not, uses the UserRepository to find and return a list of users whose usernames contain the specified fragment, ignoring case.
+     * @param usernameFragment The fragment of the username to search for. This string is trimmed and validated to ensure it is not blank before performing the search.
+     * @return A list of User objects whose usernames contain the specified fragment, ignoring case. If the input string is blank after trimming, a ResponseStatusException with a 400 Bad Request status is thrown.
+     */
+    public List<User> searchByUsername(String usernameFragment) {
+        String trimmed = usernameFragment.trim();
+        if (trimmed.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username fragment cannot be blank");
+        }
+        return userRepository.findByUsernameContainingIgnoreCase(trimmed);
+    }
+
+    /**
      * Loads a user by their username (in this case, email) for authentication purposes. This method is required by the UserDetailsService interface and is used by Spring Security to retrieve user details during the authentication process.
      * @param username the username identifying the user whose data is required (in this implementation, the email is used as the username)
      * @return
@@ -86,7 +101,7 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(@NonNull String username) {
         Optional<User> userOptional = userRepository.findByEmail(username);
         if (userOptional.isEmpty()) {
-            throw new UsernameNotFoundException("User not found with email: " + username);
+            throw new UsernameNotFoundException("User not found with email");
         }
         return userOptional.get();
     }
