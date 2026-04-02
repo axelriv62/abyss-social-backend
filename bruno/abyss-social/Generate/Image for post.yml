@@ -1,18 +1,17 @@
 info:
-  name: Login
+  name: Image for post
   type: http
   seq: 2
 
 http:
   method: POST
-  url: "{{URL}}/auth/login"
+  url: "{{URL}}/generate/post-image/69ce8cb61e56c90e807daa35"
   body:
     type: json
-    data: |2-
-        {
-          "email": "robet.duchmol@gmail.com",
-          "password": "grossecret"
-        }
+    data: |-
+      {
+        "prompt": "post"
+      }
   auth: inherit
 
 settings:

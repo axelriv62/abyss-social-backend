@@ -54,7 +54,7 @@ public class Post {
     }
 
     /**
-     * Builds a post with an author and content.
+     * Builds a post with an author.
      *
      * @param user  The author
      */
@@ -115,7 +115,9 @@ public class Post {
      *
      * @param image new image
      */
-    public void setImage(Binary image) {}
+    public void setImage(Binary image) {
+        this.image = image;
+    }
 
     /**
      * @return comment identifiers linked to this post
@@ -223,4 +225,7 @@ public class Post {
     }
 
 
+    public void setId(ObjectId postId) {
+        this.id = postId;
+    }
 }

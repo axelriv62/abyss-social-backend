@@ -1,14 +1,14 @@
 info:
-  name: Search by user
+  name: search by name
   type: http
-  seq: 10
+  seq: 6
 
 http:
   method: GET
-  url: "{{URL}}/posts/search/by-creator?username=robertduchmol"
+  url: "{{URL}}/groups/search?query="
   params:
-    - name: username
-      value: robertduchmol
+    - name: query
+      value: ""
       type: query
   auth:
     type: bearer

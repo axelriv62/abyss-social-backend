@@ -1,19 +1,18 @@
 info:
-  name: Register
+  name: Profile picture
   type: http
-  seq: 1
+  seq: 7
 
 http:
   method: POST
-  url: "{{URL}}/auth/register"
+  url: "{{URL}}/generate/profile-picture"
   body:
     type: json
     data: |-
       {
-        "username": "robertduchmol",
-        "email": "robet.duchmol@gmail.com",
-        "password": "grossecret"
+        "prompt": "post"
       }
+  auth: inherit
 
 settings:
   encodeUrl: true

@@ -1,14 +1,14 @@
 info:
-  name: Search by user
+  name: Role
   type: http
-  seq: 10
+  seq: 6
 
 http:
-  method: GET
-  url: "{{URL}}/posts/search/by-creator?username=robertduchmol"
+  method: PATCH
+  url: "{{URL}}/users/role/69ce31533b496651aa6c77dc?newRole=ADMIN"
   params:
-    - name: username
-      value: robertduchmol
+    - name: newRole
+      value: ADMIN
       type: query
   auth:
     type: bearer

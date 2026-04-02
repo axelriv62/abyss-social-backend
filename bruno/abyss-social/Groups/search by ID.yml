@@ -1,15 +1,11 @@
 info:
-  name: Search by date
+  name: search by ID
   type: http
-  seq: 9
+  seq: 7
 
 http:
   method: GET
-  url: "{{URL}}/posts/search/by-date?date=2026-04-01"
-  params:
-    - name: date
-      value: 2026-04-01
-      type: query
+  url: "{{URL}}/groups/69cd2816b8c51ba737e7a9a0"
   auth:
     type: bearer
     token: "{{TOKEN}}"

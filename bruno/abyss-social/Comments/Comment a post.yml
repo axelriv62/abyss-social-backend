@@ -1,18 +1,17 @@
 info:
-  name: Save
+  name: Comment a post
   type: http
   seq: 1
 
 http:
   method: POST
-  url: "{{URL}}/pages"
+  url: "{{URL}}/posts/69cd2942b8c51ba737e7a9a2/comments"
   body:
     type: json
-    data: |
+    data: |-
       {
-        "name": "Test",
-        "tags": ["tag1", "tag2"],
-        "posts": []
+        "text" : "Test 3",
+        "postId": "69cd2942b8c51ba737e7a9a2"
       }
   auth:
     type: bearer

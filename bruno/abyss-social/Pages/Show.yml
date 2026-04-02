@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{URL}}/pages/69cd06c9e28abf155dabf093"
+  url: "{{URL}}/pages/69cd2777b8c51ba737e7a99d"
   auth:
     type: bearer
     token: "{{TOKEN}}"
