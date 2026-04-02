@@ -171,6 +171,22 @@ public class UserService implements UserDetailsService {
     }
 
     /**
+     * Remove a friend from a user's list of friends. This method retrieves the user by their unique identifier, checks if the friend is currently associated with the user, and if so, removes the friend's ID from the user's list of friends and saves the updated user back to the database.
+     * @param userId The unique identifier of the user from whom the friend will be removed
+     * @param friendId The unique identifier of the friend to be removed
+     */
+    public void removeFriend(ObjectId userId, ObjectId friendId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if (user.getFriends().contains(friendId)) {
+            user.getFriends().remove(friendId);
+            userRepository.save(user);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Friend not associated with user");
+        }
+    }
+
+    /**
      * Check whether a given target user id is present in another user's banned list.
      * @param userId the user whose `usersBanned` list will be checked (e.g. the potential friend)
      * @param targetId the id to look for in that list (e.g. the current authenticated user)

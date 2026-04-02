@@ -139,4 +139,26 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponseDTO("Friend successfully added to friend list"));
     }
 
+    /**
+     * Endpoint for removing a friend to the current user's friend list.
+     * This method retrieves the currently authenticated user, checks if the user is authenticated, and if so, removes the specified friend ID to the user's list of friends using the UserService.
+     */
+    @PatchMapping("/friends/remove")
+    @Operation(summary = "Remove friend from friend list", description = "Remove a friend from the authenticated user's friend list")
+    @ApiResponse(responseCode = "200", description = "Friend successfully removed from friend list")
+    @ApiResponse(responseCode = "400", description = "Friend ID is required or friend not in friend list")
+    @ApiResponse(responseCode = "403", description = "User not authenticated")
+    public ResponseEntity<MessageResponseDTO> removeFriend(@AuthenticationPrincipal User currentUser, @RequestParam("friendId") ObjectId friendId) {
+        if (currentUser == null) {
+            return ResponseEntity.badRequest().body(new MessageResponseDTO("You're not authenticated"));
+        }
+        if (friendId == null) {
+            return ResponseEntity.badRequest().body(new MessageResponseDTO("Friend ID is required"));
+        }
+        if (!currentUser.getFriends().contains(friendId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDTO("Friend not in friend list"));
+        }
+        userService.removeFriend(currentUser.getId(), friendId);
+        return ResponseEntity.ok(new MessageResponseDTO("Friend successfully removed from friend list"));
+    }
 }
