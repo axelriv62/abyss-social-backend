@@ -116,25 +116,6 @@ public class UserController {
     @ApiResponse(responseCode = "401", description = "User not authenticated")
 
     public ResponseEntity<MessageResponseDTO> addFriend(@AuthenticationPrincipal User currentUser, @RequestParam("friendId") ObjectId friendId) {
-        if (currentUser == null) {
-            return ResponseEntity.badRequest().body(new MessageResponseDTO("You're not authenticated"));
-        }
-        if (friendId == null) {
-            return ResponseEntity.badRequest().body(new MessageResponseDTO("Friend ID is required"));
-        }
-        if (currentUser.getId().equals(friendId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDTO("Cannot add self as friend"));
-        }
-        if (currentUser.getFriends().contains(friendId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDTO("Friend already in friend list"));
-        }
-        if (currentUser.getUsersBanned().contains(friendId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDTO("Cannot add banned user as friend"));
-        }
-        if (userService.isUserBannedBy(friendId, currentUser.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDTO("Cannot add user: you are banned by this user"));
-        }
-
         userService.addFriend(currentUser.getId(), friendId);
         return ResponseEntity.ok(new MessageResponseDTO("Friend successfully added to friend list"));
     }

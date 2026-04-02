@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.util.ArrayList;
 
 /**
  * Service class for managing User entities, providing business logic for user-related operations.
@@ -160,14 +161,29 @@ public class UserService implements UserDetailsService {
      * @param friendId The unique identifier of the friend to be added
      */
     public void addFriend(ObjectId userId, ObjectId friendId) {
+        if (friendId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Friend ID is required");
+        }
+        if (userId.equals(friendId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot add self as friend");
+        }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        if (!user.getFriends().contains(friendId)) {
-            user.getFriends().add(friendId);
-            userRepository.save(user);
-        } else {
+
+        if (user.getFriends().contains(friendId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Friend already associated with user");
         }
+
+        if (user.getUsersBanned().contains(friendId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot add banned user as friend");
+        }
+
+        if (isUserBannedBy(friendId, userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot add user: you are banned by this user");
+        }
+
+        user.getFriends().add(friendId);
+        userRepository.save(user);
     }
 
     /**
