@@ -14,7 +14,6 @@ http:
         "email": "robet.duchmol@gmail.com",
         "password": "grossecret"
       }
-  auth: inherit
 
 settings:
   encodeUrl: true
