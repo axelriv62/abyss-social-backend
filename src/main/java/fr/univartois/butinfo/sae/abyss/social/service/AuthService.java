@@ -2,6 +2,7 @@ package fr.univartois.butinfo.sae.abyss.social.service;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.*;
 import fr.univartois.butinfo.sae.abyss.social.mapper.UserMapper;
+import fr.univartois.butinfo.sae.abyss.social.model.ROLES;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -89,6 +90,9 @@ public class AuthService {
                 registerDTO.profilePicture()
         );
 
+        if (userRepository.count() == 0) {
+            user.setRole(ROLES.ADMIN);
+        }
         User result = userRepository.save(user);
         String token = jwtService.generateToken(result);
         jwtService.saveToken(token, result.getId());
