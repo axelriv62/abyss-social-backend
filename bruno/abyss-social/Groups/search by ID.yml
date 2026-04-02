@@ -1,15 +1,11 @@
 info:
-  name: Search
+  name: search by ID
   type: http
   seq: 7
 
 http:
   method: GET
-  url: "{{URL}}/pages/search?query=Test"
-  params:
-    - name: query
-      value: Test
-      type: query
+  url: "{{URL}}/groups/69cd2816b8c51ba737e7a9a0"
   auth:
     type: bearer
     token: "{{TOKEN}}"

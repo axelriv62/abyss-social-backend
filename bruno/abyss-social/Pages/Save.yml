@@ -10,7 +10,7 @@ http:
     type: json
     data: |
       {
-        "name": "My Page",
+        "name": "Test",
         "tags": ["tag1", "tag2"],
         "posts": []
       }

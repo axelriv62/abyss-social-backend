@@ -13,7 +13,7 @@ http:
     type: json
     data: |
       {
-        "name": "Groupe de Bylel Longelin",
+        "name": "Photos des leopards des neiges",
         "tags": ["tag1", "tag5", "tag7777", "tag87"],
         "posts": ["69cab182f9aa8f8710d001e3"]
       }
