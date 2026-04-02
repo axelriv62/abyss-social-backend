@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.util.ArrayList;
 
 /**
  * Service class for managing User entities, providing business logic for user-related operations.
@@ -152,6 +153,65 @@ public class UserService implements UserDetailsService {
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Group not associated with user");
         }
+    }
+
+    /**
+     * Add a friend to a user's list of friends. This method retrieves the user by their unique identifier, checks if the friend is already associated with the user, and if not, adds the friend's ID to the user's list of friends and saves the updated user back to the database.
+     * @param userId The unique identifier of the user to whom the friend will be added
+     * @param friendId The unique identifier of the friend to be added
+     */
+    public void addFriend(ObjectId userId, ObjectId friendId) {
+        if (friendId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Friend ID is required");
+        }
+        if (userId.equals(friendId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot add self as friend");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (user.getFriends().contains(friendId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Friend already associated with user");
+        }
+
+        if (user.getUsersBanned().contains(friendId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot add banned user as friend");
+        }
+
+        if (isUserBannedBy(friendId, userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot add user: you are banned by this user");
+        }
+
+        user.getFriends().add(friendId);
+        userRepository.save(user);
+    }
+
+    /**
+     * Remove a friend from a user's list of friends. This method retrieves the user by their unique identifier, checks if the friend is currently associated with the user, and if so, removes the friend's ID from the user's list of friends and saves the updated user back to the database.
+     * @param userId The unique identifier of the user from whom the friend will be removed
+     * @param friendId The unique identifier of the friend to be removed
+     */
+    public void removeFriend(ObjectId userId, ObjectId friendId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if (user.getFriends().contains(friendId)) {
+            user.getFriends().remove(friendId);
+            userRepository.save(user);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Friend not associated with user");
+        }
+    }
+
+    /**
+     * Check whether a given target user id is present in another user's banned list.
+     * @param userId the user whose `usersBanned` list will be checked (e.g. the potential friend)
+     * @param targetId the id to look for in that list (e.g. the current authenticated user)
+     * @return true if targetId is in user.usersBanned, false otherwise
+     */
+    public boolean isUserBannedBy(ObjectId userId, ObjectId targetId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        return user.getUsersBanned() != null && user.getUsersBanned().contains(targetId);
     }
 
 }
