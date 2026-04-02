@@ -154,4 +154,32 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    /**
+     * Add a friend to a user's list of friends. This method retrieves the user by their unique identifier, checks if the friend is already associated with the user, and if not, adds the friend's ID to the user's list of friends and saves the updated user back to the database.
+     * @param userId The unique identifier of the user to whom the friend will be added
+     * @param friendId The unique identifier of the friend to be added
+     */
+    public void addFriend(ObjectId userId, ObjectId friendId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if (!user.getFriends().contains(friendId)) {
+            user.getFriends().add(friendId);
+            userRepository.save(user);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Friend already associated with user");
+        }
+    }
+
+    /**
+     * Check whether a given target user id is present in another user's banned list.
+     * @param userId the user whose `usersBanned` list will be checked (e.g. the potential friend)
+     * @param targetId the id to look for in that list (e.g. the current authenticated user)
+     * @return true if targetId is in user.usersBanned, false otherwise
+     */
+    public boolean isUserBannedBy(ObjectId userId, ObjectId targetId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        return user.getUsersBanned() != null && user.getUsersBanned().contains(targetId);
+    }
+
 }
