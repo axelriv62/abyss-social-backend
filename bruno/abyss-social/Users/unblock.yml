@@ -1,0 +1,17 @@
+info:
+  name: unblock
+  type: http
+  seq: 11
+
+http:
+  method: PATCH
+  url: "{{URL}}/users/69cee044895e5b6080e43d7c/unblock"
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

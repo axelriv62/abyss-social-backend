@@ -216,4 +216,45 @@ public class UserController {
         userService.changeUserRole(userId, newRole);
         return ResponseEntity.ok(new MessageResponseDTO("User role successfully changed to " + newRole));
     }
+
+    @PatchMapping("/{id}/block")
+    @Operation(summary = "Block a user", description = "Add the specified user to the authenticated user's banned list")
+    @ApiResponse(responseCode = "200", description = "User successfully blocked")
+    @ApiResponse(responseCode = "400", description = "Invalid request")
+    @ApiResponse(responseCode = "401", description = "User not authenticated")
+    public ResponseEntity<MessageResponseDTO> blockUser(@PathVariable("id") ObjectId userToBlockId, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (userToBlockId == null) {
+            return ResponseEntity.badRequest().body(new MessageResponseDTO("User ID to block is required"));
+        }
+        if (currentUser.getId().equals(userToBlockId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDTO("Cannot block yourself"));
+        }
+        if (userService.isAdmin(userToBlockId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDTO("Cannot block an admin"));
+        }
+
+        userService.blockUser(currentUser.getId(), userToBlockId);
+        return ResponseEntity.ok(new MessageResponseDTO("User successfully blocked"));
+    }
+
+    @PatchMapping("/{id}/unblock")
+    @Operation(summary = "Unblock a user", description = "Remove the specified user from the authenticated user's banned list")
+    @ApiResponse(responseCode = "200", description = "User successfully unblocked")
+    @ApiResponse(responseCode = "400", description = "Invalid request")
+    @ApiResponse(responseCode = "401", description = "User not authenticated")
+    public ResponseEntity<MessageResponseDTO> unblockUser(@PathVariable("id") ObjectId userToUnblockId, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (userToUnblockId == null) {
+            return ResponseEntity.badRequest().body(new MessageResponseDTO("User ID to unblock is required"));
+        }
+
+        userService.unblockUser(currentUser.getId(), userToUnblockId);
+        return ResponseEntity.ok(new MessageResponseDTO("User successfully unblocked"));
+    }
+
 }

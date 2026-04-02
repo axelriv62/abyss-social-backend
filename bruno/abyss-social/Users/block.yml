@@ -1,0 +1,17 @@
+info:
+  name: block
+  type: http
+  seq: 10
+
+http:
+  method: PATCH
+  url: "{{URL}}/users/69cee032895e5b6080e43d7a/block"
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

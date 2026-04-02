@@ -281,4 +281,54 @@ public class UserService implements UserDetailsService {
         user.setRole(newRole);
         userRepository.save(user);
     }
+
+    /**
+     * Block a user by adding his ID in currentUser userBanned list. This method retrieves the user by their unique identifier, checks if the user is currently in my banned list, and if not, adds the user to ban list and saves
+     * @param userId The current logged in user
+     * @param userToBlockId The user to block
+     */
+    public void blockUser(ObjectId userId, ObjectId userToBlockId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if (user.getUsersBanned().contains(userToBlockId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already blocked");
+        }
+        if (user.getRole() == ROLES.BANNED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot block a banned user");
+        }
+        if (user.getRole() == ROLES.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot block an admin user");
+        }
+
+        user.getUsersBanned().add(userToBlockId);
+        userRepository.save(user);
+    }
+
+    /**
+     * Check if a user is an admin. This method retrieves the user by their unique identifier and checks if their role is ADMIN.
+     * @param userId The unique identifier of the user to check
+     * @return true if the user is an admin, false otherwise
+     */
+    public boolean isAdmin(ObjectId userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        return user.getRole() == ROLES.ADMIN;
+    }
+
+    /**
+     * Unblock a user by removing his ID from currentUser userBanned list. This method retrieves the user by their unique identifier, checks if the user is currently in my banned list, and if so, removes the user from ban list and saves
+     * @param userId The current logged in user
+     * @param userToUnblockId The user to unblock
+     */
+    public void unblockUser(ObjectId userId, ObjectId userToUnblockId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if (!user.getUsersBanned().contains(userToUnblockId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not blocked");
+        }
+        user.getUsersBanned().remove(userToUnblockId);
+        userRepository.save(user);
+    }
+
+
 }
