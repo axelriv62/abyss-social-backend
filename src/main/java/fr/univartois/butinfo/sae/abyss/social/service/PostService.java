@@ -235,3 +235,4 @@ public class PostService {
         return user != null && user.getId() != null && user.getId().equals(userId);
     }
 }
+
