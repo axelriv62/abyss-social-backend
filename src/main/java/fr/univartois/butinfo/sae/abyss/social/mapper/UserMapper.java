@@ -44,13 +44,28 @@ public interface UserMapper {
      * @param users The list of User entities to be converted to a list of UserDTOs. Each User entity in the list is processed and converted to a UserDTO using the toDTO method, resulting in a list of UserDTOs that can be used for data transfer between layers of the application.
      * @return A list of UserDTO objects containing the data from the list of User entities, suitable for transfer between layers of the application
      */
-    List<UserDTO> toDTOList(List<User> users);
+    List<UserDTO> toDTOs(List<User> users);
 
     /**
      * Converts a User entity to a UserResponseDTO. This method maps the fields of the User entity to the corresponding fields in the UserResponseDTO, allowing for data transfer between layers of the application while excluding sensitive information such as the password.
+     *
+     * Uses a custom expression to access the actual username field directly, bypassing the getUsername() method which returns the email for authentication purposes.
+     *
      * @param user The User entity to be converted to a UserResponseDTO. This method maps the fields of the User entity to the corresponding fields in the UserResponseDTO, while ignoring sensitive information such as the password, resulting in a UserResponseDTO that can be used for data transfer between layers of the application without exposing sensitive information.
      * @return A UserResponseDTO object containing the data from the User entity, suitable for transfer between layers of the application while excluding sensitive information such as the password
      */
+    @Mapping(target = "username", expression = "java(user.getUsernameField())")
     UserResponseDTO toResponseDTO(User user);
+
+    /**
+     * Converts a list of User entities to a list of UserResponseDTOs. This method iterates over the list of User entities and converts each one to a UserResponseDTO using the toResponseDTO method, returning a list of UserResponseDTOs that can be used for data transfer between layers of the application while excluding sensitive information such as passwords.
+     *
+     * Uses a custom expression to access the actual username field directly for each User entity, bypassing the getUsername() method which returns the email for authentication purposes, ensuring that the correct username is included in the UserResponseDTOs while still excluding sensitive information such as passwords.
+     *
+     * @param users The list of User entities to be converted to a list of UserResponseDTOs. Each User entity in the list is processed and converted to a UserResponseDTO using the toResponseDTO method, resulting in a list of UserResponseDTOs that can be used for data transfer between layers of the application while excluding sensitive information such as passwords.
+     * @return A list of UserResponseDTO objects containing the data from the list of User entities, suitable for transfer between layers of the application while excluding sensitive information such as passwords
+     */
+    @Mapping(target = "username", expression = "java(user.getUsernameField())")
+    List<UserResponseDTO> toResponseDTOs(List<User> users);
 }
 
