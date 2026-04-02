@@ -2,6 +2,7 @@ package fr.univartois.butinfo.sae.abyss.social.controller;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.*;
 import fr.univartois.butinfo.sae.abyss.social.mapper.UserMapper;
+import fr.univartois.butinfo.sae.abyss.social.model.ROLES;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -154,5 +155,65 @@ public class UserController {
         }
         userService.removeFriend(currentUser.getId(), friendId);
         return ResponseEntity.ok(new MessageResponseDTO("Friend successfully removed from friend list"));
+    }
+    /**
+     * Endpoint for banning a user by their ID. This operation is restricted to admin users only.
+     * @param userId The ID of the user to be banned
+     * @param currentUser The currently authenticated user, whose role will be checked to ensure they have admin privileges before allowing the ban operation to proceed
+     * @return ResponseEntity with a message indicating the result of the ban operation, with a 200 OK status if the user is successfully banned, or a 403 Forbidden status if the current user does not have admin privileges
+     */
+    @PatchMapping("/ban/{userId}")
+    @Operation(summary = "Ban a user", description = "Ban a user by their ID (admin only)")
+    @ApiResponse(responseCode = "200", description = "User successfully banned")
+    @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can ban users")
+    public ResponseEntity<MessageResponseDTO> banUser(@PathVariable ObjectId userId, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new MessageResponseDTO("Access denied: You must be logged in as an admin to perform this action."));
+        }
+
+        userService.banUser(userId);
+        return ResponseEntity.ok(new MessageResponseDTO("User successfully banned"));
+    }
+
+    /**
+     * Endpoint for unbanning a user by their ID. This operation is restricted to admin users only.
+     * @param userId The ID of the user to be unbanned
+     * @param currentUser The currently authenticated user, whose role will be checked to ensure they have admin privileges before allowing the unban operation to proceed
+     * @return ResponseEntity with a message indicating the result of the unban operation, with a 200 OK status if the user is successfully unbanned, or a 403 Forbidden status if the current user does not have admin privileges
+     */
+    @PatchMapping("/unban/{userId}")
+    @Operation(summary = "Unban a user", description = "Unban a user by their ID (admin only)")
+    @ApiResponse(responseCode = "200", description = "User successfully unbanned")
+    @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can unban users")
+    public ResponseEntity<MessageResponseDTO> unbanUser(@PathVariable ObjectId userId, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new MessageResponseDTO("Access denied: You must be logged in as an admin to perform this action."));
+        }
+
+        userService.unbanUser(userId);
+        return ResponseEntity.ok(new MessageResponseDTO("User successfully unbanned"));
+    }
+
+    /**
+     * Endpoint for changing a user's role by their ID. This operation is restricted to admin users only.
+     * @param userId The ID of the user whose role is to be changed
+     * @param newRole The new role to be assigned to the user, passed as a request parameter
+     * @param currentUser The currently authenticated user, whose role will be checked to ensure they have admin privileges before allowing the role change operation to proceed
+     * @return ResponseEntity with a message indicating the result of the role change operation, with a 200 OK status if the user's role is successfully changed, or a 403 Forbidden status if the current user does not have admin privileges
+     */
+    @PatchMapping("/role/{userId}")
+    @Operation(summary = "Change user role", description = "Change the role of a user by their ID (admin only)")
+    @ApiResponse(responseCode = "200", description = "User role successfully changed")
+    @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can change user roles")
+    public ResponseEntity<MessageResponseDTO> changeUserRole(@PathVariable ObjectId userId, @RequestParam ROLES newRole, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new MessageResponseDTO("Access denied: You must be logged in as an admin to perform this action."));
+        }
+
+        userService.changeUserRole(userId, newRole);
+        return ResponseEntity.ok(new MessageResponseDTO("User role successfully changed to " + newRole));
     }
 }

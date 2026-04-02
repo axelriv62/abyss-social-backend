@@ -1,5 +1,6 @@
 package fr.univartois.butinfo.sae.abyss.social.service;
 
+import fr.univartois.butinfo.sae.abyss.social.model.ROLES;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 import org.bson.types.Binary;
@@ -229,4 +230,55 @@ public class UserService implements UserDetailsService {
         return user.getUsersBanned() != null && user.getUsersBanned().contains(targetId);
     }
 
+    /**
+     * Bans a user by setting their role to BANNED. This method retrieves the user by their unique identifier, checks if the user is already banned or if they are an admin (who cannot be banned), and if neither condition is true, updates the user's role to BANNED and saves the updated user back to the database.
+     * @param userId The unique identifier of the user to be banned
+     */
+    public void banUser(ObjectId userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if (user.getRole() == ROLES.BANNED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already banned");
+        }
+        if (user.getRole() == ROLES.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot ban an admin user");
+        }
+
+        user.setRole(ROLES.BANNED);
+        userRepository.save(user);
+    }
+
+    /**
+     * Unbans a user by setting their role back to USER. This method retrieves the user by their unique identifier, checks if the user is currently banned, and if so, updates the user's role to USER and saves the updated user back to the database.
+     * @param userId The unique identifier of the user to be unbanned
+     */
+    public void unbanUser(ObjectId userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if (user.getRole() != ROLES.BANNED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not banned");
+        }
+
+        user.setRole(ROLES.USER);
+        userRepository.save(user);
+    }
+
+    /**
+     * Changes a user's role to a new role. This method retrieves the user by their unique identifier, checks if the user is an admin or banned (whose roles cannot be changed), and if neither condition is true, updates the user's role to the specified new role and saves the updated user back to the database.
+     * @param userId The unique identifier of the user whose role is to be changed
+     * @param newRole The new role to be assigned to the user (must be a valid role defined in the ROLES enum)
+     */
+    public void changeUserRole(ObjectId userId, ROLES newRole) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if (user.getRole() == ROLES.ADMIN && newRole != ROLES.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot change role of an admin user");
+        }
+        if (user.getRole() == ROLES.BANNED && newRole != ROLES.BANNED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot change role of a banned user");
+        }
+
+        user.setRole(newRole);
+        userRepository.save(user);
+    }
 }
