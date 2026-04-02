@@ -167,7 +167,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User successfully banned")
     @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can ban users")
     public ResponseEntity<MessageResponseDTO> banUser(@PathVariable ObjectId userId, @AuthenticationPrincipal User currentUser) {
-        if (currentUser == null) {
+        if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new MessageResponseDTO("Access denied: You must be logged in as an admin to perform this action."));
         }
@@ -187,7 +187,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User successfully unbanned")
     @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can unban users")
     public ResponseEntity<MessageResponseDTO> unbanUser(@PathVariable ObjectId userId, @AuthenticationPrincipal User currentUser) {
-        if (currentUser == null) {
+        if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new MessageResponseDTO("Access denied: You must be logged in as an admin to perform this action."));
         }
@@ -208,7 +208,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User role successfully changed")
     @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can change user roles")
     public ResponseEntity<MessageResponseDTO> changeUserRole(@PathVariable ObjectId userId, @RequestParam ROLES newRole, @AuthenticationPrincipal User currentUser) {
-        if (currentUser == null) {
+        if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new MessageResponseDTO("Access denied: You must be logged in as an admin to perform this action."));
         }
