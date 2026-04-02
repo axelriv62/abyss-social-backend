@@ -57,6 +57,9 @@ public class AuthController {
     @PostMapping("/login")
     @Operation(summary = "Authenticate user and return JWT token")
     public ResponseEntity<AuthResponseDTO> authenticate(@Valid @RequestBody AuthLoginRequestDTO loginDTO) {
+        if (authService.isBanned(loginDTO)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new AuthResponseDTO(null, null, null, "Access denied: your account has been banned."));
+        }
         AuthResponseDTO response = authService.authenticate(loginDTO);
         return ResponseEntity.ok(response);
     }

@@ -18,5 +18,7 @@ public record AuthResponseDTO(
         String token,
 
         @NotBlank(message = "Token type cannot be empty")
-        String type
+        String type,
+
+        String message
 ) {}
