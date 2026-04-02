@@ -1,5 +1,7 @@
 package fr.univartois.butinfo.sae.abyss.social.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.univartois.butinfo.sae.abyss.social.model.ROLES;
 import jakarta.validation.constraints.*;
 import org.bson.types.ObjectId;
@@ -16,19 +18,19 @@ public record UserRecommendedDTO(
 
         // The recommendation score
         @PositiveOrZero(message = "Score must be zero or positive")
-        double score,
+        Double score,
 
-        // The number of shared friends
+        @JsonProperty("shared_friends")
         @PositiveOrZero(message = "Shared friends must be zero or positive")
-        int sharedFriends,
+        Integer sharedFriends,
 
-        // The number of shared groups
+        @JsonProperty("shared_groups")
         @PositiveOrZero(message = "Shared groups must be zero or positive")
-        int sharedGroups,
+        Integer sharedGroups,
 
-        // The number of shared pages
+        @JsonProperty("shared_pages")
         @PositiveOrZero(message = "Shared pages must be zero or positive")
-        int sharedPages,
+        Integer sharedPages,
 
         // The username of the recommended user
         @NotBlank(message = "Username cannot be empty")
@@ -42,6 +44,8 @@ public record UserRecommendedDTO(
         ROLES role,
 
         // The timestamp when the recommended user was created
+        @JsonProperty("created_at")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS")
         @PastOrPresent(message = "Creation date cannot be in the future")
         LocalDateTime createdAt
 ) { }
