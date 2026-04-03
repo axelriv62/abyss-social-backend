@@ -5,7 +5,7 @@ info:
 
 http:
   method: PATCH
-  url: "{{URL}}/groups/69cbdb1807d55ff1ba4d3966/follow"
+  url: "{{URL}}/groups/69cd061beec0f294d2a8ae81/follow"
   auth:
     type: bearer
     token: "{{TOKEN}}"

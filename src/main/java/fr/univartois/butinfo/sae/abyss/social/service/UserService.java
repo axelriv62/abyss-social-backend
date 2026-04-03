@@ -1,7 +1,10 @@
 package fr.univartois.butinfo.sae.abyss.social.service;
 
+import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
+import fr.univartois.butinfo.sae.abyss.social.mapper.PostMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.ROLES;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
+import fr.univartois.butinfo.sae.abyss.social.repository.PostRepository;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 import org.bson.types.Binary;
 import org.bson.types.ObjectId;
@@ -15,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.*;
 
 /**
  * Service class for managing User entities, providing business logic for user-related operations.
@@ -26,13 +30,18 @@ public class UserService implements UserDetailsService {
      * UserRepository instance for performing CRUD operations on User entities. This repository is injected via the constructor.
      */
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final PostMapper postMapper;
+    private static final String USER_NOT_FOUND = "User not found";
 
     /**
      * Constructor for UserService, injecting the UserRepository dependency.
      * @param userRepository The UserRepository instance to be used by this service
      */
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PostRepository postRepository, PostMapper postMapper){
         this.userRepository = userRepository;
+        this.postRepository = postRepository;
+        this.postMapper = postMapper;
     }
 
     /**
@@ -67,7 +76,7 @@ public class UserService implements UserDetailsService {
      */
     public void updateProfile(ObjectId userId, String username, Binary profilePicture) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
         if (!user.getUsername().equals(username) && userRepository.findByUsername(username).isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already in use");
@@ -113,7 +122,7 @@ public class UserService implements UserDetailsService {
      */
     public void addPageToUser(ObjectId userId, ObjectId pageId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         if (!user.getPages().contains(pageId)) {
             user.getPages().add(pageId);
             userRepository.save(user);
@@ -129,7 +138,7 @@ public class UserService implements UserDetailsService {
      */
     public void removePageFromUser(ObjectId userId, ObjectId pageId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         if (user.getPages().contains(pageId)) {
             user.getPages().remove(pageId);
             userRepository.save(user);
@@ -145,7 +154,7 @@ public class UserService implements UserDetailsService {
      */
     public void addGroupToUser(ObjectId userId, ObjectId groupId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         if (!user.getGroups().contains(groupId)) {
             user.getGroups().add(groupId);
             userRepository.save(user);
@@ -161,7 +170,7 @@ public class UserService implements UserDetailsService {
      */
     public void removeGroupFromUser(ObjectId userId, ObjectId groupId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         if (user.getGroups().contains(groupId)) {
             user.getGroups().remove(groupId);
             userRepository.save(user);
@@ -183,7 +192,7 @@ public class UserService implements UserDetailsService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot add self as friend");
         }
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
         if (user.getFriends().contains(friendId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Friend already associated with user");
@@ -208,7 +217,7 @@ public class UserService implements UserDetailsService {
      */
     public void removeFriend(ObjectId userId, ObjectId friendId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         if (user.getFriends().contains(friendId)) {
             user.getFriends().remove(friendId);
             userRepository.save(user);
@@ -225,7 +234,7 @@ public class UserService implements UserDetailsService {
      */
     public boolean isUserBannedBy(ObjectId userId, ObjectId targetId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         return user.getUsersBanned() != null && user.getUsersBanned().contains(targetId);
     }
 
@@ -235,7 +244,7 @@ public class UserService implements UserDetailsService {
      */
     public void banUser(ObjectId userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         if (user.getRole() == ROLES.BANNED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already banned");
         }
@@ -253,7 +262,7 @@ public class UserService implements UserDetailsService {
      */
     public void unbanUser(ObjectId userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         if (user.getRole() != ROLES.BANNED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not banned");
         }
@@ -269,7 +278,7 @@ public class UserService implements UserDetailsService {
      */
     public void changeUserRole(ObjectId userId, ROLES newRole) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         if (user.getRole() == ROLES.ADMIN && newRole != ROLES.ADMIN) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot change role of an admin user");
         }
@@ -288,7 +297,7 @@ public class UserService implements UserDetailsService {
      */
     public void blockUser(ObjectId userId, ObjectId userToBlockId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         if (user.getUsersBanned().contains(userToBlockId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already blocked");
         }
@@ -307,7 +316,7 @@ public class UserService implements UserDetailsService {
      */
     public boolean isAdmin(ObjectId userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         return user.getRole() == ROLES.ADMIN;
     }
 
@@ -318,7 +327,7 @@ public class UserService implements UserDetailsService {
      */
     public void unblockUser(ObjectId userId, ObjectId userToUnblockId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
         if (!user.getUsersBanned().contains(userToUnblockId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not blocked");
         }
@@ -326,5 +335,53 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    /**
+     * retrieves all user's pages ObjectID
+     * @param userId the user's id from which we want to retrieve the pages
+     *
+     * @return a list of Page ObjectID corresponding to the pages followed by the user with the given id
+     */
+    public List<ObjectId> getUserPages(ObjectId userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
+
+        if (user.getPages() == null) {
+            return new ArrayList<>();
+        }
+
+        return new ArrayList<>(user.getPages());
+    }
+
+    /**
+     * retrieves all user's groups ObjectID
+     * @param userId the user's id from which we want to retrieve the groups
+     *
+     * @return a list of Group ObjectID corresponding to the pages followed by the user with the given id
+     */
+    public List<ObjectId> getUserGroups(ObjectId userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
+
+        if (user.getGroups() == null) {
+            return new ArrayList<>();
+        }
+
+        return new ArrayList<>(user.getGroups());
+    }
+
+    /**
+     * Retrieves Posts associated with a user.
+     * @param userId The ID of the user whose posts are to be retrieved.
+     *
+     * @return A list of Post objects associated with the user.
+     */
+    public List<PostDTO> getUsersPosts(ObjectId userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
+
+        return postRepository.findByUser_Id(userId).stream()
+                .map(postMapper::toDTO)
+                .toList();
+    }
 
 }

@@ -1,13 +1,17 @@
 package fr.univartois.butinfo.sae.abyss.social.service;
 
+import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
+import fr.univartois.butinfo.sae.abyss.social.mapper.PostMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.repository.PageRepository;
+import fr.univartois.butinfo.sae.abyss.social.repository.PostRepository;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,15 +23,19 @@ import java.util.Optional;
 public class PageService {
     private final PageRepository pageRepository;
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final PostMapper postMapper;
 
     /**
      * Constructs a PageService with the specified PageRepository.
      *
      * @param pageRepository The repository for performing CRUD operations on Page entities.
      */
-    public PageService(PageRepository pageRepository, UserRepository userRepository) {
+    public PageService(PageRepository pageRepository, UserRepository userRepository, PostRepository postRepository, PostMapper postMapper) {
         this.pageRepository = pageRepository;
         this.userRepository = userRepository;
+        this.postRepository = postRepository;
+        this.postMapper = postMapper;
     }
 
     public Optional<Page> findById(ObjectId id) {
@@ -94,5 +102,26 @@ public class PageService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Query cannot be blank");
         }
         return pageRepository.findByNameContainingIgnoreCase(trimmed);
+    }
+
+    /**
+     * Retrieves Posts associated with a page.
+     * @param pageId The ID of the page whose posts are to be retrieved.
+     *
+     * @return A list of Post objects associated with the page.
+     */
+    public List<PostDTO> getPagesPosts(ObjectId pageId) {
+        Page page = pageRepository.findById(pageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+
+        if (page.getPosts() == null) {
+            return List.of();
+        }
+
+        return Arrays.stream(page.getPosts())
+                .map(postId -> postRepository.findById(postId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found for id=" + postId)))
+                .map(postMapper::toDTO)
+                .toList();
     }
 }

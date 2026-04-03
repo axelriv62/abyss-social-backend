@@ -1,6 +1,7 @@
 package fr.univartois.butinfo.sae.abyss.social.controller;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.GroupDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
 import fr.univartois.butinfo.sae.abyss.social.mapper.GroupMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
@@ -36,12 +37,13 @@ public class GroupController {
     // Mapper to convert between Group and GroupDTO
     private final GroupMapper groupMapper;
     private final UserService userService;
+    private static final String GROUP_NOT_FOUND = "Group not found";
 
 
     /**
      * Constructor for GroupController, with dependency injection of GroupService and GroupMapper.
-     * @param groupService
-     * @param groupMapper
+     * @param groupService The GroupService to be used by this controller, injected by Spring's dependency injection.
+     * @param groupMapper The GroupMapper to be used by this controller, injected by Spring's dependency injection.
      */
     public GroupController(GroupService groupService, GroupMapper groupMapper, UserService userService) {
         this.groupService = groupService;
@@ -84,7 +86,7 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Group group = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+        Group group = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, GROUP_NOT_FOUND));
 
         if (!group.getUser().getId().equals(currentUser.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -110,7 +112,7 @@ public class GroupController {
         }
 
         Group group = groupService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, GROUP_NOT_FOUND));
 
         if (!group.getUser().getId().equals(currentUser.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -137,7 +139,7 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Group page = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+        Group page = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, GROUP_NOT_FOUND));
         userService.addGroupToUser(currentUser.getId(), page.getId());
         return ResponseEntity.noContent().build();
     }
@@ -158,7 +160,7 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Group page = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+        Group page = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, GROUP_NOT_FOUND));
         userService.removeGroupFromUser(currentUser.getId(), page.getId());
         return ResponseEntity.noContent().build();
     }
@@ -178,7 +180,7 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Group group = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+        Group group = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, GROUP_NOT_FOUND));
         return ResponseEntity.ok(groupMapper.toDTO(group));
     }
 
@@ -194,6 +196,17 @@ public class GroupController {
     public ResponseEntity<List<GroupDTO>> searchPagesByName(@RequestParam("query") String query) {
         List<Group> matches = groupService.searchByName(query);
         return ResponseEntity.ok(groupMapper.toDTOList(matches));
+    }
+
+
+    @GetMapping("/{id}/posts")
+    @Operation(summary = "Get all posts of a group")
+    @ApiResponse(responseCode = "200", description = "Posts retrieved successfully")
+    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
+    @ApiResponse(responseCode = "404", description = "Group not found")
+    public List<PostDTO> getPosts(@PathVariable("id") ObjectId groupId, @AuthenticationPrincipal User currentUser) {
+
+        return groupService.getGroupsPosts(groupId);
     }
 
 }
