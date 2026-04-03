@@ -1,8 +1,13 @@
 package fr.univartois.butinfo.sae.abyss.social.service;
 
+import fr.univartois.butinfo.sae.abyss.social.dto.GroupDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
 import fr.univartois.butinfo.sae.abyss.social.mapper.GroupMapper;
+import fr.univartois.butinfo.sae.abyss.social.mapper.PostMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
+import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.repository.GroupRepository;
+import fr.univartois.butinfo.sae.abyss.social.repository.PostRepository;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -10,8 +15,11 @@ import org.springframework.web.server.ResponseStatusException;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 /**
@@ -32,10 +40,14 @@ import java.util.Optional;
 public class GroupService {
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final PostMapper postMapper;
 
-    public GroupService(GroupRepository groupRepository, UserRepository userRepository) {
+    public GroupService(GroupRepository groupRepository, UserRepository userRepository, PostRepository postRepository, PostMapper postMapper) {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
+        this.postRepository = postRepository;
+        this.postMapper = postMapper;
     }
 
     /**
@@ -113,4 +125,24 @@ public class GroupService {
         return groupRepository.findByNameContainingIgnoreCase(trimmed);
     }
 
+    /**
+     * Retrieves Posts associated with a group.
+     * @param groupId The ID of the group whose posts are to be retrieved.
+     *
+     * @return A list of Post objects associated with the group.
+     */
+    public List<PostDTO> getGroupsPosts(ObjectId groupId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+
+        if (group.getPosts() == null) {
+            return new ArrayList<>();
+        }
+
+        return Arrays.stream(group.getPosts())
+                .map(postId -> postRepository.findById(postId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found for id=" + postId)))
+                .map(postMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }
