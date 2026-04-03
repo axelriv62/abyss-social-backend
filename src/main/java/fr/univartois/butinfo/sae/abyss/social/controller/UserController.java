@@ -232,6 +232,9 @@ public class UserController {
         if (userService.isAdmin(userToBlockId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDTO("Cannot block an admin"));
         }
+        if (currentUser.getUsersBanned().contains(userToBlockId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDTO("Cannot block a blocked user"));
+        }
 
         userService.blockUser(currentUser.getId(), userToBlockId);
         return ResponseEntity.ok(new MessageResponseDTO("User successfully blocked"));
@@ -245,6 +248,9 @@ public class UserController {
     public ResponseEntity<MessageResponseDTO> unblockUser(@PathVariable("id") ObjectId userToUnblockId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null || userToUnblockId == null) {
             return ResponseEntity.badRequest().body(new MessageResponseDTO("current user or user to unblock is null"));
+        }
+        if (!currentUser.getUsersBanned().contains(userToUnblockId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDTO("Cannot unblock a user who is not blocked"));
         }
         userService.unblockUser(currentUser.getId(), userToUnblockId);
         return ResponseEntity.ok(new MessageResponseDTO("User successfully unblocked"));
