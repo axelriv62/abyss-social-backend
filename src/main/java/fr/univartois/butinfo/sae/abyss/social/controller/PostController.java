@@ -1,9 +1,14 @@
 package fr.univartois.butinfo.sae.abyss.social.controller;
 
+import fr.univartois.butinfo.sae.abyss.social.dto.CommentDTO;
 import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.PostWithCommentsDTO;
+import fr.univartois.butinfo.sae.abyss.social.mapper.CommentMapper;
 import fr.univartois.butinfo.sae.abyss.social.mapper.PostMapper;
+import fr.univartois.butinfo.sae.abyss.social.model.Comment;
 import fr.univartois.butinfo.sae.abyss.social.model.Post;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
+import fr.univartois.butinfo.sae.abyss.social.service.CommentService;
 import fr.univartois.butinfo.sae.abyss.social.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,6 +33,10 @@ public class PostController {
     private final PostService postService;
     /** Mapper converting between Post entities and DTOs. */
     private final PostMapper postMapper;
+    /** Service handling comment retrieval for post details. */
+    private final CommentService commentService;
+    /** Mapper converting between Comment entities and DTOs. */
+    private final CommentMapper commentMapper;
 
     /**
      * Builds the controller with required collaborators.
@@ -35,9 +44,38 @@ public class PostController {
      * @param postService service managing posts
      * @param postMapper mapper converting Post ↔ PostDTO
      */
-    public PostController(PostService postService, PostMapper postMapper) {
+    public PostController(PostService postService,
+                          PostMapper postMapper,
+                          CommentService commentService,
+                          CommentMapper commentMapper) {
         this.postService = postService;
         this.postMapper = postMapper;
+        this.commentService = commentService;
+        this.commentMapper = commentMapper;
+    }
+
+    /**
+     * Retrieves a post with all its comments.
+     *
+     * @param postId identifier of the post
+     * @param currentUser authenticated user
+     * @return post details with comments
+     */
+    @Operation(summary = "Get post details", description = "Retrieves a post with its comments.")
+    @ApiResponse(responseCode = "200", description = "Post details retrieved")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "404", description = "Post not found")
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostWithCommentsDTO> getPostWithComments(@PathVariable ObjectId postId,
+                                                                   @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Post post = postService.findByIdOrThrow(postId);
+        List<Comment> comments = commentService.findByPostId(postId);
+        PostDTO postDTO = postMapper.toDTO(post);
+        List<CommentDTO> commentDTOs = commentMapper.toDTOs(comments);
+        return ResponseEntity.ok(new PostWithCommentsDTO(postDTO, commentDTOs));
     }
 
     /**
