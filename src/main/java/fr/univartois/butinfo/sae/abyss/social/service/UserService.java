@@ -360,7 +360,7 @@ public class UserService implements UserDetailsService {
      */
     public List<ObjectId> getUserGroups(ObjectId userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
         if (user.getGroups() == null) {
             return new ArrayList<>();
@@ -377,7 +377,7 @@ public class UserService implements UserDetailsService {
      */
     public List<PostDTO> getUsersPosts(ObjectId userId) {
         userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
         return postRepository.findByUser_Id(userId).stream()
                 .map(postMapper::toDTO)
