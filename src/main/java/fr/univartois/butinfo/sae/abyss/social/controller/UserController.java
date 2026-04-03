@@ -7,6 +7,7 @@ import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * REST controller for managing User entities, providing endpoints for user-related operations.
@@ -256,4 +258,48 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponseDTO("User successfully unblocked"));
     }
 
+    @GetMapping("/{id}/pages")
+    @Operation(summary = "Get all pages of a user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pages retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public List<String> getPages(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return List.of();
+        }
+        return userService.getUserPages(userId).stream()
+                .map(ObjectId::toHexString)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/{id}/groups")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Groups retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public List<String> getGroups(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return List.of();
+        }
+        return userService.getUserGroups(userId).stream()
+                .map(ObjectId::toHexString)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/{id}/posts")
+    @Operation(summary = "Get all posts of a user, excluding posts from groups or pages the current user is not a member of")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Posts retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public List<PostDTO> getPosts(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return List.of();
+        }
+        return userService.getUsersPosts(userId);
+    }
 }
