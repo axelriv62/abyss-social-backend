@@ -1,11 +1,11 @@
 info:
-  name: Remove friend
+  name: Add friend
   type: http
-  seq: 5
+  seq: 6
 
 http:
   method: PATCH
-  url: "{{URL}}/users/friends/remove?friendId=69ce30c940ec30873ed63a8b"
+  url: "{{URL}}/users/friends/add?friendId=69ce30c940ec30873ed63a8b"
   params:
     - name: friendId
       value: 69ce30c940ec30873ed63a8b

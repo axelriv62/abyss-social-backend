@@ -5,8 +5,16 @@ info:
 
 http:
   method: PATCH
-  url: /posts/comments/69ce1ad6830cb5971eaabfcf
-  auth: inherit
+  url: "{{URL}}/posts/comments/69ce1ad6830cb5971eaabfcf"
+  body:
+    type: json
+    data: |-
+      {
+        "text" : "Démonstration fonctionnelles"
+      }
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
 
 settings:
   encodeUrl: true
