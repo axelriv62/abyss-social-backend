@@ -72,7 +72,7 @@ public class CommentController {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        commentService.deleteComment(commentId, currentUser.getId());
+        commentService.deleteComment(commentId, currentUser);
         return ResponseEntity.noContent().build();
     }
 
@@ -89,7 +89,7 @@ public class CommentController {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        Comment updated = commentService.updateComment(commentId, currentUser.getId(), request.text());
+        Comment updated = commentService.updateComment(commentId, currentUser, request.text());
         return ResponseEntity.ok(commentMapper.toDTO(updated));
     }
 }

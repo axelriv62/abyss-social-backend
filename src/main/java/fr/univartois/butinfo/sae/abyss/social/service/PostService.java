@@ -3,6 +3,7 @@ package fr.univartois.butinfo.sae.abyss.social.service;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
 import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.model.Post;
+import fr.univartois.butinfo.sae.abyss.social.model.ROLES;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.repository.GroupRepository;
 import fr.univartois.butinfo.sae.abyss.social.repository.PageRepository;
@@ -117,9 +118,10 @@ public class PostService {
      *
      * @param id identifier of the post to delete
      */
-    public void deleteById(ObjectId id) {
-        if (!postRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    public void deleteById(ObjectId id, User requester) {
+        Post post = getPostOrThrow(id);
+        if (!canManagePost(post, requester)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator or an admin can delete this post");
         }
         postRepository.deleteById(id);
     }
@@ -319,6 +321,16 @@ public class PostService {
      */
     private boolean isSameUser(User user, ObjectId userId) {
         return user != null && user.getId() != null && user.getId().equals(userId);
+    }
+
+    /**
+     * Checks whether the requester is allowed to delete the post.
+     */
+    private boolean canManagePost(Post post, User requester) {
+        if (requester == null || requester.getId() == null || post == null || post.getUser() == null || post.getUser().getId() == null) {
+            return false;
+        }
+        return requester.getId().equals(post.getUser().getId()) || requester.getRole() == ROLES.ADMIN;
     }
 
     /**

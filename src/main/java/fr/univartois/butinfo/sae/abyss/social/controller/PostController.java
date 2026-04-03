@@ -163,9 +163,14 @@ public class PostController {
     @Operation(summary = "Delete a post", description = "Delete a post with the specified ID")
     @ApiResponse(responseCode = "204", description = "Post successfully deleted")
     @ApiResponse(responseCode = "400", description = "Post don't exist")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMovieById(@PathVariable ObjectId id) {
-        postService.deleteById(id);
+    public ResponseEntity<Void> deleteMovieById(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        postService.deleteById(id, currentUser);
         return ResponseEntity.noContent().build();
     }
 
