@@ -1,6 +1,7 @@
 package fr.univartois.butinfo.sae.abyss.social.service;
 
 import fr.univartois.butinfo.sae.abyss.social.model.Comment;
+import fr.univartois.butinfo.sae.abyss.social.model.Post;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.repository.CommentRepository;
 import fr.univartois.butinfo.sae.abyss.social.repository.PostRepository;
@@ -48,13 +49,18 @@ public class CommentService {
      * @return saved comment
      */
     public Comment save(Comment comment) {
-        ObjectId postId = comment.getPostId();
+        Post post = comment.getPost();
+        ObjectId postId;
+        if (post != null) {
+            postId = post.getId();
+        } else {
+            postId = null;
+        }
         if (postId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "postId is required");
         }
-        if (!postRepository.existsById(postId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found for id=" + postId.toHexString());
-        }
+        Post persistedPost = postRepository.findById(postId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found for id=" + postId.toHexString()));
         User author = comment.getUser();
         ObjectId userId;
         if (author != null) {
@@ -73,6 +79,7 @@ public class CommentService {
         if (comment.getCreatedAt() == null) {
             comment.setCreatedAt(LocalDateTime.now());
         }
+        comment.setPost(persistedPost);
         comment.setUser(persistedUser);
         return commentRepository.save(comment);
     }
@@ -90,7 +97,7 @@ public class CommentService {
         if (!postRepository.existsById(postId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found for id=" + postId.toHexString());
         }
-        return commentRepository.findByPostId(postId);
+        return commentRepository.findByPost_Id(postId);
     }
 
     /**
