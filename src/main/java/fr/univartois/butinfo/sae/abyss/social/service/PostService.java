@@ -39,14 +39,13 @@ public class PostService {
     /** Repository used to validate and update target pages for post attachment. */
     private PageRepository pageRepository;
 
-    /** Maximum number of posts to return in a user's feed to prevent overload. */
-    private static final int FEED_LIMIT = 50;
-
     /**
      * Builds the service with required repositories.
      *
      * @param postRepository repository handling Post entities
      * @param userRepository repository handling User entities
+     * @param groupRepository repository handling Group entities
+     * @param pageRepository repository handling Page entities
      */
     public PostService(PostRepository postRepository,
                        UserRepository userRepository,
@@ -65,7 +64,6 @@ public class PostService {
      * @return saved instance
      */
     public Post save(Post post) {
-        // Extract the user's ObjectId from the post if a user is associated, otherwise leave it as null.
         ObjectId userId;
         if (post.getUser() != null) {
             userId = post.getUser().getId();
@@ -245,7 +243,154 @@ public class PostService {
     }
 
     /**
+     * Retrieves a paginated feed for a user.
+     * Returns posts from: friends, groups, pages, and own posts.
+     * Posts are sorted by creation date (most recent first) and deduplicated.
+     *
+     * @param user the user for whom to retrieve the feed
+     * @param offset starting position in the sorted list (must be >= 0)
+     * @param limit maximum number of posts to return (must be > 0 and <= 100)
+     * @return list of Post objects representing the user's paginated feed
+     */
+    public List<Post> findAllForUser(User user, int offset, int limit) {
+        validateUser(user);
+        validatePaginationParameters(offset, limit);
+        ensureUserExists(user.getId());
+
+        List<Post> allPosts = collectAllFeedPosts(user);
+        return sortAndPaginatePosts(allPosts, offset, limit);
+    }
+
+    /**
+     * Validates that the user object is not null and has a valid ID.
+     *
+     * @param user the user to validate
+     * @throws ResponseStatusException if user is null or has no ID
+     */
+    private void validateUser(User user) {
+        if (user == null || user.getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is required");
+        }
+    }
+
+    /**
+     * Validates pagination parameters (offset and limit).
+     *
+     * @param offset starting position (must be >= 0)
+     * @param limit number of posts to return (must be > 0 and <= 100)
+     * @throws ResponseStatusException if parameters are invalid
+     */
+    private void validatePaginationParameters(int offset, int limit) {
+        if (offset < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "offset cannot be negative");
+        }
+        if (limit <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit must be greater than 0");
+        }
+        if (limit > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit cannot exceed 100");
+        }
+    }
+
+    /**
+     * Collects all feed posts for a user from various sources.
+     * Combines posts from: friends, groups, pages, and the user's own posts.
+     *
+     * @param user the user for whom to collect feed posts
+     * @return list of all posts before sorting and pagination
+     */
+    private List<Post> collectAllFeedPosts(User user) {
+        List<Post> allPosts = new ArrayList<>();
+
+        addFriendsPosts(user, allPosts);
+        addGroupsPosts(user, allPosts);
+        addPagesPosts(user, allPosts);
+        addUserOwnPosts(user, allPosts);
+
+        return allPosts;
+    }
+
+    /**
+     * Adds posts from the user's friends to the feed.
+     *
+     * @param user the user whose friends' posts to collect
+     * @param postsList the list to which posts will be added
+     */
+    private void addFriendsPosts(User user, List<Post> postsList) {
+        if (user.getFriends() != null && !user.getFriends().isEmpty()) {
+            postsList.addAll(postRepository.findByUser_IdIn(user.getFriends()));
+        }
+    }
+
+    /**
+     * Adds posts from the user's joined groups to the feed.
+     *
+     * @param user the user whose groups' posts to collect
+     * @param postsList the list to which posts will be added
+     */
+    private void addGroupsPosts(User user, List<Post> postsList) {
+        if (user.getGroups() != null && !user.getGroups().isEmpty()) {
+            List<Group> userGroups = groupRepository.findAllById(user.getGroups());
+            for (Group group : userGroups) {
+                if (group.getPosts() != null && group.getPosts().length > 0) {
+                    postsList.addAll(postRepository.findAllById(Arrays.asList(group.getPosts())));
+                }
+            }
+        }
+    }
+
+    /**
+     * Adds posts from the user's followed pages to the feed.
+     *
+     * @param user the user whose pages' posts to collect
+     * @param postsList the list to which posts will be added
+     */
+    private void addPagesPosts(User user, List<Post> postsList) {
+        if (user.getPages() != null && !user.getPages().isEmpty()) {
+            List<Page> userPages = pageRepository.findAllById(user.getPages());
+            for (Page page : userPages) {
+                if (page.getPosts() != null && page.getPosts().length > 0) {
+                    postsList.addAll(postRepository.findAllById(Arrays.asList(page.getPosts())));
+                }
+            }
+        }
+    }
+
+    /**
+     * Adds the user's own posts to the feed.
+     *
+     * @param user the user whose own posts to collect
+     * @param postsList the list to which posts will be added
+     */
+    private void addUserOwnPosts(User user, List<Post> postsList) {
+        postsList.addAll(postRepository.findByUser_Id(user.getId()));
+    }
+
+    /**
+     * Sorts and paginates a list of posts.
+     * Removes duplicates, sorts by creation date (most recent first),
+     * then applies offset and limit.
+     *
+     * @param posts the list of posts to sort and paginate
+     * @param offset starting position in the sorted list
+     * @param limit number of posts to return
+     * @return paginated and sorted list of posts
+     */
+    private List<Post> sortAndPaginatePosts(List<Post> posts, int offset, int limit) {
+        return posts.stream()
+                .distinct()
+                .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
+                .skip(offset)
+                .limit(limit)
+                .toList();
+    }
+
+    /**
      * Retrieves a post or throws 404 if not found.
+     *
+     * @param postId the ID of the post to retrieve
+     * @return the post if found
+     * @throws ResponseStatusException if post is not found
      */
     private Post getPostOrThrow(ObjectId postId) {
         if (postId == null) {
@@ -257,6 +402,10 @@ public class PostService {
 
     /**
      * Retrieves a group or throws 404 if not found.
+     *
+     * @param groupId the ID of the group to retrieve
+     * @return the group if found
+     * @throws ResponseStatusException if group is not found
      */
     private Group getGroupOrThrow(ObjectId groupId) {
         if (groupId == null) {
@@ -268,6 +417,10 @@ public class PostService {
 
     /**
      * Retrieves a page or throws 404 if not found.
+     *
+     * @param pageId the ID of the page to retrieve
+     * @return the page if found
+     * @throws ResponseStatusException if page is not found
      */
     private Page getPageOrThrow(ObjectId pageId) {
         if (pageId == null) {
@@ -279,6 +432,10 @@ public class PostService {
 
     /**
      * Retrieves a user or throws 404 if not found.
+     *
+     * @param userId the ID of the user to retrieve
+     * @return the user if found
+     * @throws ResponseStatusException if user is not found
      */
     private User getUserOrThrow(ObjectId userId) {
         if (userId == null) {
@@ -290,6 +447,9 @@ public class PostService {
 
     /**
      * Ensures a user exists without loading the full entity.
+     *
+     * @param userId the ID of the user to check
+     * @throws ResponseStatusException if user does not exist
      */
     private void ensureUserExists(ObjectId userId) {
         if (userId == null) {
@@ -302,6 +462,9 @@ public class PostService {
 
     /**
      * Removes the user identified by {@code userId} from the provided list.
+     *
+     * @param users the list from which to remove the user
+     * @param userId the ID of the user to remove
      */
     private void removeUserFromList(List<User> users, ObjectId userId) {
         users.removeIf(existing -> isSameUser(existing, userId));
@@ -309,6 +472,10 @@ public class PostService {
 
     /**
      * Checks whether a user with the given identifier is already present in the list.
+     *
+     * @param users the list to search
+     * @param userId the ID of the user to find
+     * @return true if the user is in the list, false otherwise
      */
     private boolean containsUser(List<User> users, ObjectId userId) {
         return users.stream().anyMatch(existing -> isSameUser(existing, userId));
@@ -316,6 +483,10 @@ public class PostService {
 
     /**
      * Compares a user instance with an identifier, handling nulls safely.
+     *
+     * @param user the user instance to compare
+     * @param userId the ID to compare against
+     * @return true if the user's ID matches the provided ID, false otherwise
      */
     private boolean isSameUser(User user, ObjectId userId) {
         return user != null && user.getId() != null && user.getId().equals(userId);
@@ -323,6 +494,10 @@ public class PostService {
 
     /**
      * Appends an identifier to an ObjectId array if it is not already present.
+     *
+     * @param existingPostIds the original array of post IDs
+     * @param postId the ID to append
+     * @return updated array with the new ID if not already present
      */
     private ObjectId[] appendPostId(ObjectId[] existingPostIds, ObjectId postId) {
         ObjectId[] source = existingPostIds == null ? new ObjectId[0] : existingPostIds;
@@ -334,73 +509,4 @@ public class PostService {
         updated[source.length] = postId;
         return updated;
     }
-
-    /**
-     * Retrieves a paginated feed for a user.
-     * Returns posts from: friends, groups, pages, and own posts.
-     * Posts are sorted by creation date (most recent first) and deduplicated.
-     *
-     * @param user the user for whom to retrieve the feed
-     * @param offset starting position in the sorted list (default: 0)
-     * @param limit maximum number of posts to return (default: 50, max: 100)
-     * @return list of PostDTO objects representing the user's paginated feed
-     */
-    public List<Post> findAllForUser(User user, int offset, int limit) {
-        if (user == null || user.getId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is required");
-        }
-
-        // Validate pagination parameters
-        if (offset < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "offset cannot be negative");
-        }
-        if (limit <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit must be greater than 0");
-        }
-        if (limit > 100) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit cannot exceed 100");
-        }
-
-        // Check if user exists
-        if (!userRepository.existsById(user.getId())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-
-        List<Post> posts = new ArrayList<>();
-
-        // 1. Get friends' posts
-        if (user.getFriends() != null && !user.getFriends().isEmpty()) {
-            posts.addAll(postRepository.findByUser_IdIn(user.getFriends()));
-        }
-
-        // 2. Get groups' posts
-        if (user.getGroups() != null && !user.getGroups().isEmpty()) {
-            List<Group> userGroups = groupRepository.findAllById(user.getGroups());
-            for (Group group : userGroups) {
-                if (group.getPosts() != null && group.getPosts().length > 0) {
-                    posts.addAll(postRepository.findAllById(Arrays.asList(group.getPosts())));
-                }
-            }
-        }
-
-        // 3. Get pages' posts
-        if (user.getPages() != null && !user.getPages().isEmpty()) {
-            List<Page> userPages = pageRepository.findAllById(user.getPages());
-            for (Page page : userPages) {
-                if (page.getPosts() != null && page.getPosts().length > 0) {
-                    posts.addAll(postRepository.findAllById(Arrays.asList(page.getPosts())));
-                }
-            }
-        }
-
-        // Sort by date (most recent first), remove duplicates, apply pagination
-        return posts.stream()
-                .distinct()
-                .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
-                .skip(offset)
-                .limit(limit)
-                .toList();
-    }
-
 }
-

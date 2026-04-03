@@ -30,6 +30,7 @@ public class PageController {
     private final PageService pageService;
     private final UserService userService;
     private final PageMapper pageMapper;
+    private static final String PAGE_NOT_FOUND = "Page not found";
 
     /**
      * Constructs a PageController with the specified PageService and PageMapper.
@@ -82,7 +83,7 @@ public class PageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
 
         if (!page.getUser().getId().equals(currentUser.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -109,7 +110,7 @@ public class PageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
 
         if (!page.getUser().getId().equals(currentUser.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -135,7 +136,7 @@ public class PageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
         userService.addPageToUser(currentUser.getId(), page.getId());
         return ResponseEntity.ok().build();
     }
@@ -156,7 +157,7 @@ public class PageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
         userService.removePageFromUser(currentUser.getId(), page.getId());
         return ResponseEntity.ok().build();
     }
@@ -172,7 +173,7 @@ public class PageController {
     @ApiResponse(responseCode = "404", description = "Page not found")
     public ResponseEntity<PageDTO> getPageById(@PathVariable ObjectId id) {
         Page page = pageService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
         return ResponseEntity.ok(pageMapper.toDTO(page));
     }
 
