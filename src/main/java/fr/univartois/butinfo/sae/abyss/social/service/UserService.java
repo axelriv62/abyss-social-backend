@@ -1,14 +1,9 @@
 package fr.univartois.butinfo.sae.abyss.social.service;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
-import fr.univartois.butinfo.sae.abyss.social.mapper.PostMapper;
-import fr.univartois.butinfo.sae.abyss.social.model.Post;
 import fr.univartois.butinfo.sae.abyss.social.model.ROLES;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
-import fr.univartois.butinfo.sae.abyss.social.repository.PostRepository;
-import fr.univartois.butinfo.sae.abyss.social.repository.GroupRepository;
-import fr.univartois.butinfo.sae.abyss.social.repository.PageRepository;
 import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 import org.jspecify.annotations.NonNull;
@@ -19,6 +14,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,21 +29,13 @@ public class UserService implements UserDetailsService {
      * UserRepository instance for performing CRUD operations on User entities. This repository is injected via the constructor.
      */
     private final UserRepository userRepository;
-    private final PostRepository postRepository;
-    private final PageRepository pageRepository;
-    private final GroupRepository groupRepository;
-    private final PostMapper postMapper;
 
     /**
      * Constructor for UserService, injecting the UserRepository dependency.
      * @param userRepository The UserRepository instance to be used by this service
      */
-    public UserService(UserRepository userRepository, PostRepository postRepository, PageRepository pageRepository, GroupRepository groupRepository, PostMapper postMapper) {
+    public UserService(UserRepository userRepository){
         this.userRepository = userRepository;
-        this.postRepository = postRepository;
-        this.pageRepository = pageRepository;
-        this.groupRepository = groupRepository;
-        this.postMapper = postMapper;
     }
 
     /**

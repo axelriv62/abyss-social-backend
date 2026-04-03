@@ -49,7 +49,7 @@ public class GenerationController {
     @ApiResponse(responseCode = "200", description = "Profile picture generated successfully")
     @ApiResponse(responseCode = "400", description = "Invalid prompt or error during generation")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
-    public ResponseEntity<MessageResponseDTO> generate(@RequestBody GenerationRequestDTO request, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<MessageResponseDTO> generateProfilePicture(@RequestBody GenerationRequestDTO request, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDTO("Unauthorized"));
         }
@@ -76,7 +76,7 @@ public class GenerationController {
     @ApiResponse(responseCode = "200", description = "Post image generated successfully")
     @ApiResponse(responseCode = "400", description = "Invalid prompt, user is not the author of the post, or error during generation")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
-    public ResponseEntity<MessageResponseDTO> generate(@RequestBody GenerationRequestDTO request,
+    public ResponseEntity<MessageResponseDTO> generatePostImage(@RequestBody GenerationRequestDTO request,
                                            @AuthenticationPrincipal User currentUser,
                                            @PathVariable ObjectId id) {
         if (currentUser == null) {
