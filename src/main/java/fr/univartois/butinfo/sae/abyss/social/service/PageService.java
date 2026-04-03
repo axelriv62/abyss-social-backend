@@ -1,7 +1,6 @@
 package fr.univartois.butinfo.sae.abyss.social.service;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
-import fr.univartois.butinfo.sae.abyss.social.mapper.PageMapper;
 import fr.univartois.butinfo.sae.abyss.social.mapper.PostMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.repository.PageRepository;
@@ -32,7 +31,7 @@ public class PageService {
      *
      * @param pageRepository The repository for performing CRUD operations on Page entities.
      */
-    public PageService(PageRepository pageRepository, UserRepository userRepository, PageMapper pageMapper, PostRepository postRepository, PostMapper postMapper) {
+    public PageService(PageRepository pageRepository, UserRepository userRepository, PostRepository postRepository, PostMapper postMapper) {
         this.pageRepository = pageRepository;
         this.userRepository = userRepository;
         this.postRepository = postRepository;

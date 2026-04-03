@@ -533,8 +533,10 @@ public class PostService {
      * Checks whether the user is the creator of the provided group.
      */
     private boolean isGroupCreator(Group group, ObjectId userId) {
-        return group != null
-                && group.getUser() != null
+        if (group == null) {
+            return false;
+        }
+        return group.getUser() != null
                 && group.getUser().getId() != null
                 && group.getUser().getId().equals(userId);
     }

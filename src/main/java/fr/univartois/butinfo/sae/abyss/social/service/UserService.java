@@ -343,7 +343,7 @@ public class UserService implements UserDetailsService {
      */
     public List<ObjectId> getUserPages(ObjectId userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
         if (user.getPages() == null) {
             return new ArrayList<>();
