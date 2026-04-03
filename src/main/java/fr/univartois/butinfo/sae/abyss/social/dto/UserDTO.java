@@ -15,7 +15,7 @@ import java.util.List;
  */
 public record UserDTO(
         // The unique identifier for the user
-        ObjectId id,
+        String id,
 
         // The username of the user
         @NotBlank(message = "Username cannot be empty")

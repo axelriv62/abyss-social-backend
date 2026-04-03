@@ -2,10 +2,13 @@ package fr.univartois.butinfo.sae.abyss.social.mapper;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.GroupDTO;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
+import fr.univartois.butinfo.sae.abyss.social.model.User;
 import org.mapstruct.Mapper;
 
 import java.util.List;
 import org.bson.types.ObjectId;
+import org.mapstruct.Mapping;
+
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.ArrayList;
@@ -22,14 +25,21 @@ import java.util.ArrayList;
  */
 @Mapper(componentModel = "spring")
 public interface GroupMapper {
+
     /**
      * Convert a {@link Group} entity to a {@link GroupDTO}.
      *
      * @param group the entity to convert; may be null
      * @return a DTO representing the entity, or null if the input was null
      */
+    @Mapping(target = "id", expression = "java(ObjectIdConverter.objectIdToString(group.getId()))")
+    @Mapping(target = "userId", expression = "java(group.getUser() == null ? null : ObjectIdConverter.objectIdToString(group.getUser().getId()))")
+    @Mapping(target = "posts", expression = "java(toStringArray(group.getPosts()))")
     GroupDTO toDTO(Group group);
 
+    @Mapping(target = "id", expression = "java(ObjectIdConverter.stringToObjectId(groupDTO.id()))")
+    @Mapping(target = "user", expression = "java(mapUser(groupDTO.userId()))")
+    @Mapping(target = "posts", expression = "java(toObjectIdArray(groupDTO.posts()))")
     Group toEntity(GroupDTO groupDTO);
 
     /**
@@ -39,6 +49,16 @@ public interface GroupMapper {
      * @return a list of DTOs corresponding to the input list; may be null if input was null
      */
     List<GroupDTO> toDTOList(List<Group> groups);
+
+    default User mapUser(String userId) {
+        ObjectId objectId = ObjectIdConverter.stringToObjectId(userId);
+        if (objectId == null) {
+            return null;
+        }
+        User user = new User();
+        user.setId(objectId);
+        return user;
+    }
 
     default ObjectId[] toObjectIdArray(String[] ids) {
         if (ids == null) return new ObjectId[0];

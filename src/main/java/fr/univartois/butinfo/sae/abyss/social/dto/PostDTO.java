@@ -7,9 +7,9 @@ import org.bson.types.ObjectId;
 import java.time.LocalDateTime;
 
 public record PostDTO (
-        ObjectId id,
+        String id,
 
-        ObjectId userId,
+        String userId,
 
         @NotBlank(message= "Content cannot be empty")
         @Size(max = 500, message = "Content cannot exceed 500 characters")
