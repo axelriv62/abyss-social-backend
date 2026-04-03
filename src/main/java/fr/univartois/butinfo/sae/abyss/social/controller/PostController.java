@@ -204,14 +204,10 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        try {
-            List<Post> posts = postService.findAllForUser(currentUser);
-            List<PostDTO> postDTOs = posts.stream()
-                    .map(postMapper::toDTO)
-                    .toList();
-            return ResponseEntity.ok(postDTOs);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        List<Post> posts = postService.findAllForUser(currentUser);
+        List<PostDTO> postDTOs = posts.stream()
+                .map(postMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(postDTOs);
     }
 }

@@ -28,14 +28,19 @@ import java.util.List;
 public class PostService {
 
     /** Repository managing persistence of posts. */
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
 
     /** Repository used to validate and load users referenced by posts. */
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    private GroupRepository groupRepository;
+    /** Repository used to validate and load groups referenced by users. */
+    private final GroupRepository groupRepository;
 
-    private PageRepository pageRepository;
+    /** Repository used to validate and load pages referenced by users. */
+    private final PageRepository pageRepository;
+
+    /** Maximum number of posts to return in a user's feed to prevent overload. */
+    private static final int FEED_LIMIT = 50;
 
     /**
      * Builds the service with required repositories.
@@ -290,10 +295,14 @@ public class PostService {
             }
         }
 
+        // Get users' posts
+        posts.addAll(postRepository.findByUser_Id(user.getId()));
+
         // Sort by date (most recent first) and remove duplicates
         return posts.stream()
                 .distinct()
-                .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
+                // .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
+                .limit(FEED_LIMIT)
                 .toList();
     }
 
