@@ -283,8 +283,8 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * Block a user by adding his ID in currentUser userBanned list. This method retrieves the user by their unique identifier, checks if the user is currently in my banned list, and if not, adds the user to ban list and saves
-     * @param userId The current logged in user
+     * Block a user by adding his ID in the currentUser userBanned list. This method retrieves the user by their unique identifier, checks if the user is currently in my banned list, and if not, adds the user to the banlist and saves
+     * @param userId The current logged-in user
      * @param userToBlockId The user to block
      */
     public void blockUser(ObjectId userId, ObjectId userToBlockId) {
@@ -295,9 +295,6 @@ public class UserService implements UserDetailsService {
         }
         if (user.getRole() == ROLES.BANNED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot block a banned user");
-        }
-        if (user.getRole() == ROLES.ADMIN) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot block an admin user");
         }
 
         user.getUsersBanned().add(userToBlockId);
@@ -316,8 +313,8 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * Unblock a user by removing his ID from currentUser userBanned list. This method retrieves the user by their unique identifier, checks if the user is currently in my banned list, and if so, removes the user from ban list and saves
-     * @param userId The current logged in user
+     * Unblock a user by removing his ID from the currentUser userBanned list. This method retrieves the user by their unique identifier, checks if the user is currently in my banned list, and if so, removes the user from the banlist and saves
+     * @param userId The current logged-in user
      * @param userToUnblockId The user to unblock
      */
     public void unblockUser(ObjectId userId, ObjectId userToUnblockId) {

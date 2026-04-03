@@ -5,10 +5,8 @@ info:
 
 http:
   method: PATCH
-  url: "{{URL}}/users/69cee032895e5b6080e43d7a/block"
-  auth:
-    type: bearer
-    token: "{{TOKEN}}"
+  url: "{{URL}}/users/69cee04f895e5b6080e43d7e/block"
+  auth: inherit
 
 settings:
   encodeUrl: true

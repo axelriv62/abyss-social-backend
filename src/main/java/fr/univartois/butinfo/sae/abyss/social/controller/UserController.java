@@ -223,11 +223,8 @@ public class UserController {
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "401", description = "User not authenticated")
     public ResponseEntity<MessageResponseDTO> blockUser(@PathVariable("id") ObjectId userToBlockId, @AuthenticationPrincipal User currentUser) {
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        if (userToBlockId == null) {
-            return ResponseEntity.badRequest().body(new MessageResponseDTO("User ID to block is required"));
+        if (currentUser == null || userToBlockId == null) {
+            return ResponseEntity.badRequest().body(new MessageResponseDTO("current user or user to block is null"));
         }
         if (currentUser.getId().equals(userToBlockId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDTO("Cannot block yourself"));
@@ -246,13 +243,9 @@ public class UserController {
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "401", description = "User not authenticated")
     public ResponseEntity<MessageResponseDTO> unblockUser(@PathVariable("id") ObjectId userToUnblockId, @AuthenticationPrincipal User currentUser) {
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (currentUser == null || userToUnblockId == null) {
+            return ResponseEntity.badRequest().body(new MessageResponseDTO("current user or user to unblock is null"));
         }
-        if (userToUnblockId == null) {
-            return ResponseEntity.badRequest().body(new MessageResponseDTO("User ID to unblock is required"));
-        }
-
         userService.unblockUser(currentUser.getId(), userToUnblockId);
         return ResponseEntity.ok(new MessageResponseDTO("User successfully unblocked"));
     }
