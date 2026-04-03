@@ -7,6 +7,7 @@ import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * REST controller for managing User entities, providing endpoints for user-related operations.
@@ -32,6 +34,7 @@ public class UserController {
      * UserMapper instance for converting between User entities and UserDTOs. This mapper is injected via the constructor.
      */
     private final UserMapper userMapper;
+    private static final String ADMIN_ACCESS_DENIED = "Access denied: You must be logged in as an admin to perform this action.";
 
     /**
      * Constructor for UserController, injecting the UserService dependency.
@@ -169,7 +172,7 @@ public class UserController {
     public ResponseEntity<MessageResponseDTO> banUser(@PathVariable ObjectId userId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new MessageResponseDTO("Access denied: You must be logged in as an admin to perform this action."));
+                    .body(new MessageResponseDTO(ADMIN_ACCESS_DENIED));
         }
 
         userService.banUser(userId);
@@ -189,7 +192,7 @@ public class UserController {
     public ResponseEntity<MessageResponseDTO> unbanUser(@PathVariable ObjectId userId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new MessageResponseDTO("Access denied: You must be logged in as an admin to perform this action."));
+                    .body(new MessageResponseDTO(ADMIN_ACCESS_DENIED));
         }
 
         userService.unbanUser(userId);
@@ -210,7 +213,7 @@ public class UserController {
     public ResponseEntity<MessageResponseDTO> changeUserRole(@PathVariable ObjectId userId, @RequestParam ROLES newRole, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new MessageResponseDTO("Access denied: You must be logged in as an admin to perform this action."));
+                    .body(new MessageResponseDTO(ADMIN_ACCESS_DENIED));
         }
 
         userService.changeUserRole(userId, newRole);
@@ -256,4 +259,48 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponseDTO("User successfully unblocked"));
     }
 
+    @GetMapping("/{id}/pages")
+    @Operation(summary = "Get all pages of a user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pages retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public List<String> getPages(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return List.of();
+        }
+        return userService.getUserPages(userId).stream()
+                .map(ObjectId::toHexString)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/{id}/groups")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Groups retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public List<String> getGroups(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return List.of();
+        }
+        return userService.getUserGroups(userId).stream()
+                .map(ObjectId::toHexString)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/{id}/posts")
+    @Operation(summary = "Get all posts of a user, excluding posts from groups or pages the current user is not a member of")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Posts retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public List<PostDTO> getPosts(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return List.of();
+        }
+        return userService.getUsersPosts(userId);
+    }
 }

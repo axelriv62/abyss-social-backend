@@ -1,6 +1,7 @@
 package fr.univartois.butinfo.sae.abyss.social.controller;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.PageDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
 import fr.univartois.butinfo.sae.abyss.social.mapper.PageMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
@@ -8,6 +9,7 @@ import fr.univartois.butinfo.sae.abyss.social.service.PageService;
 import fr.univartois.butinfo.sae.abyss.social.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,7 @@ public class PageController {
     private final PageService pageService;
     private final UserService userService;
     private final PageMapper pageMapper;
+    private static final String PAGE_NOT_FOUND = "Page not found";
 
     /**
      * Constructs a PageController with the specified PageService and PageMapper.
@@ -80,7 +83,7 @@ public class PageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
 
         if (!page.getUser().getId().equals(currentUser.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -107,7 +110,7 @@ public class PageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
 
         if (!page.getUser().getId().equals(currentUser.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -133,7 +136,7 @@ public class PageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
         userService.addPageToUser(currentUser.getId(), page.getId());
         return ResponseEntity.ok().build();
     }
@@ -154,7 +157,7 @@ public class PageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
         userService.removePageFromUser(currentUser.getId(), page.getId());
         return ResponseEntity.ok().build();
     }
@@ -170,7 +173,7 @@ public class PageController {
     @ApiResponse(responseCode = "404", description = "Page not found")
     public ResponseEntity<PageDTO> getPageById(@PathVariable ObjectId id) {
         Page page = pageService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
         return ResponseEntity.ok(pageMapper.toDTO(page));
     }
 
@@ -186,5 +189,19 @@ public class PageController {
     public ResponseEntity<List<PageDTO>> searchPagesByName(@RequestParam("query") String query) {
         List<Page> matches = pageService.searchByName(query);
         return ResponseEntity.ok(pageMapper.toDTOList(matches));
+    }
+
+    @GetMapping("/{id}/posts")
+    @Operation(summary = "Get all posts of a page")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Posts retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated"),
+            @ApiResponse(responseCode = "404", description = "Page not found")
+    })
+    public List<PostDTO> getPosts(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return List.of();
+        }
+        return pageService.getPagesPosts(userId);
     }
 }
