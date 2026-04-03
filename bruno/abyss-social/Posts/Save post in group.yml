@@ -1,0 +1,26 @@
+info:
+  name: Save post in group
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: "{{URL}}/posts/groups/69cf68e40df9ea4aa8fc9d99"
+  body:
+    type: json
+    data: |-
+      {
+        "content": "Premier post dans un groupe",
+        "comments": [],
+        "likes": [],
+        "dislikes": []
+      }
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
