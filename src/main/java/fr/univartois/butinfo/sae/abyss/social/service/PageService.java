@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 public class PageService {
     private final PageRepository pageRepository;
     private final UserRepository userRepository;
-    private final PageMapper pageMapper;
     private final PostRepository postRepository;
     private final PostMapper postMapper;
 
@@ -38,7 +37,6 @@ public class PageService {
     public PageService(PageRepository pageRepository, UserRepository userRepository, PageMapper pageMapper, PostRepository postRepository, PostMapper postMapper) {
         this.pageRepository = pageRepository;
         this.userRepository = userRepository;
-        this.pageMapper = pageMapper;
         this.postRepository = postRepository;
         this.postMapper = postMapper;
     }

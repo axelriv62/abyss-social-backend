@@ -33,6 +33,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final PostMapper postMapper;
+    private static final String USER_NOT_FOUND = "User not found";
 
     /**
      * Constructor for UserService, injecting the UserRepository dependency.

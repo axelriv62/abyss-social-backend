@@ -1,11 +1,9 @@
 package fr.univartois.butinfo.sae.abyss.social.service;
 
-import fr.univartois.butinfo.sae.abyss.social.dto.GroupDTO;
 import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
 import fr.univartois.butinfo.sae.abyss.social.mapper.GroupMapper;
 import fr.univartois.butinfo.sae.abyss.social.mapper.PostMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
-import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.repository.GroupRepository;
 import fr.univartois.butinfo.sae.abyss.social.repository.PostRepository;
 import org.bson.types.ObjectId;
