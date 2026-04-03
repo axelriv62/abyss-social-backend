@@ -7,5 +7,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface CommentRepository extends MongoRepository<Comment, ObjectId> {
-    List<Comment> findByPostId(ObjectId postId);
+    List<Comment> findByPost_Id(ObjectId postId);
 }

@@ -1,14 +1,14 @@
 info:
-  name: Remove friend
+  name: Add friend
   type: http
-  seq: 5
+  seq: 9
 
 http:
   method: PATCH
-  url: "{{URL}}/users/friends/remove?friendId=69ccf2aa15852ad1e8d5b0a2"
+  url: "{{URL}}/users/friends/add?friendId=69cf77fd7b2adc8e1b890c43"
   params:
     - name: friendId
-      value: 69ccf2aa15852ad1e8d5b0a2
+      value: 69cf77fd7b2adc8e1b890c43
       type: query
   auth:
     type: bearer

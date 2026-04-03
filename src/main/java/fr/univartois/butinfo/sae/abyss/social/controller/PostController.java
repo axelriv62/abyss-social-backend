@@ -1,9 +1,14 @@
 package fr.univartois.butinfo.sae.abyss.social.controller;
 
+import fr.univartois.butinfo.sae.abyss.social.dto.CommentDTO;
 import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.PostWithCommentsDTO;
+import fr.univartois.butinfo.sae.abyss.social.mapper.CommentMapper;
 import fr.univartois.butinfo.sae.abyss.social.mapper.PostMapper;
+import fr.univartois.butinfo.sae.abyss.social.model.Comment;
 import fr.univartois.butinfo.sae.abyss.social.model.Post;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
+import fr.univartois.butinfo.sae.abyss.social.service.CommentService;
 import fr.univartois.butinfo.sae.abyss.social.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,6 +33,10 @@ public class PostController {
     private final PostService postService;
     /** Mapper converting between Post entities and DTOs. */
     private final PostMapper postMapper;
+    /** Service handling comment retrieval for post details. */
+    private final CommentService commentService;
+    /** Mapper converting between Comment entities and DTOs. */
+    private final CommentMapper commentMapper;
 
     /**
      * Builds the controller with required collaborators.
@@ -35,9 +44,38 @@ public class PostController {
      * @param postService service managing posts
      * @param postMapper mapper converting Post ↔ PostDTO
      */
-    public PostController(PostService postService, PostMapper postMapper) {
+    public PostController(PostService postService,
+                          PostMapper postMapper,
+                          CommentService commentService,
+                          CommentMapper commentMapper) {
         this.postService = postService;
         this.postMapper = postMapper;
+        this.commentService = commentService;
+        this.commentMapper = commentMapper;
+    }
+
+    /**
+     * Retrieves a post with all its comments.
+     *
+     * @param postId identifier of the post
+     * @param currentUser authenticated user
+     * @return post details with comments
+     */
+    @Operation(summary = "Get post details", description = "Retrieves a post with its comments.")
+    @ApiResponse(responseCode = "200", description = "Post details retrieved")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "404", description = "Post not found")
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostWithCommentsDTO> getPostWithComments(@PathVariable ObjectId postId,
+                                                                   @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Post post = postService.findByIdOrThrow(postId);
+        List<Comment> comments = commentService.findByPostId(postId);
+        PostDTO postDTO = postMapper.toDTO(post);
+        List<CommentDTO> commentDTOs = commentMapper.toDTOs(comments);
+        return ResponseEntity.ok(new PostWithCommentsDTO(postDTO, commentDTOs));
     }
 
     /**
@@ -62,6 +100,58 @@ public class PostController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(postMapper.toDTO(savedPost));
 
+    }
+
+    /**
+     * Creates a post and attaches it to a group.
+     *
+     * @param groupId target group identifier
+     * @param postDTO payload describing the post to create
+     * @param currentUser authenticated user creating the post
+     * @return created post DTO
+     */
+    @Operation(summary = "Create a post in a group", description = "Create a new post and attach it to the specified group.")
+    @ApiResponse(responseCode = "201", description = "Post successfully created in group")
+    @ApiResponse(responseCode = "400", description = "Invalid data")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "404", description = "Group or user not found")
+    @PostMapping("/groups/{groupId}")
+    public ResponseEntity<PostDTO> createPostInGroup(@PathVariable ObjectId groupId,
+                                                     @Valid @RequestBody PostDTO postDTO,
+                                                     @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Post post = postMapper.toEntity(postDTO);
+        post.setUser(currentUser);
+        Post savedPost = postService.saveInGroup(post, groupId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(postMapper.toDTO(savedPost));
+    }
+
+    /**
+     * Creates a post and attaches it to a page.
+     *
+     * @param pageId target page identifier
+     * @param postDTO payload describing the post to create
+     * @param currentUser authenticated user creating the post
+     * @return created post DTO
+     */
+    @Operation(summary = "Create a post in a page", description = "Create a new post and attach it to the specified page.")
+    @ApiResponse(responseCode = "201", description = "Post successfully created in page")
+    @ApiResponse(responseCode = "400", description = "Invalid data")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "404", description = "Page or user not found")
+    @PostMapping("/pages/{pageId}")
+    public ResponseEntity<PostDTO> createPostInPage(@PathVariable ObjectId pageId,
+                                                    @Valid @RequestBody PostDTO postDTO,
+                                                    @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Post post = postMapper.toEntity(postDTO);
+        post.setUser(currentUser);
+        Post savedPost = postService.saveInPage(post, pageId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(postMapper.toDTO(savedPost));
     }
 
     /**
