@@ -9,7 +9,6 @@ import fr.univartois.butinfo.sae.abyss.social.service.PageService;
 import fr.univartois.butinfo.sae.abyss.social.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
@@ -193,11 +192,9 @@ public class PageController {
 
     @GetMapping("/{id}/posts")
     @Operation(summary = "Get all posts of a page")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Posts retrieved successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated"),
-            @ApiResponse(responseCode = "404", description = "Page not found")
-    })
+    @ApiResponse(responseCode = "200", description = "Posts retrieved successfully")
+    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
+    @ApiResponse(responseCode = "404", description = "Page not found")
     public List<PostDTO> getPosts(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return List.of();

@@ -7,7 +7,6 @@ import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
@@ -261,11 +260,9 @@ public class UserController {
 
     @GetMapping("/{id}/pages")
     @Operation(summary = "Get all pages of a user")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Pages retrieved successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated"),
-            @ApiResponse(responseCode = "404", description = "User not found")
-    })
+    @ApiResponse(responseCode = "200", description = "Pages retrieved successfully")
+    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
+    @ApiResponse(responseCode = "404", description = "User not found")
     public List<String> getPages(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return List.of();
@@ -276,11 +273,9 @@ public class UserController {
     }
 
     @GetMapping("/{id}/groups")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Groups retrieved successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated"),
-            @ApiResponse(responseCode = "404", description = "User not found")
-    })
+    @ApiResponse(responseCode = "200", description = "Groups retrieved successfully")
+    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
+    @ApiResponse(responseCode = "404", description = "User not found")
     public List<String> getGroups(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return List.of();
@@ -292,11 +287,9 @@ public class UserController {
 
     @GetMapping("/{id}/posts")
     @Operation(summary = "Get all posts of a user, excluding posts from groups or pages the current user is not a member of")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Posts retrieved successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated"),
-            @ApiResponse(responseCode = "404", description = "User not found")
-    })
+    @ApiResponse(responseCode = "200", description = "Posts retrieved successfully")
+    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
+    @ApiResponse(responseCode = "404", description = "User not found")
     public List<PostDTO> getPosts(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return List.of();
