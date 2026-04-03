@@ -118,6 +118,16 @@ public class PostService {
     }
 
     /**
+     * Retrieves a post by identifier.
+     *
+     * @param postId identifier of the post to retrieve
+     * @return the matching post
+     */
+    public Post findByIdOrThrow(ObjectId postId) {
+        return getPostOrThrow(postId);
+    }
+
+    /**
      * Finds posts whose content contains the provided fragment, case-insensitively.
      *
      * @param contentFragment substring to search for
