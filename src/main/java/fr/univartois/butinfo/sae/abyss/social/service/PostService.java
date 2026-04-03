@@ -326,13 +326,29 @@ public class PostService {
     }
 
     /**
-     * Retrieves the complete feed for a user.
+     * Retrieves a paginated feed for a user.
      * Returns posts from: friends, groups, pages, and own posts.
      * Posts are sorted by creation date (most recent first) and deduplicated.
+     *
+     * @param user the user for whom to retrieve the feed
+     * @param offset starting position in the sorted list (default: 0)
+     * @param limit maximum number of posts to return (default: 50, max: 100)
+     * @return list of PostDTO objects representing the user's paginated feed
      */
-    public List<Post> findAllForUser(User user) {
+    public List<Post> findAllForUser(User user, int offset, int limit) {
         if (user == null || user.getId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is required");
+        }
+
+        // Validate pagination parameters
+        if (offset < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "offset cannot be negative");
+        }
+        if (limit <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit must be greater than 0");
+        }
+        if (limit > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit cannot exceed 100");
         }
 
         // Check if user exists
@@ -342,12 +358,12 @@ public class PostService {
 
         List<Post> posts = new ArrayList<>();
 
-        // 1. Get friends' posts (friends are stored as ObjectId list, posts are linked to users by userId)
+        // 1. Get friends' posts
         if (user.getFriends() != null && !user.getFriends().isEmpty()) {
             posts.addAll(postRepository.findByUser_IdIn(user.getFriends()));
         }
 
-        // 2. Get groups' posts (groups store ObjectId[] of posts)
+        // 2. Get groups' posts
         if (user.getGroups() != null && !user.getGroups().isEmpty()) {
             List<Group> userGroups = groupRepository.findAllById(user.getGroups());
             for (Group group : userGroups) {
@@ -357,7 +373,7 @@ public class PostService {
             }
         }
 
-        // 3. Get pages' posts (pages store ObjectId[] of posts)
+        // 3. Get pages' posts
         if (user.getPages() != null && !user.getPages().isEmpty()) {
             List<Page> userPages = pageRepository.findAllById(user.getPages());
             for (Page page : userPages) {
@@ -367,12 +383,14 @@ public class PostService {
             }
         }
 
-        // Sort by date (most recent first) and remove duplicates
+        // Sort by date (most recent first), remove duplicates, apply pagination
         return posts.stream()
                 .distinct()
                 .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
-                .limit(FEED_LIMIT)
+                .skip(offset)
+                .limit(limit)
                 .toList();
     }
+
 }
 

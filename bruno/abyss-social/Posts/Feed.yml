@@ -5,7 +5,11 @@ info:
 
 http:
   method: GET
-  url: "{{URL}}/posts/feed"
+  url: "{{URL}}/posts/feed?limit=30"
+  params:
+    - name: limit
+      value: "30"
+      type: query
   auth: inherit
 
 settings:
