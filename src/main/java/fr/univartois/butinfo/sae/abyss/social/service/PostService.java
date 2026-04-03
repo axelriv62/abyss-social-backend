@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -28,16 +29,16 @@ import java.util.List;
 public class PostService {
 
     /** Repository managing persistence of posts. */
-    private final PostRepository postRepository;
+    private PostRepository postRepository;
 
     /** Repository used to validate and load users referenced by posts. */
-    private final UserRepository userRepository;
+    private UserRepository userRepository;
 
-    /** Repository used to validate and load groups referenced by users. */
-    private final GroupRepository groupRepository;
+    /** Repository used to validate and update target groups for post attachment. */
+    private GroupRepository groupRepository;
 
-    /** Repository used to validate and load pages referenced by users. */
-    private final PageRepository pageRepository;
+    /** Repository used to validate and update target pages for post attachment. */
+    private PageRepository pageRepository;
 
     /** Maximum number of posts to return in a user's feed to prevent overload. */
     private static final int FEED_LIMIT = 50;
@@ -48,7 +49,10 @@ public class PostService {
      * @param postRepository repository handling Post entities
      * @param userRepository repository handling User entities
      */
-    public PostService(PostRepository postRepository, UserRepository userRepository, GroupRepository groupRepository, PageRepository pageRepository) {
+    public PostService(PostRepository postRepository,
+                       UserRepository userRepository,
+                       GroupRepository groupRepository,
+                       PageRepository pageRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.groupRepository = groupRepository;
@@ -73,7 +77,40 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "userId is required");
         }
         getUserOrThrow(userId);
+        if (post.getCreatedAt() == null) {
+            post.setCreatedAt(LocalDateTime.now());
+        }
         return postRepository.save(post);
+    }
+
+    /**
+     * Creates a post and attaches it to the provided group.
+     *
+     * @param post post to create
+     * @param groupId target group identifier
+     * @return persisted post
+     */
+    public Post saveInGroup(Post post, ObjectId groupId) {
+        Group group = getGroupOrThrow(groupId);
+        Post savedPost = save(post);
+        group.setPosts(appendPostId(group.getPosts(), savedPost.getId()));
+        groupRepository.save(group);
+        return savedPost;
+    }
+
+    /**
+     * Creates a post and attaches it to the provided page.
+     *
+     * @param post post to create
+     * @param pageId target page identifier
+     * @return persisted post
+     */
+    public Post saveInPage(Post post, ObjectId pageId) {
+        Page page = getPageOrThrow(pageId);
+        Post savedPost = save(post);
+        page.setPosts(appendPostId(page.getPosts(), savedPost.getId()));
+        pageRepository.save(page);
+        return savedPost;
     }
 
     /**
@@ -210,6 +247,28 @@ public class PostService {
     }
 
     /**
+     * Retrieves a group or throws 404 if not found.
+     */
+    private Group getGroupOrThrow(ObjectId groupId) {
+        if (groupId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "groupId is required");
+        }
+        return groupRepository.findById(groupId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found for id=" + groupId.toHexString()));
+    }
+
+    /**
+     * Retrieves a page or throws 404 if not found.
+     */
+    private Page getPageOrThrow(ObjectId pageId) {
+        if (pageId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "pageId is required");
+        }
+        return pageRepository.findById(pageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found for id=" + pageId.toHexString()));
+    }
+
+    /**
      * Retrieves a user or throws 404 if not found.
      */
     private User getUserOrThrow(ObjectId userId) {
@@ -251,6 +310,20 @@ public class PostService {
      */
     private boolean isSameUser(User user, ObjectId userId) {
         return user != null && user.getId() != null && user.getId().equals(userId);
+    }
+
+    /**
+     * Appends an identifier to an ObjectId array if it is not already present.
+     */
+    private ObjectId[] appendPostId(ObjectId[] existingPostIds, ObjectId postId) {
+        ObjectId[] source = existingPostIds == null ? new ObjectId[0] : existingPostIds;
+        boolean alreadyPresent = Arrays.stream(source).anyMatch(postId::equals);
+        if (alreadyPresent) {
+            return source;
+        }
+        ObjectId[] updated = Arrays.copyOf(source, source.length + 1);
+        updated[source.length] = postId;
+        return updated;
     }
 
     /**
@@ -305,6 +378,5 @@ public class PostService {
                 .limit(FEED_LIMIT)
                 .toList();
     }
-
 }
 

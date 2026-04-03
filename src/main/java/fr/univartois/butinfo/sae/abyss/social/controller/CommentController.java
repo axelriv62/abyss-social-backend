@@ -4,6 +4,7 @@ import fr.univartois.butinfo.sae.abyss.social.dto.CommentDTO;
 import fr.univartois.butinfo.sae.abyss.social.dto.CommentPatchDTO;
 import fr.univartois.butinfo.sae.abyss.social.mapper.CommentMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Comment;
+import fr.univartois.butinfo.sae.abyss.social.model.Post;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,7 +43,9 @@ public class CommentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         Comment comment = commentMapper.toEntity(request);
-        comment.setPostId(postId);
+        Post post = new Post();
+        post.setId(postId);
+        comment.setPost(post);
         comment.setUser(currentUser);
         Comment saved = commentService.save(comment);
         return ResponseEntity.status(HttpStatus.CREATED).body(commentMapper.toDTO(saved));

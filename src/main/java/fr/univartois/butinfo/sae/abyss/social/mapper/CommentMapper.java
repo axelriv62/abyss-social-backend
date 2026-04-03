@@ -17,6 +17,7 @@ public interface CommentMapper {
 
     List<CommentDTO> toDTOs(List<Comment> comments);
 
+    @Mapping(target = "post", ignore = true)
     @Mapping(source = "userId", target = "user")
     Comment toEntity(@Valid CommentDTO commentDTO);
 
@@ -44,4 +45,5 @@ public interface CommentMapper {
         user.setId(userId);
         return user;
     }
+
 }
