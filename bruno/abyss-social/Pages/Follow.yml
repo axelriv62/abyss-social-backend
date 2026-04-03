@@ -5,7 +5,7 @@ info:
 
 http:
   method: PATCH
-  url: "{{URL}}/pages/69ccd86e5ea234e09d4637c4/follow"
+  url: "{{URL}}/pages/69cfa861c26d5063191b0a66/follow"
   auth:
     type: bearer
     token: "{{TOKEN}}"

@@ -1,8 +1,10 @@
 package fr.univartois.butinfo.sae.abyss.social.service;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
+import fr.univartois.butinfo.sae.abyss.social.mapper.PostMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.ROLES;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
+import fr.univartois.butinfo.sae.abyss.social.repository.PostRepository;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 import org.bson.types.Binary;
 import org.bson.types.ObjectId;
@@ -29,13 +31,17 @@ public class UserService implements UserDetailsService {
      * UserRepository instance for performing CRUD operations on User entities. This repository is injected via the constructor.
      */
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final PostMapper postMapper;
 
     /**
      * Constructor for UserService, injecting the UserRepository dependency.
      * @param userRepository The UserRepository instance to be used by this service
      */
-    public UserService(UserRepository userRepository){
+    public UserService(UserRepository userRepository, PostRepository postRepository, PostMapper postMapper){
         this.userRepository = userRepository;
+        this.postRepository = postRepository;
+        this.postMapper = postMapper;
     }
 
     /**
