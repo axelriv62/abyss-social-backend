@@ -32,6 +32,7 @@ public class UserController {
      * UserMapper instance for converting between User entities and UserDTOs. This mapper is injected via the constructor.
      */
     private final UserMapper userMapper;
+    private static final String ADMIN_ACCESS_DENIED = "Access denied: You must be logged in as an admin to perform this action.";
 
     /**
      * Constructor for UserController, injecting the UserService dependency.
@@ -169,7 +170,7 @@ public class UserController {
     public ResponseEntity<MessageResponseDTO> banUser(@PathVariable ObjectId userId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new MessageResponseDTO("Access denied: You must be logged in as an admin to perform this action."));
+                    .body(new MessageResponseDTO(ADMIN_ACCESS_DENIED));
         }
 
         userService.banUser(userId);
@@ -189,7 +190,7 @@ public class UserController {
     public ResponseEntity<MessageResponseDTO> unbanUser(@PathVariable ObjectId userId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new MessageResponseDTO("Access denied: You must be logged in as an admin to perform this action."));
+                    .body(new MessageResponseDTO(ADMIN_ACCESS_DENIED));
         }
 
         userService.unbanUser(userId);
@@ -210,7 +211,7 @@ public class UserController {
     public ResponseEntity<MessageResponseDTO> changeUserRole(@PathVariable ObjectId userId, @RequestParam ROLES newRole, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new MessageResponseDTO("Access denied: You must be logged in as an admin to perform this action."));
+                    .body(new MessageResponseDTO(ADMIN_ACCESS_DENIED));
         }
 
         userService.changeUserRole(userId, newRole);
