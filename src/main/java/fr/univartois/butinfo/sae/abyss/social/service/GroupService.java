@@ -33,7 +33,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
 
-    public GroupService(GroupRepository groupRepository, GroupMapper groupMapper, UserRepository userRepository) {
+    public GroupService(GroupRepository groupRepository, UserRepository userRepository) {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
     }

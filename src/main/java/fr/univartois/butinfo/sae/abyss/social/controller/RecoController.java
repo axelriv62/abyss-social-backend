@@ -7,7 +7,6 @@ import fr.univartois.butinfo.sae.abyss.social.service.RecommendationService;
 import fr.univartois.butinfo.sae.abyss.social.dto.UserRecommendedDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.bson.types.ObjectId;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
