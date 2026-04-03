@@ -14,9 +14,11 @@ public interface TokenRepository extends MongoRepository<Token, ObjectId> {
 
     /**
      * Find a token by its string representation.
-     * @param token The string representation of the token to find.
+     * @param userToken The string representation of the token to find.
      * @return An Optional containing the found Token, or empty if no token matches the provided string.
      */
-    Optional<Token> findByToken(String token);
+    // The Token entity stores the token string in the `userToken` field,
+    // so the repository method name must reference that field for query derivation.
+    Optional<Token> findByUserToken(String userToken);
 
 }

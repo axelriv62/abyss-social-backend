@@ -41,7 +41,7 @@ public interface GroupMapper {
     List<GroupDTO> toDTOList(List<Group> groups);
 
     default ObjectId[] toObjectIdArray(String[] ids) {
-        if (ids == null) return null;
+        if (ids == null) return new ObjectId[0];
         List<String> invalid = new ArrayList<>();
         ObjectId[] result = Arrays.stream(ids)
                 .filter(Objects::nonNull)

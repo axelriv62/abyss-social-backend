@@ -1,0 +1,21 @@
+info:
+  name: Role
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{URL}}/users/role/69ce31533b496651aa6c77dc?newRole=ADMIN"
+  params:
+    - name: newRole
+      value: ADMIN
+      type: query
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

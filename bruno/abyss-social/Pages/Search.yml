@@ -5,10 +5,10 @@ info:
 
 http:
   method: GET
-  url: "{{URL}}/pages/search?query=Page"
+  url: "{{URL}}/pages/search?query=Test"
   params:
     - name: query
-      value: Page
+      value: Test
       type: query
   auth:
     type: bearer

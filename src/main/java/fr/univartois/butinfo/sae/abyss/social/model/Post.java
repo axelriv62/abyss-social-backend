@@ -115,7 +115,9 @@ public class Post {
      *
      * @param image new image
      */
-    public void setImage(Binary image) {}
+    public void setImage(Binary image) {
+        this.image = image;
+    }
 
     /**
      * @return comment identifiers linked to this post

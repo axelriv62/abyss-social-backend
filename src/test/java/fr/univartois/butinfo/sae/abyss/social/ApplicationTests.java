@@ -8,6 +8,7 @@ class ApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// This test will pass if the application context loads successfully, indicating that the Spring Boot application is configured correctly.
 	}
 
 }

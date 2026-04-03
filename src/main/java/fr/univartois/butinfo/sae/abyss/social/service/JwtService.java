@@ -106,7 +106,7 @@ public class JwtService {
      * @return A boolean value indicating whether the JWT token is valid (true) or not (false), based on the presence of the token in the TokenRepository, the validity of its claims
      */
     public boolean isTokenValid(String jwt, UserDetails userDetails) {
-        Optional<Token> token = tokenRepository.findByToken(jwt);
+        Optional<Token> token = tokenRepository.findByUserToken(jwt);
         if (token.isPresent()) {
             Token tokenEntity = token.get();
             if (tokenEntity.isRevoked() || tokenEntity.isExpired()) {
@@ -161,7 +161,7 @@ public class JwtService {
     /**
      * Extracts all claims from the given JWT token by parsing the token using the JJWT library. This method verifies the token's signature using the secret key and retrieves the claims contained in the token's payload. The extracted claims are returned as a Claims object, which can be used to access specific claims such as the subject (username), expiration time, and any additional claims included in the token.
      * @param token The JWT token from which to extract all claims, which is typically extracted from the Authorization header of an incoming HTTP request. This token is parsed using the JJWT library to verify its signature and retrieve the claims contained in the token's payload.
-     *              The extracted claims are returned as a Claims object, which can be used to access specific claims such as the subject (username), expiration time, and any additional claims included in the token for authentication and authorization purposes in the application.
+     *              The extracted claims are returned as a Claims object, which can be used to access specific claims such as the subject (username), expiration time, and any additional claims that may be included in the token for authentication and authorization purposes in the application.
      * @return A Claims object representing all the claims extracted from the JWT token, which includes standard claims such as the subject (username) and expiration time, as well as any additional claims that may be included in the token's payload. This Claims object can be used to access specific claims for authentication and authorization purposes in the application.
      */
     private Claims extractAllClaims(String token) {

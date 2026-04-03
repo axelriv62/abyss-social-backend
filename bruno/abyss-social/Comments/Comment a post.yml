@@ -5,13 +5,13 @@ info:
 
 http:
   method: POST
-  url: "{{URL}}/posts/69cd1b0f772d9b831ad8f4ce/comments"
+  url: "{{URL}}/posts/69cd2942b8c51ba737e7a9a2/comments"
   body:
     type: json
     data: |-
       {
-        "text" : "Super ! Qu'en as-tu pensé ?",
-        "postId": "69cd1b0f772d9b831ad8f4ce"
+        "text" : "Test 3",
+        "postId": "69cd2942b8c51ba737e7a9a2"
       }
   auth:
     type: bearer

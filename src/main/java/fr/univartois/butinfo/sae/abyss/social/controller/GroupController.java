@@ -1,10 +1,8 @@
 package fr.univartois.butinfo.sae.abyss.social.controller;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.GroupDTO;
-import fr.univartois.butinfo.sae.abyss.social.dto.PageDTO;
 import fr.univartois.butinfo.sae.abyss.social.mapper.GroupMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
-import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.GroupService;
 import fr.univartois.butinfo.sae.abyss.social.service.UserService;
@@ -14,9 +12,7 @@ import jakarta.validation.Valid;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 

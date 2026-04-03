@@ -1,8 +1,10 @@
 package fr.univartois.butinfo.sae.abyss.social.controller;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.CommentDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.CommentPatchDTO;
 import fr.univartois.butinfo.sae.abyss.social.mapper.CommentMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Comment;
+import fr.univartois.butinfo.sae.abyss.social.model.Post;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,7 +43,9 @@ public class CommentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         Comment comment = commentMapper.toEntity(request);
-        comment.setPostId(postId);
+        Post post = new Post();
+        post.setId(postId);
+        comment.setPost(post);
         comment.setUser(currentUser);
         Comment saved = commentService.save(comment);
         return ResponseEntity.status(HttpStatus.CREATED).body(commentMapper.toDTO(saved));
@@ -71,5 +75,21 @@ public class CommentController {
         commentService.deleteComment(commentId, currentUser.getId());
         return ResponseEntity.noContent().build();
     }
-}
 
+    @Operation(summary = "Update a comment", description = "Updates the targeted comment text if the authenticated user is the author.")
+    @ApiResponse(responseCode = "200", description = "Comment updated")
+    @ApiResponse(responseCode = "400", description = "Invalid payload")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Update forbidden")
+    @ApiResponse(responseCode = "404", description = "Comment not found")
+    @PatchMapping("/comments/{commentId}")
+    public ResponseEntity<CommentDTO> updateComment(@PathVariable ObjectId commentId,
+                                                    @Valid @RequestBody CommentPatchDTO request,
+                                                    @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Comment updated = commentService.updateComment(commentId, currentUser.getId(), request.text());
+        return ResponseEntity.ok(commentMapper.toDTO(updated));
+    }
+}

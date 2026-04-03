@@ -2,6 +2,7 @@ package fr.univartois.butinfo.sae.abyss.social.service;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.*;
 import fr.univartois.butinfo.sae.abyss.social.mapper.UserMapper;
+import fr.univartois.butinfo.sae.abyss.social.model.ROLES;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -89,12 +90,15 @@ public class AuthService {
                 registerDTO.profilePicture()
         );
 
+        if (userRepository.count() == 0) {
+            user.setRole(ROLES.ADMIN);
+        }
         User result = userRepository.save(user);
         String token = jwtService.generateToken(result);
         jwtService.saveToken(token, result.getId());
 
         UserResponseDTO userResponseDTO = userMapper.toResponseDTO(result);
-        return new AuthResponseDTO(userResponseDTO, token, "Bearer");
+        return new AuthResponseDTO(userResponseDTO, token, "Bearer", "");
     }
 
     /**
@@ -119,6 +123,22 @@ public class AuthService {
         String token = jwtService.generateToken(user);
         jwtService.saveToken(token, user.getId());
         UserResponseDTO userResponseDTO = this.userMapper.toResponseDTO(user);
-        return new AuthResponseDTO(userResponseDTO, token, "Bearer");
+        return new AuthResponseDTO(userResponseDTO, token, "Bearer", "");
+    }
+
+    /**
+     * Checks if a user is banned based on their login credentials.
+     * @param loginDTO The AuthLoginRequestDTO object containing the login credentials for authentication, including the user's email and password.
+     * @return true if the user is banned, false otherwise
+     */
+    public boolean isBanned(AuthLoginRequestDTO loginDTO) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password())
+        );
+
+        User user = userRepository.findByEmail(loginDTO.email())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email"));
+
+        return user.getRole() == ROLES.BANNED;
     }
 }
