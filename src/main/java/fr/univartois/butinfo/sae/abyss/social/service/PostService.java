@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -368,13 +367,10 @@ public class PostService {
             }
         }
 
-        // Get users' posts
-        posts.addAll(postRepository.findByUser_Id(user.getId()));
-
         // Sort by date (most recent first) and remove duplicates
         return posts.stream()
                 .distinct()
-                // .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
+                .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
                 .limit(FEED_LIMIT)
                 .toList();
     }
