@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,12 +29,18 @@ public class PostService {
 
     /** Repository managing persistence of posts. */
     private PostRepository postRepository;
+
     /** Repository used to validate and load users referenced by posts. */
     private UserRepository userRepository;
+
     /** Repository used to validate and update target groups for post attachment. */
     private GroupRepository groupRepository;
+
     /** Repository used to validate and update target pages for post attachment. */
     private PageRepository pageRepository;
+
+    /** Maximum number of posts to return in a user's feed to prevent overload. */
+    private static final int FEED_LIMIT = 50;
 
     /**
      * Builds the service with required repositories.
@@ -327,5 +334,73 @@ public class PostService {
         updated[source.length] = postId;
         return updated;
     }
+
+    /**
+     * Retrieves a paginated feed for a user.
+     * Returns posts from: friends, groups, pages, and own posts.
+     * Posts are sorted by creation date (most recent first) and deduplicated.
+     *
+     * @param user the user for whom to retrieve the feed
+     * @param offset starting position in the sorted list (default: 0)
+     * @param limit maximum number of posts to return (default: 50, max: 100)
+     * @return list of PostDTO objects representing the user's paginated feed
+     */
+    public List<Post> findAllForUser(User user, int offset, int limit) {
+        if (user == null || user.getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is required");
+        }
+
+        // Validate pagination parameters
+        if (offset < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "offset cannot be negative");
+        }
+        if (limit <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit must be greater than 0");
+        }
+        if (limit > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit cannot exceed 100");
+        }
+
+        // Check if user exists
+        if (!userRepository.existsById(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        List<Post> posts = new ArrayList<>();
+
+        // 1. Get friends' posts
+        if (user.getFriends() != null && !user.getFriends().isEmpty()) {
+            posts.addAll(postRepository.findByUser_IdIn(user.getFriends()));
+        }
+
+        // 2. Get groups' posts
+        if (user.getGroups() != null && !user.getGroups().isEmpty()) {
+            List<Group> userGroups = groupRepository.findAllById(user.getGroups());
+            for (Group group : userGroups) {
+                if (group.getPosts() != null && group.getPosts().length > 0) {
+                    posts.addAll(postRepository.findAllById(Arrays.asList(group.getPosts())));
+                }
+            }
+        }
+
+        // 3. Get pages' posts
+        if (user.getPages() != null && !user.getPages().isEmpty()) {
+            List<Page> userPages = pageRepository.findAllById(user.getPages());
+            for (Page page : userPages) {
+                if (page.getPosts() != null && page.getPosts().length > 0) {
+                    posts.addAll(postRepository.findAllById(Arrays.asList(page.getPosts())));
+                }
+            }
+        }
+
+        // Sort by date (most recent first), remove duplicates, apply pagination
+        return posts.stream()
+                .distinct()
+                .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
+                .skip(offset)
+                .limit(limit)
+                .toList();
+    }
+
 }
 
