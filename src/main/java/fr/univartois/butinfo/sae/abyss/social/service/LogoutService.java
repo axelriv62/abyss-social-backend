@@ -47,7 +47,7 @@ public class LogoutService implements LogoutHandler {
             return;
         }
         String jwt = authHeader.substring(7);
-        Optional<Token> token = tokenRepository.findByToken(jwt);
+        Optional<Token> token = tokenRepository.findByUserToken(jwt);
         token.ifPresent(value -> {
             value.setRevoked(true);
             tokenRepository.save(value);

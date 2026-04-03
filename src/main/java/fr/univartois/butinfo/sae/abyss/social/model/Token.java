@@ -12,7 +12,7 @@ public class Token {
     private ObjectId id;
 
     @Indexed(unique = true)
-    private String token;
+    private String userToken;
 
     private ObjectId userId;
 
@@ -23,7 +23,7 @@ public class Token {
     public Token() {}
 
     public Token(String token, ObjectId userId) {
-        this.token = token;
+        this.userToken = token;
         this.userId = userId;
         this.revoked = false;
         this.expired = false;
@@ -37,12 +37,12 @@ public class Token {
         this.id = id;
     }
 
-    public String getToken() {
-        return token;
+    public String getUserToken() {
+        return userToken;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setUserToken(String userToken) {
+        this.userToken = userToken;
     }
 
     public ObjectId getUserId() {
