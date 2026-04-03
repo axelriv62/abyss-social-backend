@@ -3,6 +3,7 @@ package fr.univartois.butinfo.sae.abyss.social.service;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
 import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.model.Post;
+import fr.univartois.butinfo.sae.abyss.social.model.ROLES;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.repository.GroupRepository;
 import fr.univartois.butinfo.sae.abyss.social.repository.PageRepository;
@@ -89,6 +90,14 @@ public class PostService {
      */
     public Post saveInGroup(Post post, ObjectId groupId) {
         Group group = getGroupOrThrow(groupId);
+        ObjectId authorId = extractPostAuthorId(post);
+        User author = getUserOrThrow(authorId);
+
+        if (!isGroupCreator(group, authorId) && !isGroupMember(author, groupId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only the group creator or group members can publish posts in this group");
+        }
+
         Post savedPost = save(post);
         group.setPosts(appendPostId(group.getPosts(), savedPost.getId()));
         groupRepository.save(group);
@@ -104,6 +113,13 @@ public class PostService {
      */
     public Post saveInPage(Post post, ObjectId pageId) {
         Page page = getPageOrThrow(pageId);
+        ObjectId authorId = extractPostAuthorId(post);
+
+        if (!isPageCreator(page, authorId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only the page creator can publish posts on this page");
+        }
+
         Post savedPost = save(post);
         page.setPosts(appendPostId(page.getPosts(), savedPost.getId()));
         pageRepository.save(page);
@@ -115,9 +131,10 @@ public class PostService {
      *
      * @param id identifier of the post to delete
      */
-    public void deleteById(ObjectId id) {
-        if (!postRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    public void deleteById(ObjectId id, User requester) {
+        Post post = getPostOrThrow(id);
+        if (!canManagePost(post, requester)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator or an admin can delete this post");
         }
         postRepository.deleteById(id);
     }
@@ -490,6 +507,55 @@ public class PostService {
      */
     private boolean isSameUser(User user, ObjectId userId) {
         return user != null && user.getId() != null && user.getId().equals(userId);
+    }
+
+    /**
+     * Extracts and validates the author identifier from a post payload.
+     */
+    private ObjectId extractPostAuthorId(Post post) {
+        if (post == null || post.getUser() == null || post.getUser().getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "userId is required");
+        }
+        return post.getUser().getId();
+    }
+
+    /**
+     * Checks whether the user is the creator of the provided page.
+     */
+    private boolean isPageCreator(Page page, ObjectId userId) {
+        return page != null
+                && page.getUser() != null
+                && page.getUser().getId() != null
+                && page.getUser().getId().equals(userId);
+    }
+
+    /**
+     * Checks whether the user is the creator of the provided group.
+     */
+    private boolean isGroupCreator(Group group, ObjectId userId) {
+        return group != null
+                && group.getUser() != null
+                && group.getUser().getId() != null
+                && group.getUser().getId().equals(userId);
+    }
+
+    /**
+     * Checks whether the user is member of the provided group.
+     */
+    private boolean isGroupMember(User user, ObjectId groupId) {
+        return user != null
+                && user.getGroups() != null
+                && user.getGroups().contains(groupId);
+    }
+
+    /**
+     * Checks whether the requester is allowed to delete the post.
+     */
+    private boolean canManagePost(Post post, User requester) {
+        if (requester == null || requester.getId() == null || post == null || post.getUser() == null || post.getUser().getId() == null) {
+            return false;
+        }
+        return requester.getId().equals(post.getUser().getId()) || requester.getRole() == ROLES.ADMIN;
     }
 
     /**

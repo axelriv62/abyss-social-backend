@@ -2,6 +2,7 @@ package fr.univartois.butinfo.sae.abyss.social.service;
 
 import fr.univartois.butinfo.sae.abyss.social.model.Comment;
 import fr.univartois.butinfo.sae.abyss.social.model.Post;
+import fr.univartois.butinfo.sae.abyss.social.model.ROLES;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.repository.CommentRepository;
 import fr.univartois.butinfo.sae.abyss.social.repository.PostRepository;
@@ -104,16 +105,15 @@ public class CommentService {
      * Deletes a comment only if the requester is its author.
      *
      * @param commentId identifier of the comment to delete
-     * @param requesterId identifier of the authenticated user requesting deletion
+     * @param requester authenticated user requesting deletion
      */
-    public void deleteComment(ObjectId commentId, ObjectId requesterId) {
+    public void deleteComment(ObjectId commentId, User requester) {
         if (commentId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "commentId is required");
         }
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found for id=" + commentId.toHexString()));
-        if (comment.getUser() == null || comment.getUser().getId() == null
-                || !comment.getUser().getId().equals(requesterId)) {
+        if (!canManageComment(comment, requester)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author can delete this comment");
         }
         commentRepository.deleteById(commentId);
@@ -124,11 +124,11 @@ public class CommentService {
      * The creation timestamp is also refreshed to the current time.
      *
      * @param commentId identifier of the comment to update
-     * @param requesterId identifier of the authenticated user
+     * @param requester authenticated user
      * @param text new comment content
      * @return updated comment
      */
-    public Comment updateComment(ObjectId commentId, ObjectId requesterId, String text) {
+    public Comment updateComment(ObjectId commentId, User requester, String text) {
         if (commentId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "commentId is required");
         }
@@ -139,13 +139,22 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found for id=" + commentId.toHexString()));
 
-        if (comment.getUser() == null || comment.getUser().getId() == null
-                || !comment.getUser().getId().equals(requesterId)) {
+        if (!canManageComment(comment, requester)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author can update this comment");
         }
 
         comment.setText(text.trim());
         comment.setCreatedAt(LocalDateTime.now());
         return commentRepository.save(comment);
+    }
+
+    /**
+     * Checks whether the requester is allowed to update or delete the comment.
+     */
+    private boolean canManageComment(Comment comment, User requester) {
+        if (requester == null || requester.getId() == null || comment == null || comment.getUser() == null || comment.getUser().getId() == null) {
+            return false;
+        }
+        return requester.getId().equals(comment.getUser().getId()) || requester.getRole() == ROLES.ADMIN;
     }
 }
