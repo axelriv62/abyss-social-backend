@@ -114,6 +114,7 @@ public class PostController {
     @ApiResponse(responseCode = "201", description = "Post successfully created in group")
     @ApiResponse(responseCode = "400", description = "Invalid data")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
     @ApiResponse(responseCode = "404", description = "Group or user not found")
     @PostMapping("/groups/{groupId}")
     public ResponseEntity<PostDTO> createPostInGroup(@PathVariable ObjectId groupId,
@@ -140,6 +141,7 @@ public class PostController {
     @ApiResponse(responseCode = "201", description = "Post successfully created in page")
     @ApiResponse(responseCode = "400", description = "Invalid data")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
     @ApiResponse(responseCode = "404", description = "Page or user not found")
     @PostMapping("/pages/{pageId}")
     public ResponseEntity<PostDTO> createPostInPage(@PathVariable ObjectId pageId,
