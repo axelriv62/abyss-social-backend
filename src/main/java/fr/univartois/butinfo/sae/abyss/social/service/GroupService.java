@@ -13,12 +13,9 @@ import org.springframework.web.server.ResponseStatusException;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 
 /**
  * Service class for managing Group entities, providing business logic for group-related operations.
