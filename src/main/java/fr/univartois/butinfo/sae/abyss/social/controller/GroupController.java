@@ -1,6 +1,7 @@
 package fr.univartois.butinfo.sae.abyss.social.controller;
 
 import fr.univartois.butinfo.sae.abyss.social.dto.GroupDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
 import fr.univartois.butinfo.sae.abyss.social.mapper.GroupMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Group;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
@@ -8,6 +9,7 @@ import fr.univartois.butinfo.sae.abyss.social.service.GroupService;
 import fr.univartois.butinfo.sae.abyss.social.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
@@ -195,6 +197,19 @@ public class GroupController {
     public ResponseEntity<List<GroupDTO>> searchPagesByName(@RequestParam("query") String query) {
         List<Group> matches = groupService.searchByName(query);
         return ResponseEntity.ok(groupMapper.toDTOList(matches));
+    }
+
+
+    @GetMapping("/{id}/posts")
+    @Operation(summary = "Get all posts of a group")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Posts retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated"),
+            @ApiResponse(responseCode = "404", description = "Group not found")
+    })
+    public List<PostDTO> getPosts(@PathVariable("id") ObjectId groupId, @AuthenticationPrincipal User currentUser) {
+
+        return groupService.getGroupsPosts(groupId);
     }
 
 }

@@ -1,7 +1,10 @@
 package fr.univartois.butinfo.sae.abyss.social.service;
 
+import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
+import fr.univartois.butinfo.sae.abyss.social.mapper.PostMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.ROLES;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
+import fr.univartois.butinfo.sae.abyss.social.repository.PostRepository;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 import org.bson.types.Binary;
 import org.bson.types.ObjectId;
@@ -15,6 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Service class for managing User entities, providing business logic for user-related operations.
@@ -26,14 +31,17 @@ public class UserService implements UserDetailsService {
      * UserRepository instance for performing CRUD operations on User entities. This repository is injected via the constructor.
      */
     private final UserRepository userRepository;
-    private static final String USER_NOT_FOUND = "User not found";
+    private final PostRepository postRepository;
+    private final PostMapper postMapper;
 
     /**
      * Constructor for UserService, injecting the UserRepository dependency.
      * @param userRepository The UserRepository instance to be used by this service
      */
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PostRepository postRepository, PostMapper postMapper){
         this.userRepository = userRepository;
+        this.postRepository = postRepository;
+        this.postMapper = postMapper;
     }
 
     /**
@@ -327,5 +335,53 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    /**
+     * retrieves all user's pages ObjectID
+     * @param userId the user's id from which we want to retrieve the pages
+     *
+     * @return a list of Page ObjectID corresponding to the pages followed by the user with the given id
+     */
+    public List<ObjectId> getUserPages(ObjectId userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (user.getPages() == null) {
+            return new ArrayList<>();
+        }
+
+        return new ArrayList<>(user.getPages());
+    }
+
+    /**
+     * retrieves all user's groups ObjectID
+     * @param userId the user's id from which we want to retrieve the groups
+     *
+     * @return a list of Group ObjectID corresponding to the pages followed by the user with the given id
+     */
+    public List<ObjectId> getUserGroups(ObjectId userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (user.getGroups() == null) {
+            return new ArrayList<>();
+        }
+
+        return new ArrayList<>(user.getGroups());
+    }
+
+    /**
+     * Retrieves Posts associated with a user.
+     * @param userId The ID of the user whose posts are to be retrieved.
+     *
+     * @return A list of Post objects associated with the user.
+     */
+    public List<PostDTO> getUsersPosts(ObjectId userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        return postRepository.findByUser_Id(userId).stream()
+                .map(postMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 
 }
