@@ -15,7 +15,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.ArrayList;
 
 /**
  * Service class for managing User entities, providing business logic for user-related operations.
