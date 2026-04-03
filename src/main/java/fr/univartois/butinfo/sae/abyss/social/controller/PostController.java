@@ -5,7 +5,6 @@ import fr.univartois.butinfo.sae.abyss.social.mapper.PostMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.Post;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.PostService;
-import fr.univartois.butinfo.sae.abyss.social.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
@@ -27,7 +26,6 @@ import java.util.List;
 public class PostController {
     /** Service handling business logic for posts and users. */
     private final PostService postService;
-    private final UserService userService;
     /** Mapper converting between Post entities and DTOs. */
     private final PostMapper postMapper;
 
@@ -37,9 +35,8 @@ public class PostController {
      * @param postService service managing posts
      * @param postMapper mapper converting Post ↔ PostDTO
      */
-    public PostController(PostService postService, UserService userService, PostMapper postMapper) {
+    public PostController(PostService postService, PostMapper postMapper) {
         this.postService = postService;
-        this.userService = userService;
         this.postMapper = postMapper;
     }
 
