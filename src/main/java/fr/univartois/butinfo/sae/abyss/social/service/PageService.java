@@ -118,13 +118,13 @@ public class PageService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found"));
 
         if (page.getPosts() == null) {
-            return new ArrayList<>();
+            return List.of();
         }
 
         return Arrays.stream(page.getPosts())
                 .map(postId -> postRepository.findById(postId)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found for id=" + postId)))
                 .map(postMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

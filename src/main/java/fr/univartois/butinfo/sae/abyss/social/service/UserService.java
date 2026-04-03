@@ -382,7 +382,7 @@ public class UserService implements UserDetailsService {
 
         return postRepository.findByUser_Id(userId).stream()
                 .map(postMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 }

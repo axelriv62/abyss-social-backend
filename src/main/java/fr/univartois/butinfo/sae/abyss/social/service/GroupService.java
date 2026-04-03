@@ -134,13 +134,13 @@ public class GroupService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
 
         if (group.getPosts() == null) {
-            return new ArrayList<>();
+            return List.of();
         }
 
         return Arrays.stream(group.getPosts())
                 .map(postId -> postRepository.findById(postId)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found for id=" + postId)))
                 .map(postMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

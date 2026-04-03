@@ -269,7 +269,7 @@ public class UserController {
         }
         return userService.getUserPages(userId).stream()
                 .map(ObjectId::toHexString)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @GetMapping("/{id}/groups")
@@ -282,7 +282,7 @@ public class UserController {
         }
         return userService.getUserGroups(userId).stream()
                 .map(ObjectId::toHexString)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @GetMapping("/{id}/posts")
