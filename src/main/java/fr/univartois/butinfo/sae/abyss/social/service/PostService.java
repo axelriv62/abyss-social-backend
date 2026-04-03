@@ -1,7 +1,11 @@
 package fr.univartois.butinfo.sae.abyss.social.service;
 
+import fr.univartois.butinfo.sae.abyss.social.model.Group;
+import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.model.Post;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
+import fr.univartois.butinfo.sae.abyss.social.repository.GroupRepository;
+import fr.univartois.butinfo.sae.abyss.social.repository.PageRepository;
 import fr.univartois.butinfo.sae.abyss.social.repository.PostRepository;
 import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
 import org.bson.types.ObjectId;
@@ -12,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,6 +30,10 @@ public class PostService {
     private PostRepository postRepository;
     /** Repository used to validate and load users referenced by posts. */
     private UserRepository userRepository;
+    /** Repository used to validate and update target groups for post attachment. */
+    private GroupRepository groupRepository;
+    /** Repository used to validate and update target pages for post attachment. */
+    private PageRepository pageRepository;
 
     /**
      * Builds the service with required repositories.
@@ -32,9 +41,14 @@ public class PostService {
      * @param postRepository repository handling Post entities
      * @param userRepository repository handling User entities
      */
-    public PostService(PostRepository postRepository, UserRepository userRepository) {
+    public PostService(PostRepository postRepository,
+                       UserRepository userRepository,
+                       GroupRepository groupRepository,
+                       PageRepository pageRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.groupRepository = groupRepository;
+        this.pageRepository = pageRepository;
     }
 
     /**
@@ -55,7 +69,40 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "userId is required");
         }
         getUserOrThrow(userId);
+        if (post.getCreatedAt() == null) {
+            post.setCreatedAt(LocalDateTime.now());
+        }
         return postRepository.save(post);
+    }
+
+    /**
+     * Creates a post and attaches it to the provided group.
+     *
+     * @param post post to create
+     * @param groupId target group identifier
+     * @return persisted post
+     */
+    public Post saveInGroup(Post post, ObjectId groupId) {
+        Group group = getGroupOrThrow(groupId);
+        Post savedPost = save(post);
+        group.setPosts(appendPostId(group.getPosts(), savedPost.getId()));
+        groupRepository.save(group);
+        return savedPost;
+    }
+
+    /**
+     * Creates a post and attaches it to the provided page.
+     *
+     * @param post post to create
+     * @param pageId target page identifier
+     * @return persisted post
+     */
+    public Post saveInPage(Post post, ObjectId pageId) {
+        Page page = getPageOrThrow(pageId);
+        Post savedPost = save(post);
+        page.setPosts(appendPostId(page.getPosts(), savedPost.getId()));
+        pageRepository.save(page);
+        return savedPost;
     }
 
     /**
@@ -192,6 +239,28 @@ public class PostService {
     }
 
     /**
+     * Retrieves a group or throws 404 if not found.
+     */
+    private Group getGroupOrThrow(ObjectId groupId) {
+        if (groupId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "groupId is required");
+        }
+        return groupRepository.findById(groupId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found for id=" + groupId.toHexString()));
+    }
+
+    /**
+     * Retrieves a page or throws 404 if not found.
+     */
+    private Page getPageOrThrow(ObjectId pageId) {
+        if (pageId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "pageId is required");
+        }
+        return pageRepository.findById(pageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Page not found for id=" + pageId.toHexString()));
+    }
+
+    /**
      * Retrieves a user or throws 404 if not found.
      */
     private User getUserOrThrow(ObjectId userId) {
@@ -233,6 +302,20 @@ public class PostService {
      */
     private boolean isSameUser(User user, ObjectId userId) {
         return user != null && user.getId() != null && user.getId().equals(userId);
+    }
+
+    /**
+     * Appends an identifier to an ObjectId array if it is not already present.
+     */
+    private ObjectId[] appendPostId(ObjectId[] existingPostIds, ObjectId postId) {
+        ObjectId[] source = existingPostIds == null ? new ObjectId[0] : existingPostIds;
+        boolean alreadyPresent = Arrays.stream(source).anyMatch(postId::equals);
+        if (alreadyPresent) {
+            return source;
+        }
+        ObjectId[] updated = Arrays.copyOf(source, source.length + 1);
+        updated[source.length] = postId;
+        return updated;
     }
 }
 

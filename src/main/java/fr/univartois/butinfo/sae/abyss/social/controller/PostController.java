@@ -65,6 +65,58 @@ public class PostController {
     }
 
     /**
+     * Creates a post and attaches it to a group.
+     *
+     * @param groupId target group identifier
+     * @param postDTO payload describing the post to create
+     * @param currentUser authenticated user creating the post
+     * @return created post DTO
+     */
+    @Operation(summary = "Create a post in a group", description = "Create a new post and attach it to the specified group.")
+    @ApiResponse(responseCode = "201", description = "Post successfully created in group")
+    @ApiResponse(responseCode = "400", description = "Invalid data")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "404", description = "Group or user not found")
+    @PostMapping("/groups/{groupId}")
+    public ResponseEntity<PostDTO> createPostInGroup(@PathVariable ObjectId groupId,
+                                                     @Valid @RequestBody PostDTO postDTO,
+                                                     @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Post post = postMapper.toEntity(postDTO);
+        post.setUser(currentUser);
+        Post savedPost = postService.saveInGroup(post, groupId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(postMapper.toDTO(savedPost));
+    }
+
+    /**
+     * Creates a post and attaches it to a page.
+     *
+     * @param pageId target page identifier
+     * @param postDTO payload describing the post to create
+     * @param currentUser authenticated user creating the post
+     * @return created post DTO
+     */
+    @Operation(summary = "Create a post in a page", description = "Create a new post and attach it to the specified page.")
+    @ApiResponse(responseCode = "201", description = "Post successfully created in page")
+    @ApiResponse(responseCode = "400", description = "Invalid data")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "404", description = "Page or user not found")
+    @PostMapping("/pages/{pageId}")
+    public ResponseEntity<PostDTO> createPostInPage(@PathVariable ObjectId pageId,
+                                                    @Valid @RequestBody PostDTO postDTO,
+                                                    @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Post post = postMapper.toEntity(postDTO);
+        post.setUser(currentUser);
+        Post savedPost = postService.saveInPage(post, pageId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(postMapper.toDTO(savedPost));
+    }
+
+    /**
      * Deletes an existing post using its identifier.
      *
      * @param id identifier of the post to delete
