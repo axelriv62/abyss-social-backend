@@ -272,4 +272,38 @@ public class PostController {
         Post updated = postService.undislikePost(postId, userId);
         return ResponseEntity.ok(postMapper.toDTO(updated));
     }
+
+    /**
+     * Retrieves the paginated feed for the authenticated user.
+     * Returns posts from the user's friends, groups, pages, and their own posts.
+     * Posts are sorted by creation date (most recent first).
+     *
+     * @param currentUser The authenticated user, injected by Spring Security
+     * @param offset Starting position in the feed (default: 0)
+     * @param limit Number of posts to return (default: 50, max: 100)
+     * @return ResponseEntity containing list of PostDTOs representing the paginated feed
+     */
+    @GetMapping("/feed")
+    @Operation(summary = "Get user's paginated feed", description = "Retrieves posts from friends, groups, pages and own posts with pagination")
+    @ApiResponse(responseCode = "200", description = "Feed retrieved successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid pagination parameters")
+    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
+    @ApiResponse(responseCode = "404", description = "User not found")
+    public ResponseEntity<List<PostDTO>> getUserFeed(
+            @AuthenticationPrincipal User currentUser,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "50") int limit) {
+
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<Post> posts = postService.findAllForUser(currentUser, offset, limit);
+        List<PostDTO> postDTOs = posts.stream()
+                .map(postMapper::toDTO)
+                .toList();
+
+        return ResponseEntity.ok(postDTOs);
+    }
+
 }
