@@ -14,9 +14,10 @@ import org.bson.types.ObjectId;
  * @param role The role of the user, represented as an enum (ROLES), which can be used to determine the user's permissions and access levels within the application.
  */
 public record UserResponseDTO(
-        ObjectId id,
+        String id,
         String username,
         String email,
         Binary profilePicture,
         ROLES role
 ) {}
+

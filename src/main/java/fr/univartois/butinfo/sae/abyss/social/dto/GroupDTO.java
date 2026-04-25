@@ -16,9 +16,9 @@ import java.time.LocalDateTime;
  * @param createdAt
  */
 public record GroupDTO (
-        ObjectId id,
+        String id,
 
-        ObjectId userId,
+        String userId,
 
         @NotBlank(message = "Groups name cannot be blank")
         @Size(min = 3, max = 50, message = "Groups name must be between 3 and 50 characters")

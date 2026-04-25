@@ -15,55 +15,24 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface PageMapper {
 
-    /**
-     * Converts a page entity to its DTO representation.
-     *
-     * @param page the source page entity.
-     * @return the mapped page DTO.
-     */
-    @Mapping(source = "user", target = "userId")
+    @Mapping(target = "id", expression = "java(ObjectIdConverter.objectIdToString(page.getId()))")
+    @Mapping(target = "userId", expression = "java(page.getUser() == null ? null : ObjectIdConverter.objectIdToString(page.getUser().getId()))")
     PageDTO toDTO(Page page);
 
-    /**
-     * Converts a page DTO to its entity representation.
-     *
-     * @param pageDTO the source page DTO.
-     * @return the mapped page entity.
-     */
-    @Mapping(source = "userId", target = "user")
+    @Mapping(target = "id", expression = "java(ObjectIdConverter.stringToObjectId(pageDTO.id()))")
+    @Mapping(target = "user", expression = "java(mapUser(pageDTO.userId()))")
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     Page toEntity(PageDTO pageDTO);
 
-    /**
-     * Converts a list of page entities to a list of page DTOs.
-     *
-     * @param pages the source page entities.
-     * @return the mapped page DTOs.
-     */
     List<PageDTO> toDTOList(List<Page> pages);
 
-    /**
-     * Maps a user to its identifier.
-     *
-     * @param user the source user.
-     * @return the user identifier, or {@code null} if the user is {@code null}.
-     */
-    default ObjectId map(User user) {
-        return user != null ? user.getId() : null;
-    }
-
-    /**
-     * Maps a user identifier to a user instance.
-     *
-     * @param userId the source user identifier.
-     * @return a user with the given identifier, or {@code null} if the identifier is {@code null}.
-     */
-    default User map(ObjectId userId) {
-        if (userId == null) {
+    default User mapUser(String userId) {
+        ObjectId objectId = ObjectIdConverter.stringToObjectId(userId);
+        if (objectId == null) {
             return null;
         }
         User user = new User();
-        user.setId(userId);
+        user.setId(objectId);
         return user;
     }
 }

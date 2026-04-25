@@ -5,6 +5,8 @@ import fr.univartois.butinfo.sae.abyss.social.dto.AuthLoginRequestDTO;
 import fr.univartois.butinfo.sae.abyss.social.dto.AuthResponseDTO;
 import fr.univartois.butinfo.sae.abyss.social.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +43,8 @@ public class AuthController {
      */
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
+    @ApiResponse(responseCode = "201", description = "User has been successfully authenticated and a JWT token is returned")
+    @ApiResponse(responseCode = "400", description = "Input data is invalid, that could mean that that some data are already used (for email and username) or that don't meet the requirements")
     public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody AuthRegisterRequestDTO registerDTO) {
         AuthResponseDTO response = authService.register(registerDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -56,6 +60,8 @@ public class AuthController {
      */
     @PostMapping("/login")
     @Operation(summary = "Authenticate user and return JWT token")
+    @ApiResponse(responseCode = "200", description = "User has been successfully authenticated and a JWT token is returned")
+    @ApiResponse(responseCode = "401", description = "Authentication failed, that could mean that the email or the password is incorrect")
     public ResponseEntity<AuthResponseDTO> authenticate(@Valid @RequestBody AuthLoginRequestDTO loginDTO) {
         if (authService.isBanned(loginDTO)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new AuthResponseDTO(null, null, null, "Access denied: your account has been banned."));

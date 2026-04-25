@@ -7,8 +7,8 @@ import org.bson.types.ObjectId;
 import java.time.LocalDateTime;
 
 public record CommentDTO(
-        ObjectId id,
-        ObjectId userId,
+        String id,
+        String userId,
         @NotBlank(message = "text cannot be blank")
         String text,
         @PastOrPresent(message = "Creation date cannot be in the future")

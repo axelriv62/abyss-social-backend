@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  */
 public record UserRecommendedDTO(
         // The unique identifier for the recommended user
-        ObjectId id,
+        String id,
 
         // The recommendation score
         @PositiveOrZero(message = "Score must be zero or positive")

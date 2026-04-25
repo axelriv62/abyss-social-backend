@@ -9,9 +9,9 @@ import org.bson.types.ObjectId;
 import java.time.LocalDateTime;
 
 public record PageDTO (
-        ObjectId id,
+        String id,
 
-        ObjectId userId,
+        String userId,
 
         @NotBlank(message = "Page name cannot be blank")
         @Size(min = 3, max = 50, message = "Page name must be between 3 and 50 characters")

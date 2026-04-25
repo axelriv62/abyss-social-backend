@@ -5,8 +5,14 @@ info:
 
 http:
   method: POST
-  url: "{{URL}}/posts/69cbb7e321b10aa759bd6fda/likes"
-  auth: inherit
+  url: "{{URL}}/posts/69cfe9cf591405a8d9be409d/likes?userId=69cfe9b0591405a8d9be409b"
+  params:
+    - name: userId
+      value: 69cfe9b0591405a8d9be409b
+      type: query
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
 
 settings:
   encodeUrl: true

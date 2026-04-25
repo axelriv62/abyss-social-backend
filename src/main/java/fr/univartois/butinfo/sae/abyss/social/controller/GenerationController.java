@@ -46,9 +46,9 @@ public class GenerationController {
      */
     @PostMapping("/profile-picture")
     @Operation(summary = "Generate a profile picture based on a user-provided prompt")
-    @ApiResponse(responseCode = "200", description = "Profile picture generated successfully")
-    @ApiResponse(responseCode = "400", description = "Invalid prompt or error during generation")
-    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "200", description = "Profile picture generated successfully and set as the user's profile picture")
+    @ApiResponse(responseCode = "400", description = "Invalid prompt or error during generation, that could mean that the prompt is empty or that the generation service encountered an issue while generating the image")
+    @ApiResponse(responseCode = "401", description = "Unauthorized, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
     public ResponseEntity<MessageResponseDTO> generateProfilePicture(@RequestBody GenerationRequestDTO request, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDTO("Unauthorized"));
@@ -73,9 +73,9 @@ public class GenerationController {
      */
     @PostMapping("/post-image/{id}")
     @Operation(summary = "Generate a post image based on a user-provided prompt")
-    @ApiResponse(responseCode = "200", description = "Post image generated successfully")
-    @ApiResponse(responseCode = "400", description = "Invalid prompt, user is not the author of the post, or error during generation")
-    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "200", description = "Post image generated successfully and set as the post's image")
+    @ApiResponse(responseCode = "400", description = "Invalid prompt, user is not the author of the post, or error during generation, that could mean that the prompt is empty, that the user is trying to generate an image for a post they don't own, or that the generation service encountered an issue while generating the image")
+    @ApiResponse(responseCode = "401", description = "Unauthorized, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
     public ResponseEntity<MessageResponseDTO> generatePostImage(@RequestBody GenerationRequestDTO request,
                                            @AuthenticationPrincipal User currentUser,
                                            @PathVariable ObjectId id) {

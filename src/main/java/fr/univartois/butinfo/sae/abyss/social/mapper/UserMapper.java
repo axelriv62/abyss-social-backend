@@ -21,6 +21,7 @@ public interface UserMapper {
      * @param user The User entity to be converted to a UserDTO
      * @return A UserDTO object containing the data from the User entity, suitable for transfer between layers of the application
      */
+    @Mapping(target = "id", expression = "java(ObjectIdConverter.objectIdToString(user.getId()))")
     @Mapping(target = "password", ignore = true)
     UserDTO toDTO(User user);
 
@@ -54,6 +55,7 @@ public interface UserMapper {
      * @param user The User entity to be converted to a UserResponseDTO. This method maps the fields of the User entity to the corresponding fields in the UserResponseDTO, while ignoring sensitive information such as the password, resulting in a UserResponseDTO that can be used for data transfer between layers of the application without exposing sensitive information.
      * @return A UserResponseDTO object containing the data from the User entity, suitable for transfer between layers of the application while excluding sensitive information such as the password
      */
+    @Mapping(target = "id", expression = "java(ObjectIdConverter.objectIdToString(user.getId()))")
     @Mapping(target = "username", expression = "java(user.getUsernameField())")
     UserResponseDTO toResponseDTO(User user);
 
