@@ -3,13 +3,16 @@ package fr.univartois.butinfo.sae.abyss.social.controller;
 import fr.univartois.butinfo.sae.abyss.social.dto.AuthRegisterRequestDTO;
 import fr.univartois.butinfo.sae.abyss.social.dto.AuthLoginRequestDTO;
 import fr.univartois.butinfo.sae.abyss.social.dto.AuthResponseDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.UserResponseDTO;
+import fr.univartois.butinfo.sae.abyss.social.mapper.UserMapper;
+import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -26,11 +29,18 @@ public class AuthController {
     private final AuthService authService;
 
     /**
+     * UserMapper instance for mapping User entities to UserResponseDTOs. This mapper is injected via the constructor and is used to convert User objects to their corresponding DTO representations when returning user information in responses.
+     */
+    private final UserMapper userMapper;
+
+    /**
      * Constructor for AuthController, injecting the AuthService dependency.
      * @param authService The AuthService instance to be used by this controller.
+     * @param userMapper The UserMapper instance to be used for mapping User entities to UserResponseDTOs.
      */
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UserMapper userMapper) {
         this.authService = authService;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -68,5 +78,23 @@ public class AuthController {
         }
         AuthResponseDTO response = authService.authenticate(loginDTO);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Endpoint for retrieving the profile information of the currently authenticated user.
+     * This method uses the @AuthenticationPrincipal annotation to inject the currently authenticated User object, and returns a UserResponseDTO containing the user's profile information.
+     *
+     * @param currentUser The currently authenticated user, injected by Spring Security using the @AuthenticationPrincipal annotation. This user object is used to retrieve the profile information of the authenticated user and return it in the response.
+     * @return ResponseEntity containing the UserResponseDTO with the profile information of the authenticated user, with an HTTP status of 200 if the user is authenticated, or 401 if the user is not authenticated or if the authentication token is missing or invalid.
+     */
+    @GetMapping("/me")
+    @Operation(summary = "Get current user profile", description = "Get the profile information of the authenticated user")
+    @ApiResponse(responseCode = "200", description = "Profile retrieved successfully, the profile information of the authenticated user is returned in the response")
+    @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
+    public ResponseEntity<UserResponseDTO> getMe(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(userMapper.toResponseDTO(currentUser));
     }
 }
