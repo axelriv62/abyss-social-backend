@@ -1,11 +1,11 @@
 info:
-  name: Delete post by id
+  name: Get user's joined groups by id
   type: http
-  seq: 8
+  seq: 13
 
 http:
-  method: DELETE
-  url: "{{URL}}/posts/69cb910130ff12f3b65b255a"
+  method: GET
+  url: "{{URL}}/users/69cf7442f0083fdc1d1fc147/groups"
   auth: inherit
 
 settings:

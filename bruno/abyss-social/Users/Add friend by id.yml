@@ -1,0 +1,21 @@
+info:
+  name: Add friend by id
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: "{{URL}}/users/friends/add?friendId=69cf77fd7b2adc8e1b890c43"
+  params:
+    - name: friendId
+      value: 69cf77fd7b2adc8e1b890c43
+      type: query
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

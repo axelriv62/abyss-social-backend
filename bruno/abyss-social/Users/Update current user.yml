@@ -1,0 +1,23 @@
+info:
+  name: Update current user
+  type: http
+  seq: 3
+
+http:
+  method: PATCH
+  url: "{{URL}}/users"
+  body:
+    type: json
+    data: |
+      {
+        "username": "robertduchmol"
+      }
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

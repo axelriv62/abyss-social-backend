@@ -1,0 +1,17 @@
+info:
+  name: Follow page by id
+  type: http
+  seq: 4
+
+http:
+  method: PATCH
+  url: "{{URL}}/pages/69ecb24b2c6d59f01e3e99fc/follow"
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

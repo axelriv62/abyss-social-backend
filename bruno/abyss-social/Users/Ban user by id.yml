@@ -1,0 +1,17 @@
+info:
+  name: Ban user by id
+  type: http
+  seq: 7
+
+http:
+  method: PATCH
+  url: "{{URL}}/usersn/69ce31533b496651aa6c77/ban"
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

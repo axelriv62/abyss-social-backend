@@ -159,7 +159,7 @@ public class PostController {
     /**
      * Deletes an existing post using its identifier.
      *
-     * @param id identifier of the post to delete
+     * @param postId identifier of the post to delete
      * @return empty response when deletion succeeds
      */
     @Operation(summary = "Delete a post", description = "Delete a post with the specified ID")
@@ -167,12 +167,12 @@ public class PostController {
     @ApiResponse(responseCode = "400", description = "Post don't exist")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "403", description = "Forbidden")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMovieById(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deleteById(@PathVariable ObjectId postId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        postService.deleteById(id, currentUser);
+        postService.deleteById(postId, currentUser);
         return ResponseEntity.noContent().build();
     }
 

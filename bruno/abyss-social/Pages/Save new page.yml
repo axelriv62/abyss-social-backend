@@ -1,19 +1,18 @@
 info:
-  name: Save post with id
+  name: Save new page
   type: http
   seq: 1
 
 http:
   method: POST
-  url: "{{URL}}/posts"
+  url: "{{URL}}/pages"
   body:
     type: json
-    data: |-
+    data: |
       {
-        "content": "Première plongée de l'année effectuée à Roeux",
-        "comments": [],
-        "likes": [],
-        "dislikes": []
+        "name": "Test2",
+        "tags": ["tag1", "tag2"],
+        "posts": []
       }
   auth:
     type: bearer

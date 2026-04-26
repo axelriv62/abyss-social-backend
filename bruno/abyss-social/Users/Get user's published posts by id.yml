@@ -1,11 +1,11 @@
 info:
-  name: Delete post by id
+  name: Get user's published posts by id
   type: http
-  seq: 8
+  seq: 14
 
 http:
-  method: DELETE
-  url: "{{URL}}/posts/69cb910130ff12f3b65b255a"
+  method: GET
+  url: "{{URL}}/users/69cf7442f0083fdc1d1fc147/posts"
   auth: inherit
 
 settings:

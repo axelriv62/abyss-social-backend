@@ -1,19 +1,17 @@
 info:
-  name: Save post in group
+  name: Save comment by post id
   type: http
-  seq: 3
+  seq: 1
 
 http:
   method: POST
-  url: "{{URL}}/posts/groups/69cf68e40df9ea4aa8fc9d99"
+  url: "{{URL}}/posts/69cd2942b8c51ba737e7a9a2/comments"
   body:
     type: json
     data: |-
       {
-        "content": "Premier post dans un groupe",
-        "comments": [],
-        "likes": [],
-        "dislikes": []
+        "text" : "Test 3",
+        "postId": "69cd2942b8c51ba737e7a9a2"
       }
   auth:
     type: bearer

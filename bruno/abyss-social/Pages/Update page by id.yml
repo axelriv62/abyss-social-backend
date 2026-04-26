@@ -1,19 +1,18 @@
 info:
-  name: Save post in group
+  name: Update page by id
   type: http
   seq: 3
 
 http:
-  method: POST
-  url: "{{URL}}/posts/groups/69cf68e40df9ea4aa8fc9d99"
+  method: PUT
+  url: "{{URL}}/pages/69ccde3322041a8709bb509"
   body:
     type: json
     data: |-
       {
-        "content": "Premier post dans un groupe",
-        "comments": [],
-        "likes": [],
-        "dislikes": []
+        "name": "My Page 3",
+        "tags": ["tag2", "tag3"],
+        "posts": []
       }
   auth:
     type: bearer

@@ -1,12 +1,14 @@
 info:
-  name: Delete post by id
+  name: Delete current user
   type: http
-  seq: 8
+  seq: 2
 
 http:
   method: DELETE
-  url: "{{URL}}/posts/69cb910130ff12f3b65b255a"
-  auth: inherit
+  url: "{{URL}}/users"
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
 
 settings:
   encodeUrl: true

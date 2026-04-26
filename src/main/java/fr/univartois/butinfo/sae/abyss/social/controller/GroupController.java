@@ -24,10 +24,6 @@ import java.util.List;
   *REST controller for Group resources.
   *Uses GroupService for business logic and GroupMapper to convert between DTO and entity.
   *The service is responsible for setting server-side fields (e.g. createdAt) before persistence.
- * Here are all the routes :
- * Create Group : /groups (POST)
- * Update Group : /groups/{id} (PUT)
- * Delete Group : /groups/{id} (DELETE)
 */
 @RestController
 @RequestMapping("/groups")
@@ -73,114 +69,114 @@ public class GroupController {
 
     /**
      * Handles the update of an existing Group by its ID.
-     * @param id The ObjectId of the Group to be updated.
+     * @param groupId The ObjectId of the Group to be updated.
      * @param groupDTO The GroupDTO containing the updated data for the Group.
      * @return A ResponseEntity containing the updated GroupDTO if the update was successful, or a 404 (Not Found) status if the Group does not exist.
      */
-    @Operation(summary = "Update a group", description = "Update the group with the specified ID. If the group does not exist, a 404 Not Found response is returned.")
+    @Operation(summary = "Edit a group", description = "Edit the group with the specified ID. If the group does not exist, a 404 Not Found response is returned.")
     @ApiResponse(responseCode = "200", description = "Group successfully updated")
     @ApiResponse(responseCode = "404", description = "Group not found")
-    @PutMapping("/{id}")
-    public ResponseEntity<GroupDTO> updatePage(@PathVariable ObjectId id, @Valid @RequestBody GroupDTO groupDTO, @AuthenticationPrincipal User currentUser) {
+    @PutMapping("/{groupId}")
+    public ResponseEntity<GroupDTO> updatePage(@PathVariable ObjectId groupId, @Valid @RequestBody GroupDTO groupDTO, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Group group = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, GROUP_NOT_FOUND));
+        Group group = groupService.findById(groupId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, GROUP_NOT_FOUND));
 
         if (!group.getUser().getId().equals(currentUser.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        Group updatedGroup = groupService.updateGroup(id, groupMapper.toEntity(groupDTO));
+        Group updatedGroup = groupService.updateGroup(groupId, groupMapper.toEntity(groupDTO));
         return ResponseEntity.ok(groupMapper.toDTO(updatedGroup));
     }
 
     /**
      * Handles the deletion of a Group by its ID.
-     * @param id The ObjectId of the Group to be deleted.
+     * @param groupId The ObjectId of the Group to be deleted.
      * @return A ResponseEntity with HTTP status 204 (No Content) if the deletion was successful, or 404 (Not Found) if the Group does not exist.
      */
     @Operation(summary = "Delete a Group", description = "Deletes the Group with the specified ID. If the Group does not exist, a 404 Not Found response is returned.")
     @ApiResponse(responseCode = "204", description = "Group successfully deleted")
     @ApiResponse(responseCode = "404", description = "Group not found")
     @ApiResponse(responseCode = "403", description = "You are not the creator of this group")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteGroup(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<Void> deleteGroup(@PathVariable ObjectId groupId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Group group = groupService.findById(id)
+        Group group = groupService.findById(groupId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, GROUP_NOT_FOUND));
 
         if (!group.getUser().getId().equals(currentUser.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        groupService.deleteById(id);
+        groupService.deleteById(groupId);
         return ResponseEntity.noContent().build();
     }
 
 
     /**
      * Handles the following of a group by the authenticated user. This method allows the user to follow a group by its ID. If the user is not authenticated, a 401 Unauthorized response is returned. If the group does not exist, a 404 Not Found response is returned. If the operation is successful, a 200 OK response is returned.
-     * @param id The ObjectId of the group to be followed.
+     * @param groupId The ObjectId of the group to be followed.
      * @param currentUser The currently authenticated user, injected by Spring Security. If the user is not authenticated, this parameter will be null.
      * @return A ResponseEntity with HTTP status 200 (OK) if the user successfully followed the group, 404 (Not Found) if the group does not exist, or 401 (Unauthorized) if the user is not authenticated.
      */
-    @PatchMapping("/{id}/follow")
+    @PatchMapping("/{groupId}/follow")
     @Operation(summary = "Unfollow a group", description = "Allows the authenticated user to follow a group by its ID.")
     @ApiResponse(responseCode = "204", description = "User successfully followed the group")
     @ApiResponse(responseCode = "404", description = "Group not found")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
-    public ResponseEntity<Void> followGroup(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<Void> followGroup(@PathVariable ObjectId groupId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Group page = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, GROUP_NOT_FOUND));
+        Group page = groupService.findById(groupId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, GROUP_NOT_FOUND));
         userService.addGroupToUser(currentUser.getId(), page.getId());
         return ResponseEntity.noContent().build();
     }
 
     /**
      * Handles the unfollowing of a group by the authenticated user. This method allows the user to unfollow a group by its ID. If the user is not authenticated, a 401 Unauthorized response is returned. If the group does not exist, a 404 Not Found response is returned. If the operation is successful, a 200 OK response is returned.
-     * @param id The ObjectId of the group to be unfollowed.
+     * @param groupId The ObjectId of the group to be unfollowed.
      * @param currentUser The currently authenticated user, injected by Spring Security. If the user is not authenticated, this parameter will be null.
      * @return A ResponseEntity with HTTP status 200 (OK) if the user successfully unfollowed the group, 404 (Not Found) if the group does not exist, or 401 (Unauthorized) if the user is not authenticated.
      */
-    @PatchMapping("/{id}/unfollow")
+    @PatchMapping("/{groupId}/unfollow")
     @Operation(summary = "Unfollow a group", description = "Allows the authenticated user to unfollow a group by its ID.")
     @ApiResponse(responseCode = "204", description = "User successfully unfollowed the group")
     @ApiResponse(responseCode = "404", description = "Group not found")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
-    public ResponseEntity<Void> unfollowGroup(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<Void> unfollowGroup(@PathVariable ObjectId groupId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Group page = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, GROUP_NOT_FOUND));
+        Group page = groupService.findById(groupId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, GROUP_NOT_FOUND));
         userService.removeGroupFromUser(currentUser.getId(), page.getId());
         return ResponseEntity.noContent().build();
     }
 
     /**
      * Handles the search of a group with a given ID, in the URL.
-     * @param id The ObjectId of the group to be searched.
+     * @param groupId The ObjectId of the group to be searched.
      * @return A ResponseEntity containing the GroupDTO if the group is found, a 404 (Not Found) status if the group does not exist or a 401 if user is not logged in.
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{groupId}")
     @Operation(summary = "Get a group by ID", description = "Retrieves a group by its ID. If the group does not exist, a 404 Not Found response is returned.")
     @ApiResponse(responseCode = "200", description = "Group successfully retrieved")
     @ApiResponse(responseCode = "404", description = "Group not found")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
-    public ResponseEntity<GroupDTO> getGroupById(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<GroupDTO> getGroupById(@PathVariable ObjectId groupId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Group group = groupService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, GROUP_NOT_FOUND));
+        Group group = groupService.findById(groupId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, GROUP_NOT_FOUND));
         return ResponseEntity.ok(groupMapper.toDTO(group));
     }
 
@@ -198,14 +194,12 @@ public class GroupController {
         return ResponseEntity.ok(groupMapper.toDTOList(matches));
     }
 
-
-    @GetMapping("/{id}/posts")
+    @GetMapping("/{groupId}/posts")
     @Operation(summary = "Get all posts of a group")
     @ApiResponse(responseCode = "200", description = "Posts retrieved successfully")
     @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
     @ApiResponse(responseCode = "404", description = "Group not found")
-    public List<PostDTO> getPosts(@PathVariable("id") ObjectId groupId, @AuthenticationPrincipal User currentUser) {
-
+    public List<PostDTO> getPosts(@PathVariable ObjectId groupId, @AuthenticationPrincipal User currentUser) {
         return groupService.getGroupsPosts(groupId);
     }
 

@@ -1,11 +1,11 @@
 info:
-  name: Delete post by id
+  name: Update comment by id
   type: http
-  seq: 8
+  seq: 3
 
 http:
-  method: DELETE
-  url: "{{URL}}/posts/69cb910130ff12f3b65b255a"
+  method: PATCH
+  url: /posts/comments/69ce1ad6830cb5971eaabfcf
   auth: inherit
 
 settings:

@@ -67,23 +67,23 @@ public class GenerationController {
      * It requires the user to be authenticated and ensures that the user is the author
      * @param request The GenerationRequestDTO containing the prompt for image generation. This DTO is expected to have a "prompt" field that provides the textual input for generating the post image.
      * @param currentUser The currently authenticated user, injected by Spring Security using the @AuthenticationPrincipal annotation. This user is used to ensure that the post image is generated for the correct user and to update the post with the generated image if the user is the author of the post.
-     * @param id The ObjectId of the post for which the image is to be generated. This path variable is used to identify the specific post that the user wants to generate an image for, and it is passed to the GenerationService to ensure that the correct post is updated with the generated image.
+     * @param postId The ObjectId of the post for which the image is to be generated. This path variable is used to identify the specific post that the user wants to generate an image for, and it is passed to the GenerationService to ensure that the correct post is updated with the generated image.
      * @return A ResponseEntity containing a MessageResponseDTO with the result of the operation. If the user is not authenticated, it returns a 401 Unauthorized response. If the generation is successful, it returns a 200 OK response with a success message.
      *         If there is an error during generation (e.g., invalid prompt or user is not the author of the post), it returns a 400 Bad Request response with the error message.
      */
-    @PostMapping("/post-image/{id}")
+    @PostMapping("/post-image/{postId}")
     @Operation(summary = "Generate a post image based on a user-provided prompt")
     @ApiResponse(responseCode = "200", description = "Post image generated successfully and set as the post's image")
     @ApiResponse(responseCode = "400", description = "Invalid prompt, user is not the author of the post, or error during generation, that could mean that the prompt is empty, that the user is trying to generate an image for a post they don't own, or that the generation service encountered an issue while generating the image")
     @ApiResponse(responseCode = "401", description = "Unauthorized, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
     public ResponseEntity<MessageResponseDTO> generatePostImage(@RequestBody GenerationRequestDTO request,
                                            @AuthenticationPrincipal User currentUser,
-                                           @PathVariable ObjectId id) {
+                                           @PathVariable ObjectId postId) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDTO("Unauthorized"));
         }
         try {
-            generationService.generatePostImage(currentUser, id, request.prompt());
+            generationService.generatePostImage(currentUser, postId, request.prompt());
             return ResponseEntity.ok(new MessageResponseDTO("Post image generated successfully"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponseDTO(e.getMessage()));
