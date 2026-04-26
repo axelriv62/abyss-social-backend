@@ -1,6 +1,4 @@
 info:
   name: Auth
   type: folder
-  seq: 3
-
-request: {}
+  seq: 1

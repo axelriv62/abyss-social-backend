@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record GroupRecommendedDTO(
-        ObjectId id,
+        String id,
 
         @PositiveOrZero(message = "Score must be zero or positive")
         Double score,

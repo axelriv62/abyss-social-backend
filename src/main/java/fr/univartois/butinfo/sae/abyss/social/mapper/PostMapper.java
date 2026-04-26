@@ -22,7 +22,8 @@ public interface PostMapper {
      * @param post the Post entity to convert
      * @return the corresponding PostDTO
      */
-    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "id", expression = "java(ObjectIdConverter.objectIdToString(post.getId()))")
+    @Mapping(target = "userId", expression = "java(ObjectIdConverter.objectIdToString(post.getUser().getId()))")
     @Mapping(target = "likes", ignore = true)
     @Mapping(target = "dislikes", ignore = true)
     PostDTO toDTOPartial(Post post);
@@ -64,9 +65,10 @@ public interface PostMapper {
     /**
      * Converts a PostDTO to a Post entity.
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "likes", ignore = true)
     @Mapping(target = "dislikes", ignore = true)
-    @Mapping(source = "userId", target = "user")
+    @Mapping(target = "user", ignore = true)
     Post toEntityPartial(@Valid PostDTO postDTO);
 
     /**

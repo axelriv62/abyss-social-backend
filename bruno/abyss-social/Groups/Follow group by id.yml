@@ -1,0 +1,17 @@
+info:
+  name: Follow group by id
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: "{{URL}}/groups/69cd061beec0f294d2a8ae81/follow"
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

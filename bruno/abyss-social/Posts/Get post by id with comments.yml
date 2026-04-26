@@ -1,0 +1,17 @@
+info:
+  name: Get post by id with comments
+  type: http
+  seq: 10
+
+http:
+  method: GET
+  url: "{{URL}}/posts/69cf68d00df9ea4aa8fc9d97"
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

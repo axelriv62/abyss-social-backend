@@ -53,8 +53,8 @@ public class UserController {
      */
     @PostMapping
     @Operation(summary = "Create a new user", description = "Create a new user with the provided data")
-    @ApiResponse(responseCode = "200", description = "User successfully created")
-    @ApiResponse(responseCode = "400", description = "Invalid data")
+    @ApiResponse(responseCode = "200", description = "User successfully created and returned in the response")
+    @ApiResponse(responseCode = "400", description = "Invalid data, that could mean that some data are already used (for email and username) or that don't meet the requirements")
     public ResponseEntity<UserResponseDTO> create(@Valid @RequestBody UserDTO userDTO) {
         User user = userMapper.toEntity(userDTO);
         User savedUser = userService.save(user);
@@ -62,15 +62,15 @@ public class UserController {
     }
 
     /**
-     * Endpoint for deleting a user by their unique identifier.
+     * Endpoint for deleting the current user.
      * This method retrieves the currently authenticated user from the security context, checks if the user is authenticated, and if so, deletes the user using the UserService.
      * It returns a 204 No Content response if the deletion is successful, or a 401 Unauthorized response if the user is not authenticated.
      */
     @DeleteMapping
-    @Operation(summary = "Delete user account", description = "Delete user account")
-    @ApiResponse(responseCode = "204", description = "Profile successfully deleted")
-    @ApiResponse(responseCode = "404", description = "User not found")
-    public ResponseEntity<Void> deleteById(@AuthenticationPrincipal User currentUser) {
+    @Operation(summary = "Delete user account", description = "Delete user account of the authenticated user")
+    @ApiResponse(responseCode = "204", description = "Profile successfully deleted, the account has been successfully deleted from the database and that the user will no longer be able to access their account or any associated data")
+    @ApiResponse(responseCode = "404", description = "User not found, that could mean that the user does not exist in the database or that the user is already deleted")
+    public ResponseEntity<Void> delete(@AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -88,9 +88,9 @@ public class UserController {
      */
     @PatchMapping
     @Operation(summary = "Update current user profile", description = "Update username and profile picture of the authenticated user")
-    @ApiResponse(responseCode = "204", description = "Profile successfully updated")
-    @ApiResponse(responseCode = "400", description = "Username already in use or invalid data")
-    @ApiResponse(responseCode = "401", description = "User not authenticated")
+    @ApiResponse(responseCode = "204", description = "Profile successfully updated, the user's profile information has been successfully updated in the database and will be reflected in subsequent requests")
+    @ApiResponse(responseCode = "400", description = "Username already in use or invalid data, that could mean that the new username is already taken by another user or that the provided data does not meet the validation requirements")
+    @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
     public ResponseEntity<MessageResponseDTO> updateProfile(@AuthenticationPrincipal User currentUser, @Valid @RequestBody UserUpdateRequestDTO updateDTO) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -106,10 +106,10 @@ public class UserController {
      * @param username The username fragment to search for. This string is trimmed and validated to ensure it is not blank before performing the search.
      * @return A ResponseEntity containing a list of UserDTO objects whose usernames contain the specified fragment, ignoring case. If the input string is blank after trimming, a ResponseEntity with a 400 Bad Request status is returned. If the user is not authenticated, a ResponseEntity with a 401 Unauthorized status is returned.
      */
-    @Operation(summary = "Search posts by username", description = "Lists posts created on the provided username.")
-    @ApiResponse(responseCode = "200", description = "Search completed")
-    @ApiResponse(responseCode = "400", description = "Username fragment invalid")
-    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @Operation(summary = "Search posts by username", description = "Lists posts created on the provided username fragment, that could be a full username or just a part of it. The search is case-insensitive and will return all users whose usernames contain the provided fragment")
+    @ApiResponse(responseCode = "200", description = "Search completed successfully, a list of users whose usernames contain the provided fragment is returned in the response")
+    @ApiResponse(responseCode = "400", description = "Username fragment invalid, that could mean that the provided username fragment is blank or does not meet the validation requirements")
+    @ApiResponse(responseCode = "401", description = "Unauthorized, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
     @GetMapping("/search")
     public ResponseEntity<List<UserResponseDTO>> searchUserByUsername(@RequestParam("username") String username, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
@@ -127,8 +127,8 @@ public class UserController {
     @PatchMapping("/friends/add")
     @Operation(summary = "Add friend to friend list", description = "Add a friend to the authenticated user's friend list")
     @ApiResponse(responseCode = "200", description = "Friend successfully added to friend list")
-    @ApiResponse(responseCode = "400", description = "Friend ID is required or friend already in friend list")
-    @ApiResponse(responseCode = "401", description = "User not authenticated")
+    @ApiResponse(responseCode = "400", description = "Friend ID is required or friend already in friend list, that could mean that the friend ID is missing from the request or that the specified friend is already in the authenticated user's friend list")
+    @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
 
     public ResponseEntity<MessageResponseDTO> addFriend(@AuthenticationPrincipal User currentUser, @RequestParam("friendId") ObjectId friendId) {
         userService.addFriend(currentUser.getId(), friendId);
@@ -142,8 +142,8 @@ public class UserController {
     @PatchMapping("/friends/remove")
     @Operation(summary = "Remove friend from friend list", description = "Remove a friend from the authenticated user's friend list")
     @ApiResponse(responseCode = "200", description = "Friend successfully removed from friend list")
-    @ApiResponse(responseCode = "400", description = "Friend ID is required or friend not in friend list")
-    @ApiResponse(responseCode = "403", description = "User not authenticated")
+    @ApiResponse(responseCode = "400", description = "Friend ID is required or friend not in friend list, that could mean that the friend ID is missing from the request or that the specified friend is not in the authenticated user's friend list")
+    @ApiResponse(responseCode = "403", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
     public ResponseEntity<MessageResponseDTO> removeFriend(@AuthenticationPrincipal User currentUser, @RequestParam("friendId") ObjectId friendId) {
         if (currentUser == null) {
             return ResponseEntity.badRequest().body(new MessageResponseDTO("You're not authenticated"));
@@ -163,10 +163,10 @@ public class UserController {
      * @param currentUser The currently authenticated user, whose role will be checked to ensure they have admin privileges before allowing the ban operation to proceed
      * @return ResponseEntity with a message indicating the result of the ban operation, with a 200 OK status if the user is successfully banned, or a 403 Forbidden status if the current user does not have admin privileges
      */
-    @PatchMapping("/ban/{userId}")
+    @PatchMapping("/{userId}/ban")
     @Operation(summary = "Ban a user", description = "Ban a user by their ID (admin only)")
     @ApiResponse(responseCode = "200", description = "User successfully banned")
-    @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can ban users")
+    @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can ban users, that could mean that the user is not authenticated or that the user does not have admin privileges")
     public ResponseEntity<MessageResponseDTO> banUser(@PathVariable ObjectId userId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -183,10 +183,10 @@ public class UserController {
      * @param currentUser The currently authenticated user, whose role will be checked to ensure they have admin privileges before allowing the unban operation to proceed
      * @return ResponseEntity with a message indicating the result of the unban operation, with a 200 OK status if the user is successfully unbanned, or a 403 Forbidden status if the current user does not have admin privileges
      */
-    @PatchMapping("/unban/{userId}")
+    @PatchMapping("/{userId}/unban")
     @Operation(summary = "Unban a user", description = "Unban a user by their ID (admin only)")
     @ApiResponse(responseCode = "200", description = "User successfully unbanned")
-    @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can unban users")
+    @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can unban users, that could mean that the user is not authenticated or that the user does not have admin privileges")
     public ResponseEntity<MessageResponseDTO> unbanUser(@PathVariable ObjectId userId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -204,10 +204,10 @@ public class UserController {
      * @param currentUser The currently authenticated user, whose role will be checked to ensure they have admin privileges before allowing the role change operation to proceed
      * @return ResponseEntity with a message indicating the result of the role change operation, with a 200 OK status if the user's role is successfully changed, or a 403 Forbidden status if the current user does not have admin privileges
      */
-    @PatchMapping("/role/{userId}")
+    @PatchMapping("/{userId}/role")
     @Operation(summary = "Change user role", description = "Change the role of a user by their ID (admin only)")
     @ApiResponse(responseCode = "200", description = "User role successfully changed")
-    @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can change user roles")
+    @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can change user roles, that could mean that the user is not authenticated or that the user does not have admin privileges")
     public ResponseEntity<MessageResponseDTO> changeUserRole(@PathVariable ObjectId userId, @RequestParam ROLES newRole, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -218,12 +218,12 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponseDTO("User role successfully changed to " + newRole));
     }
 
-    @PatchMapping("/{id}/block")
+    @PatchMapping("/{userId}/block")
     @Operation(summary = "Block a user", description = "Add the specified user to the authenticated user's banned list")
     @ApiResponse(responseCode = "200", description = "User successfully blocked")
-    @ApiResponse(responseCode = "400", description = "Invalid request")
-    @ApiResponse(responseCode = "401", description = "User not authenticated")
-    public ResponseEntity<MessageResponseDTO> blockUser(@PathVariable("id") ObjectId userToBlockId, @AuthenticationPrincipal User currentUser) {
+    @ApiResponse(responseCode = "400", description = "Invalid request, that could mean that the user to block ID is missing from the request or that the user is trying to block themselves, an admin, or a user who is already blocked")
+    @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
+    public ResponseEntity<MessageResponseDTO> blockUser(@PathVariable("userId") ObjectId userToBlockId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null || userToBlockId == null) {
             return ResponseEntity.badRequest().body(new MessageResponseDTO("current user or user to block is null"));
         }
@@ -241,12 +241,12 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponseDTO("User successfully blocked"));
     }
 
-    @PatchMapping("/{id}/unblock")
+    @PatchMapping("/{userId}/unblock")
     @Operation(summary = "Unblock a user", description = "Remove the specified user from the authenticated user's banned list")
     @ApiResponse(responseCode = "200", description = "User successfully unblocked")
-    @ApiResponse(responseCode = "400", description = "Invalid request")
-    @ApiResponse(responseCode = "401", description = "User not authenticated")
-    public ResponseEntity<MessageResponseDTO> unblockUser(@PathVariable("id") ObjectId userToUnblockId, @AuthenticationPrincipal User currentUser) {
+    @ApiResponse(responseCode = "400", description = "Invalid request, that could mean that the user to unblock ID is missing from the request or that the user is trying to unblock themselves or a user who is not currently blocked")
+    @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
+    public ResponseEntity<MessageResponseDTO> unblockUser(@PathVariable("userId") ObjectId userToUnblockId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null || userToUnblockId == null) {
             return ResponseEntity.badRequest().body(new MessageResponseDTO("current user or user to unblock is null"));
         }
@@ -257,12 +257,12 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponseDTO("User successfully unblocked"));
     }
 
-    @GetMapping("/{id}/pages")
+    @GetMapping("/{userId}/pages")
     @Operation(summary = "Get all pages of a user")
     @ApiResponse(responseCode = "200", description = "Pages retrieved successfully")
-    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
-    @ApiResponse(responseCode = "404", description = "User not found")
-    public List<String> getPages(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
+    @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
+    @ApiResponse(responseCode = "404", description = "User not found, that could mean that the user with the specified ID does not exist in the database")
+    public List<String> getPages(@PathVariable ObjectId userId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return List.of();
         }
@@ -271,11 +271,11 @@ public class UserController {
                 .toList();
     }
 
-    @GetMapping("/{id}/groups")
+    @GetMapping("/{userId}/groups")
     @ApiResponse(responseCode = "200", description = "Groups retrieved successfully")
-    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
-    @ApiResponse(responseCode = "404", description = "User not found")
-    public List<String> getGroups(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
+    @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
+    @ApiResponse(responseCode = "404", description = "User not found, that could mean that the user with the specified ID does not exist in the database")
+    public List<String> getGroups(@PathVariable ObjectId userId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return List.of();
         }
@@ -284,15 +284,59 @@ public class UserController {
                 .toList();
     }
 
-    @GetMapping("/{id}/posts")
+    @GetMapping("/{userId}/posts")
     @Operation(summary = "Get all posts of a user, excluding posts from groups or pages the current user is not a member of")
-    @ApiResponse(responseCode = "200", description = "Posts retrieved successfully")
-    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
-    @ApiResponse(responseCode = "404", description = "User not found")
-    public List<PostDTO> getPosts(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
+    @ApiResponse(responseCode = "200", description = "Posts retrieved successfully, a list of posts created by the specified user is returned in the response, excluding any posts that belong to groups or pages that the current user is not a member of")
+    @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
+    @ApiResponse(responseCode = "404", description = "User not found, that could mean that the user with the specified ID does not exist in the database")
+    public List<PostDTO> getPosts(@PathVariable ObjectId userId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return List.of();
         }
         return userService.getUsersPosts(userId);
+    }
+
+    /**
+     * Endpoint for retrieving the list of all registered users.
+     * This operation is restricted to admin users only.
+     *
+     * @param currentUser The currently authenticated user, whose role will be checked to ensure they have admin privileges
+     * @return ResponseEntity containing a list of UserResponseDTOs for all registered users with an HTTP status of 200 if successful, or 403 if the user doesn't have admin privileges
+     */
+    @GetMapping("/all")
+    @Operation(summary = "Get all registered users", description = "Retrieve a list of all registered users (admin only)")
+    @ApiResponse(responseCode = "200", description = "Users retrieved successfully, a list of all registered users is returned in the response")
+    @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can view all users, that could mean that the user is not authenticated or that the user does not have admin privileges")
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(List.of());
+        }
+
+        List<User> users = userService.getAllUsers();
+        List<UserResponseDTO> userDTOs = userMapper.toResponseDTOs(users);
+        return ResponseEntity.ok(userDTOs);
+    }
+
+    /**
+     * Endpoint for retrieving the list of users blocked by the authenticated user.
+     * This method is only accessible to authenticated users.
+     *
+     * @param currentUser The currently authenticated user
+     * @return ResponseEntity containing a list of UserResponseDTOs for all blocked users with an HTTP status of 200 if successful, or 401 if not authenticated
+     */
+    @GetMapping("/blocked")
+    @Operation(summary = "Get blocked users list", description = "Retrieve a list of all users blocked by the authenticated user")
+    @ApiResponse(responseCode = "200", description = "Blocked users retrieved successfully, a list of all users blocked by the authenticated user is returned in the response")
+    @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
+    public ResponseEntity<List<UserResponseDTO>> getBlockedUsers(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(List.of());
+        }
+
+        List<User> blockedUsers = userService.getBlockedUsers(currentUser.getId());
+        List<UserResponseDTO> blockedUserDTOs = userMapper.toResponseDTOs(blockedUsers);
+        return ResponseEntity.ok(blockedUserDTOs);
     }
 }

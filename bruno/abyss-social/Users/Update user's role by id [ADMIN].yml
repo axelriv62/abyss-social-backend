@@ -1,0 +1,21 @@
+info:
+  name: Update user's role by id [ADMIN]
+  type: http
+  seq: 4
+
+http:
+  method: PATCH
+  url: "{{URL}}/users/69ccf2aa15852ad1e8d5b0a2/role?newRole=ADMIN"
+  params:
+    - name: newRole
+      value: ADMIN
+      type: query
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

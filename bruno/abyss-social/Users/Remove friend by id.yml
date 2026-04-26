@@ -1,0 +1,21 @@
+info:
+  name: Remove friend by id
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{URL}}/users/friends/remove?friendId=69ccf2aa15852ad1e8d5b0a2"
+  params:
+    - name: friendId
+      value: 69ccf2aa15852ad1e8d5b0a2
+      type: query
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
