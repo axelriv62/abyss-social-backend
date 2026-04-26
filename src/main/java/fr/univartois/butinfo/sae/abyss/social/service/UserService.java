@@ -384,4 +384,13 @@ public class UserService implements UserDetailsService {
                 .toList();
     }
 
+    /**
+     * Retrieves all users in the database.
+     * This method is restricted to admin users only and returns a list of all User entities.
+     * @return A list of all User objects in the database
+     */
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
 }

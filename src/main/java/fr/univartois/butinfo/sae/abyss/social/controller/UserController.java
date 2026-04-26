@@ -295,4 +295,26 @@ public class UserController {
         }
         return userService.getUsersPosts(userId);
     }
+
+    /**
+     * Endpoint for retrieving the list of all registered users.
+     * This operation is restricted to admin users only.
+     *
+     * @param currentUser The currently authenticated user, whose role will be checked to ensure they have admin privileges
+     * @return ResponseEntity containing a list of UserResponseDTOs for all registered users with an HTTP status of 200 if successful, or 403 if the user doesn't have admin privileges
+     */
+    @GetMapping("/all")
+    @Operation(summary = "Get all registered users", description = "Retrieve a list of all registered users (admin only)")
+    @ApiResponse(responseCode = "200", description = "Users retrieved successfully, a list of all registered users is returned in the response")
+    @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can view all users, that could mean that the user is not authenticated or that the user does not have admin privileges")
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(List.of());
+        }
+
+        List<User> users = userService.getAllUsers();
+        List<UserResponseDTO> userDTOs = userMapper.toResponseDTOs(users);
+        return ResponseEntity.ok(userDTOs);
+    }
 }
