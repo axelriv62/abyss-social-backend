@@ -1,9 +1,6 @@
 package fr.univartois.butinfo.sae.abyss.social.controller;
 
-import fr.univartois.butinfo.sae.abyss.social.dto.AuthRegisterRequestDTO;
-import fr.univartois.butinfo.sae.abyss.social.dto.AuthLoginRequestDTO;
-import fr.univartois.butinfo.sae.abyss.social.dto.AuthResponseDTO;
-import fr.univartois.butinfo.sae.abyss.social.dto.UserResponseDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.*;
 import fr.univartois.butinfo.sae.abyss.social.mapper.UserMapper;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
 import fr.univartois.butinfo.sae.abyss.social.service.AuthService;
@@ -96,5 +93,25 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.ok(userMapper.toResponseDTO(currentUser));
+    }
+
+    /**
+     * Endpoint for changing the password of the currently authenticated user.
+     * Authentication is verified via JWT token, so only the new password is required.
+     *
+     * @param currentUser The currently authenticated user, injected by Spring Security using the @AuthenticationPrincipal annotation.
+     * @param changePasswordDTO The ChangePasswordRequestDTO object containing the new password, which is validated using the @Valid annotation.
+     * @return ResponseEntity containing a MessageResponseDTO with a success or error message, with an HTTP status of 200 if the password is successfully changed, or 401 if the user is not authenticated.
+     */
+    @PatchMapping("/change-password")
+    @Operation(summary = "Change the password of the authenticated user")
+    @ApiResponse(responseCode = "200", description = "Password has been successfully changed")
+    @ApiResponse(responseCode = "401", description = "User not authenticated, JWT token is missing or invalid")
+    public ResponseEntity<MessageResponseDTO> changePassword(@AuthenticationPrincipal User currentUser, @Valid @RequestBody ChangePasswordRequestDTO changePasswordDTO) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDTO("User not authenticated"));
+        }
+        authService.changePassword(currentUser, changePasswordDTO);
+        return ResponseEntity.ok(new MessageResponseDTO("Password has been successfully changed"));
     }
 }
