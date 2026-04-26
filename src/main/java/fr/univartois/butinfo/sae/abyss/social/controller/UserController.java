@@ -317,4 +317,26 @@ public class UserController {
         List<UserResponseDTO> userDTOs = userMapper.toResponseDTOs(users);
         return ResponseEntity.ok(userDTOs);
     }
+
+    /**
+     * Endpoint for retrieving the list of users blocked by the authenticated user.
+     * This method is only accessible to authenticated users.
+     *
+     * @param currentUser The currently authenticated user
+     * @return ResponseEntity containing a list of UserResponseDTOs for all blocked users with an HTTP status of 200 if successful, or 401 if not authenticated
+     */
+    @GetMapping("/blocked")
+    @Operation(summary = "Get blocked users list", description = "Retrieve a list of all users blocked by the authenticated user")
+    @ApiResponse(responseCode = "200", description = "Blocked users retrieved successfully, a list of all users blocked by the authenticated user is returned in the response")
+    @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
+    public ResponseEntity<List<UserResponseDTO>> getBlockedUsers(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(List.of());
+        }
+
+        List<User> blockedUsers = userService.getBlockedUsers(currentUser.getId());
+        List<UserResponseDTO> blockedUserDTOs = userMapper.toResponseDTOs(blockedUsers);
+        return ResponseEntity.ok(blockedUserDTOs);
+    }
 }
