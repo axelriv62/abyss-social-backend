@@ -68,110 +68,110 @@ public class PageController {
 
     /**
      * Handles the deletion of a Page by its ID.
-     * @param id The ObjectId of the Page to be deleted.
+     * @param pageId The ObjectId of the Page to be deleted.
      * @param currentUser The currently authenticated user, injected by Spring Security. If the user is not authenticated, this parameter will be null. Only the creator of the page can perform this action. If the authenticated user is not the creator of the page, a 403 Forbidden response is returned.
      * @return A ResponseEntity with HTTP status 204 (No Content) if the deletion was successful, or 404 (Not Found) if the Page does not exist.
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{pageId}")
     @Operation(summary = "Delete a page", description = "Deletes the page with the specified ID. Only the creator of the page can perform this action.")
     @ApiResponse(responseCode = "204", description = "Page successfully deleted")
     @ApiResponse(responseCode = "403", description = "Forbidden")
     @ApiResponse(responseCode = "404", description = "Page not found")
-    public ResponseEntity<Void> deletePage(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<Void> deletePage(@PathVariable ObjectId pageId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
+        Page page = pageService.findById(pageId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
 
         if (!page.getUser().getId().equals(currentUser.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        pageService.deleteById(id);
+        pageService.deleteById(pageId);
         return ResponseEntity.noContent().build();
     }
 
     /**
      * Handles the update of an existing Page by its ID.
-     * @param id The ObjectId of the Page to be updated.
+     * @param pageId The ObjectId of the Page to be updated.
      * @param pageDTO The PageDTO containing the updated details of the page. The request body must contain a valid PageDTO object. If the page does not exist, a 404 Not Found response is returned.
      * @param currentUser The currently authenticated user, injected by Spring Security. If the user is not authenticated, this parameter will be null. Only the creator of the page can perform this action. If the authenticated user is not the creator of the page, a 403 Forbidden response is returned.
      * @return A ResponseEntity containing the updated PageDTO and HTTP status 200 (OK) if the update was successful, or 404 (Not Found) if the Page does not exist.
      */
-    @PutMapping("/{id}")
-    @Operation(summary = "Update a page", description = "Updates the page with the specified ID using the provided details. Only the creator of the page can perform this action.")
+    @PutMapping("/{pageId}")
+    @Operation(summary = "Edit a page", description = "Edit the page with the specified ID using the provided details. Only the creator of the page can perform this action.")
     @ApiResponse(responseCode = "200", description = "Page successfully updated")
     @ApiResponse(responseCode = "403", description = "Forbidden")
     @ApiResponse(responseCode = "404", description = "Page not found")
-    public ResponseEntity<PageDTO> updatePage(@PathVariable ObjectId id, @Valid @RequestBody PageDTO pageDTO, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<PageDTO> updatePage(@PathVariable ObjectId pageId, @Valid @RequestBody PageDTO pageDTO, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
+        Page page = pageService.findById(pageId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
 
         if (!page.getUser().getId().equals(currentUser.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        Page updatedPage = pageService.updatePage(id, pageMapper.toEntity(pageDTO));
+        Page updatedPage = pageService.updatePage(pageId, pageMapper.toEntity(pageDTO));
         return ResponseEntity.ok(pageMapper.toDTO(updatedPage));
     }
 
     /**
      * Handles the following of a page by the authenticated user. This method allows the user to follow a page by its ID. If the user is not authenticated, a 401 Unauthorized response is returned. If the page does not exist, a 404 Not Found response is returned. If the operation is successful, a 200 OK response is returned.
-     * @param id The ObjectId of the page to be followed.
+     * @param pageId The ObjectId of the page to be followed.
      * @param currentUser The currently authenticated user, injected by Spring Security. If the user is not authenticated, this parameter will be null.
      * @return A ResponseEntity with HTTP status 200 (OK) if the user successfully followed the page, 404 (Not Found) if the page does not exist, or 401 (Unauthorized) if the user is not authenticated.
      */
-    @PatchMapping("/{id}/follow")
+    @PatchMapping("/{pageId}/follow")
     @Operation(summary = "Follow a page", description = "Allows the authenticated user to follow a page by its ID.")
     @ApiResponse(responseCode = "200", description = "User successfully followed the page")
     @ApiResponse(responseCode = "404", description = "Page not found")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
-    public ResponseEntity<Void> followPage(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<Void> followPage(@PathVariable ObjectId pageId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
+        Page page = pageService.findById(pageId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
         userService.addPageToUser(currentUser.getId(), page.getId());
         return ResponseEntity.ok().build();
     }
 
     /**
      * Handles the unfollowing of a page by the authenticated user. This method allows the user to unfollow a page by its ID. If the user is not authenticated, a 401 Unauthorized response is returned. If the page does not exist, a 404 Not Found response is returned. If the operation is successful, a 200 OK response is returned.
-     * @param id The ObjectId of the page to be unfollowed.
+     * @param pageId The ObjectId of the page to be unfollowed.
      * @param currentUser The currently authenticated user, injected by Spring Security. If the user is not authenticated, this parameter will be null.
      * @return A ResponseEntity with HTTP status 200 (OK) if the user successfully unfollowed the page, 404 (Not Found) if the page does not exist, or 401 (Unauthorized) if the user is not authenticated.
      */
-    @PatchMapping("/{id}/unfollow")
+    @PatchMapping("/{pageId}/unfollow")
     @Operation(summary = "Unfollow a page", description = "Allows the authenticated user to unfollow a page by its ID.")
     @ApiResponse(responseCode = "200", description = "User successfully unfollowed the page")
     @ApiResponse(responseCode = "404", description = "Page not found")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
-    public ResponseEntity<Void> unfollowPage(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<Void> unfollowPage(@PathVariable ObjectId pageId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Page page = pageService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
+        Page page = pageService.findById(pageId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
         userService.removePageFromUser(currentUser.getId(), page.getId());
         return ResponseEntity.ok().build();
     }
 
     /**
      * Handles the retrieval of a Page by its ID. This method allows clients to retrieve the details of a page by providing its ID in the URL path. If the page exists, a 200 OK response is returned with the PageDTO in the response body. If the page does not exist, a 404 Not Found response is returned.
-     * @param id The ObjectId of the page to be retrieved.
+     * @param pageId The ObjectId of the page to be retrieved.
      * @return A ResponseEntity containing the PageDTO of the requested page and HTTP status 200 (OK) if the page is found, or HTTP status 404 (Not Found) if the page does not exist.
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{pageId}")
     @Operation(summary = "Get page details", description = "Retrieve the details of a page by its ID.")
     @ApiResponse(responseCode = "200", description = "Page details retrieved successfully")
     @ApiResponse(responseCode = "404", description = "Page not found")
-    public ResponseEntity<PageDTO> getPageById(@PathVariable ObjectId id) {
-        Page page = pageService.findById(id)
+    public ResponseEntity<PageDTO> getPageById(@PathVariable ObjectId pageId) {
+        Page page = pageService.findById(pageId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PAGE_NOT_FOUND));
         return ResponseEntity.ok(pageMapper.toDTO(page));
     }
@@ -190,15 +190,15 @@ public class PageController {
         return ResponseEntity.ok(pageMapper.toDTOList(matches));
     }
 
-    @GetMapping("/{id}/posts")
+    @GetMapping("/{pageId}/posts")
     @Operation(summary = "Get all posts of a page")
     @ApiResponse(responseCode = "200", description = "Posts retrieved successfully")
     @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
     @ApiResponse(responseCode = "404", description = "Page not found")
-    public List<PostDTO> getPosts(@PathVariable("id") ObjectId userId, @AuthenticationPrincipal User currentUser) {
+    public List<PostDTO> getPosts(@PathVariable ObjectId pageId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return List.of();
         }
-        return pageService.getPagesPosts(userId);
+        return pageService.getPagesPosts(pageId);
     }
 }

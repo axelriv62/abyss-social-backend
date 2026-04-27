@@ -1,0 +1,21 @@
+info:
+  name: Add current user's like by id
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{URL}}/posts/69cfe9cf591405a8d9be409d/likes?userId=69cfe9b0591405a8d9be409b"
+  params:
+    - name: userId
+      value: 69cfe9b0591405a8d9be409b
+      type: query
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,15 @@
+info:
+  name: Get posts of page by id
+  type: http
+  seq: 8
+
+http:
+  method: GET
+  url: "{{URL}}/pages/69cfa861c26d5063191b0a66/posts"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -127,6 +127,18 @@ public class AuthService {
     }
 
     /**
+     * Changes the password for an authenticated user.
+     * The user authentication is already verified via JWT token.
+     *
+     * @param user The authenticated User entity whose password is to be changed.
+     * @param changePasswordDTO The ChangePasswordRequestDTO containing the new password.
+     */
+    public void changePassword(User user, ChangePasswordRequestDTO changePasswordDTO) {
+        user.setPassword(passwordEncoder.encode(changePasswordDTO.newPassword()));
+        userRepository.save(user);
+    }
+
+    /**
      * Checks if a user is banned based on their login credentials.
      * @param loginDTO The AuthLoginRequestDTO object containing the login credentials for authentication, including the user's email and password.
      * @return true if the user is banned, false otherwise

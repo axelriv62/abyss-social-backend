@@ -1,0 +1,21 @@
+info:
+  name: Save new user [DEPRECATED]
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{URL}}/users"
+  body:
+    type: json
+    data: |
+      {
+        "username": "robertduchmol",
+        "email": "robertduchmol@example.com"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

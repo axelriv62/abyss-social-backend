@@ -384,4 +384,32 @@ public class UserService implements UserDetailsService {
                 .toList();
     }
 
+    /**
+     * Retrieves all users in the database.
+     * This method is restricted to admin users only and returns a list of all User entities.
+     * @return A list of all User objects in the database
+     */
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    /**
+     * Retrieves all users that have been blocked by the current user.
+     * This method retrieves the current user, gets the list of blocked user IDs (usersBanned),
+     * and retrieves the corresponding User entities from the database.
+     *
+     * @param userId The ID of the current authenticated user
+     * @return A list of User objects that have been blocked by the current user
+     * @throws ResponseStatusException if the user is not found
+     */
+    public List<User> getBlockedUsers(ObjectId userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
+
+        if (user.getUsersBanned() == null || user.getUsersBanned().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return userRepository.findAllById(user.getUsersBanned());
+    }
+
 }

@@ -1,0 +1,21 @@
+info:
+  name: Generate image for post by id
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{URL}}/generate/post-image/69ce8cb61e56c90e807daa35"
+  body:
+    type: json
+    data: |-
+      {
+        "prompt": "post"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

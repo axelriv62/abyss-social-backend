@@ -1,0 +1,17 @@
+info:
+  name: Get page by id
+  type: http
+  seq: 7
+
+http:
+  method: GET
+  url: "{{URL}}/pages/69cd2777b8c51ba737e7a99d"
+  auth:
+    type: bearer
+    token: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
