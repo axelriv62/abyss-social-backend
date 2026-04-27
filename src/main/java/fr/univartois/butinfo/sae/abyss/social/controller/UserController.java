@@ -339,4 +339,22 @@ public class UserController {
         List<UserResponseDTO> blockedUserDTOs = userMapper.toResponseDTOs(blockedUsers);
         return ResponseEntity.ok(blockedUserDTOs);
     }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get user by ID", description = "Retrieve a user's information by their ID")
+    @ApiResponse(responseCode = "200", description = "User retrieved successfully, the user's information is returned in the response")
+    @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
+    @ApiResponse(responseCode = "404", description = "User not found, that could mean that the user with the specified ID does not exist in the database")
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = userService.getById(id);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(userMapper.toResponseDTO(user));
+    }
+
 }

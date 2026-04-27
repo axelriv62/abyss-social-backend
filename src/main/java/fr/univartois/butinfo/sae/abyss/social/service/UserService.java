@@ -412,4 +412,16 @@ public class UserService implements UserDetailsService {
         return userRepository.findAllById(user.getUsersBanned());
     }
 
+    /**
+     * Retrieves a user by their unique identifier.
+     * This method uses the UserRepository to find and return the User entity with the specified ID.
+     * If no user is found with the given ID, a ResponseStatusException with a 404 Not Found status is thrown.
+     * @param userId The ID of the user to be retrieved
+     * @return The User object corresponding to the specified ID
+     * @throws ResponseStatusException if no user is found with the given ID, with a 404 Not Found status and a message indicating that the user was not found
+     */
+    public User getById(ObjectId userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
+    }
+
 }
