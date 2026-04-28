@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.univartois.butinfo.sae.abyss.social.model.ROLES;
 import jakarta.validation.constraints.*;
-import org.bson.types.ObjectId;
 
 import java.time.LocalDateTime;
 
@@ -42,6 +41,9 @@ public record UserRecommendedDTO(
 
         // The role of the recommended user
         ROLES role,
+
+        // The profile picture of the recommended user, encoded as a data URL ready to be rendered by a client
+        String profilePicture,
 
         // The timestamp when the recommended user was created
         @JsonProperty("created_at")

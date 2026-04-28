@@ -5,6 +5,7 @@ import fr.univartois.butinfo.sae.abyss.social.dto.PostDTO;
 import fr.univartois.butinfo.sae.abyss.social.dto.UserResponseDTO;
 import fr.univartois.butinfo.sae.abyss.social.model.Post;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
+import fr.univartois.butinfo.sae.abyss.social.repository.CommentRepository;
 import jakarta.validation.Valid;
 import org.bson.types.ObjectId;
 import org.mapstruct.Mapper;
@@ -16,7 +17,22 @@ import java.util.List;
 import java.util.Objects;
 
 @Mapper(componentModel = "spring", uses = {CommentMapper.class, UserMapper.class})
-public interface PostMapper {
+public abstract class PostMapper {
+
+    protected CommentRepository commentRepository;
+
+    /**
+     * Constructor to inject CommentRepository
+     */
+    public PostMapper() {
+    }
+
+    /**
+     * Setter for CommentRepository - will be injected by Spring
+     */
+    public void setCommentRepository(CommentRepository commentRepository) {
+        this.commentRepository = commentRepository;
+    }
 
     /**
      * Converts a Post entity to a PostDTO.
@@ -31,12 +47,12 @@ public interface PostMapper {
     @Mapping(target = "likes", ignore = true)
     @Mapping(target = "dislikes", ignore = true)
     @Mapping(target = "comments", ignore = true)
-    PostDTO toDTOPartial(Post post);
+    public abstract PostDTO toDTOPartial(Post post);
 
     /**
      * Maps a list of Post entities to PostDTOs.
      */
-    default List<PostDTO> toDTOs(List<Post> posts) {
+    public List<PostDTO> toDTOs(List<Post> posts) {
         if (posts == null) {
             return new ArrayList<>();
         }
@@ -48,7 +64,7 @@ public interface PostMapper {
     /**
      * Converts a Post entity to a PostDTO with full mapping of likes, dislikes and comments as complete objects.
      */
-    default PostDTO toDTO(Post post) {
+    public PostDTO toDTO(Post post) {
         if (post == null) {
             return null;
         }
@@ -76,12 +92,12 @@ public interface PostMapper {
     @Mapping(target = "dislikes", ignore = true)
     @Mapping(target = "comments", ignore = true)
     @Mapping(target = "user", ignore = true)
-    Post toEntityPartial(@Valid PostDTO postDTO);
+    public abstract Post toEntityPartial(@Valid PostDTO postDTO);
 
     /**
      * Maps a PostDTO to a Post entity with full mapping of likes and dislikes.
      */
-    default Post toEntity(@Valid PostDTO postDTO) {
+    public Post toEntity(@Valid PostDTO postDTO) {
         if (postDTO == null) {
             return null;
         }
@@ -101,7 +117,7 @@ public interface PostMapper {
      * @param post the Post entity
      * @return the image as a data URL (e.g., "data:image/png;base64,...") or null
      */
-    default String toPostImageDataUrl(Post post) {
+    public String toPostImageDataUrl(Post post) {
         if (post == null || post.getImage() == null || post.getImage().getData() == null) {
             return null;
         }
@@ -121,7 +137,7 @@ public interface PostMapper {
      * @param bytes the binary data
      * @return the inferred MIME type
      */
-    default String inferMimeType(byte[] bytes) {
+    public String inferMimeType(byte[] bytes) {
         if (bytes.length >= 8
                 && (bytes[0] & 0xFF) == 0x89
                 && bytes[1] == 0x50
@@ -156,19 +172,28 @@ public interface PostMapper {
     }
 
     /**
-     * Converts a list of Comment entities to CommentDTOs.
+     * Converts Comment ObjectIds to full CommentDTO objects by fetching from database.
+     * This method loads the actual Comment entities from the repository.
      *
-     * @param comments the comment ObjectIds from Post
-     * @return list of CommentDTO objects (empty list if null)
+     * @param commentIds the comment ObjectIds from Post
+     * @return list of CommentDTO objects (empty list if null or repository unavailable)
      */
-    default List<CommentDTO> mapCommentsToDTO(ObjectId[] comments) {
-        // Note: This requires Comment entities, but Post only stores ObjectIds
-        // You'll need to fetch full Comment entities from the database if needed
-        // For now, this returns empty list - adjust based on your Comment fetching strategy
-        if (comments == null || comments.length == 0) {
+    public List<CommentDTO> mapCommentsToDTO(ObjectId[] commentIds) {
+        if (commentIds == null || commentIds.length == 0 || commentRepository == null) {
             return new ArrayList<>();
         }
-        return new ArrayList<>(); // Placeholder - implement based on your needs
+
+        List<CommentDTO> commentDTOs = new ArrayList<>();
+        CommentMapper commentMapper = new CommentMapperImpl();
+
+        for (ObjectId commentId : commentIds) {
+            commentRepository.findById(commentId).ifPresent(comment -> {
+                CommentDTO dto = commentMapper.toDTO(comment);
+                commentDTOs.add(dto);
+            });
+        }
+
+        return commentDTOs;
     }
 
     /**
@@ -177,7 +202,7 @@ public interface PostMapper {
      * @param users the users to convert
      * @return list of UserResponseDTO objects
      */
-    default List<UserResponseDTO> mapUsersToResponseDTO(List<User> users) {
+    public List<UserResponseDTO> mapUsersToResponseDTO(List<User> users) {
         if (users == null || users.isEmpty()) {
             return new ArrayList<>();
         }
@@ -193,7 +218,7 @@ public interface PostMapper {
      * @param userDTO the DTO to convert
      * @return User entity with only ID set
      */
-    default User userResponseDTOToUser(UserResponseDTO userDTO) {
+    public User userResponseDTOToUser(UserResponseDTO userDTO) {
         if (userDTO == null) {
             return null;
         }
@@ -204,17 +229,14 @@ public interface PostMapper {
 
     /**
      * Converts a User entity to UserResponseDTO.
-     * This is a simple conversion - you may need to use UserMapper for full mapping.
      *
      * @param user the user to convert
      * @return UserResponseDTO
      */
-    default UserResponseDTO userToResponseDTO(User user) {
+    public UserResponseDTO userToResponseDTO(User user) {
         if (user == null) {
             return null;
         }
-        // This is a minimal conversion - if you need the full UserResponseDTO with profile picture,
-        // consider injecting UserMapper and using its toResponseDTO method
         return new UserResponseDTO(
                 ObjectIdConverter.objectIdToString(user.getId()),
                 user.getUsernameField(),
@@ -230,7 +252,7 @@ public interface PostMapper {
      * @param dtos the DTOs to convert
      * @return list of User entities
      */
-    default List<User> mapResponseDTOToUsers(List<UserResponseDTO> dtos) {
+    public List<User> mapResponseDTOToUsers(List<UserResponseDTO> dtos) {
         if (dtos == null || dtos.isEmpty()) {
             return new ArrayList<>();
         }
@@ -246,7 +268,7 @@ public interface PostMapper {
      * @param comments the comment DTOs to convert
      * @return list of ObjectIds
      */
-    default List<ObjectId> mapCommentDTOToObjectIds(List<CommentDTO> comments) {
+    public List<ObjectId> mapCommentDTOToObjectIds(List<CommentDTO> comments) {
         if (comments == null || comments.isEmpty()) {
             return new ArrayList<>();
         }
