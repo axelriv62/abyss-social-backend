@@ -55,6 +55,12 @@ public class User implements UserDetails {
     private Binary profilePicture;
 
     /**
+     * MIME type of the stored profile picture.
+     */
+    @Field("profile_picture_content_type")
+    private String profilePictureContentType;
+
+    /**
      * A list of ObjectIds representing the user's friends.
      */
     private List<ObjectId> friends;
@@ -100,6 +106,7 @@ public class User implements UserDetails {
         this.password = password;
         this.role = ROLES.USER;
         this.profilePicture = null;
+        this.profilePictureContentType = null;
         this.friends = new ArrayList<>();
         this.usersBanned = new ArrayList<>();
         this.groups = new ArrayList<>();
@@ -121,6 +128,7 @@ public class User implements UserDetails {
         this.password = password;
         this.role = ROLES.USER;
         this.profilePicture = profilePicture;
+        this.profilePictureContentType = null;
         this.friends = new ArrayList<>();
         this.usersBanned = new ArrayList<>();
         this.groups = new ArrayList<>();
@@ -140,6 +148,7 @@ public class User implements UserDetails {
         this.email = email;
         this.role = ROLES.USER;
         this.profilePicture = profilePicture;
+        this.profilePictureContentType = null;
         this.friends = new ArrayList<>();
         this.usersBanned = new ArrayList<>();
         this.groups = new ArrayList<>();
@@ -160,6 +169,7 @@ public class User implements UserDetails {
         this.email = email;
         this.role = role;
         this.profilePicture = profilePicture;
+        this.profilePictureContentType = null;
         this.friends = new ArrayList<>();
         this.usersBanned = new ArrayList<>();
         this.groups = new ArrayList<>();
@@ -338,6 +348,24 @@ public class User implements UserDetails {
      */
     public void setProfilePicture(Binary profilePicture) {
         this.profilePicture = profilePicture;
+    }
+
+    /**
+     * Gets the MIME type of the profile picture.
+     *
+     * @return The MIME type of the profile picture.
+     */
+    public String getProfilePictureContentType() {
+        return profilePictureContentType;
+    }
+
+    /**
+     * Sets the MIME type of the profile picture.
+     *
+     * @param profilePictureContentType The MIME type to set.
+     */
+    public void setProfilePictureContentType(String profilePictureContentType) {
+        this.profilePictureContentType = profilePictureContentType;
     }
 
     /**

@@ -76,7 +76,7 @@ public class UserService implements UserDetailsService {
      * @param profilePicture The new profile picture (optional, can be null)
      * @throws ResponseStatusException if username or email is already in use or user not found
      */
-    public void updateProfile(ObjectId userId, String username, String email, Binary profilePicture) {
+    public void updateProfile(ObjectId userId, String username, String email, Binary profilePicture, String profilePictureContentType) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
@@ -99,6 +99,7 @@ public class UserService implements UserDetailsService {
         // Update profile picture only if provided
         if (profilePicture != null) {
             user.setProfilePicture(profilePicture);
+            user.setProfilePictureContentType(profilePictureContentType);
         }
 
         userRepository.save(user);

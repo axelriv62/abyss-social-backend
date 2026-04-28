@@ -44,6 +44,8 @@ public class Post {
     @DBRef
     private List<User> dislikes = new ArrayList<>();
 
+    private String imageContentType;
+
     /** Timestamp of post creation. */
     @Field("created_at")
     private LocalDateTime createdAt;
@@ -227,5 +229,13 @@ public class Post {
 
     public void setId(ObjectId postId) {
         this.id = postId;
+    }
+
+    public String getImageContentType() {
+        return imageContentType;
+    }
+
+    public void setImageContentType(String imageContentType) {
+        this.imageContentType = imageContentType;
     }
 }

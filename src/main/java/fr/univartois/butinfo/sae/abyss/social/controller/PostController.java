@@ -13,13 +13,17 @@ import fr.univartois.butinfo.sae.abyss.social.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -89,17 +93,33 @@ public class PostController {
     @ApiResponse(responseCode = "400", description = "Invalid data")
     @ApiResponse(responseCode = "404", description = "User don't exist")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
-    @PostMapping
-    public ResponseEntity<PostDTO> createPost(@Valid @RequestBody PostDTO postDTO, @AuthenticationPrincipal User currentUser) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PostDTO> createPost(
+            @RequestParam String content,
+            @RequestParam(required = false) MultipartFile image,
+            @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        Post post = postMapper.toEntity(postDTO);
+
+        Binary imageBinary = null;
+        String imageContentType = null;
+        if (image != null && !image.isEmpty()) {
+            try {
+                imageBinary = new Binary(image.getBytes());
+                imageContentType = image.getContentType();
+            } catch (IOException e) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
+        Post post = new Post();
+        post.setContent(content);
+        post.setImage(imageBinary);
+        post.setImageContentType(imageContentType);
         post.setUser(currentUser);
         Post savedPost = postService.save(post);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(postMapper.toDTO(savedPost));
-
     }
 
     /**
@@ -116,14 +136,30 @@ public class PostController {
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "403", description = "Forbidden")
     @ApiResponse(responseCode = "404", description = "Group or user not found")
-    @PostMapping("/groups/{groupId}")
+    @PostMapping(value = "/groups/{groupId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PostDTO> createPostInGroup(@PathVariable ObjectId groupId,
-                                                     @Valid @RequestBody PostDTO postDTO,
+                                                     @RequestParam String content,
+                                                     @RequestParam(required = false) MultipartFile image,
                                                      @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        Post post = postMapper.toEntity(postDTO);
+
+        Binary imageBinary = null;
+        String imageContentType = null;
+        if (image != null && !image.isEmpty()) {
+            try {
+                imageBinary = new Binary(image.getBytes());
+                imageContentType = image.getContentType();
+            } catch (IOException e) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
+        Post post = new Post();
+        post.setContent(content);
+        post.setImage(imageBinary);
+        post.setImageContentType(imageContentType);
         post.setUser(currentUser);
         Post savedPost = postService.saveInGroup(post, groupId);
         return ResponseEntity.status(HttpStatus.CREATED).body(postMapper.toDTO(savedPost));
@@ -143,14 +179,30 @@ public class PostController {
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "403", description = "Forbidden")
     @ApiResponse(responseCode = "404", description = "Page or user not found")
-    @PostMapping("/pages/{pageId}")
+    @PostMapping(value = "/pages/{pageId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PostDTO> createPostInPage(@PathVariable ObjectId pageId,
-                                                    @Valid @RequestBody PostDTO postDTO,
+                                                    @RequestParam String content,
+                                                    @RequestParam(required = false) MultipartFile image,
                                                     @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        Post post = postMapper.toEntity(postDTO);
+
+        Binary imageBinary = null;
+        String imageContentType = null;
+        if (image != null && !image.isEmpty()) {
+            try {
+                imageBinary = new Binary(image.getBytes());
+                imageContentType = image.getContentType();
+            } catch (IOException e) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
+        Post post = new Post();
+        post.setContent(content);
+        post.setImage(imageBinary);
+        post.setImageContentType(imageContentType);
         post.setUser(currentUser);
         Post savedPost = postService.saveInPage(post, pageId);
         return ResponseEntity.status(HttpStatus.CREATED).body(postMapper.toDTO(savedPost));

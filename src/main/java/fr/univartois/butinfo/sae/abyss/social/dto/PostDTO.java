@@ -1,8 +1,6 @@
 package fr.univartois.butinfo.sae.abyss.social.dto;
 
 import jakarta.validation.constraints.*;
-import org.bson.types.Binary;
-import org.bson.types.ObjectId;
 
 import java.time.LocalDateTime;
 
@@ -15,16 +13,16 @@ public record PostDTO (
         @Size(max = 500, message = "Content cannot exceed 500 characters")
         String content,
 
-        Binary image,
+        String image,
 
         @NotNull(message = "Comments tab cannot be null")
-        ObjectId[] comments,
+        String[] comments,
 
         @NotNull(message = "Likes tab cannot be null")
-        ObjectId[] likes,
+        String[] likes,
 
         @NotNull(message = "Dislikes tab cannot be null")
-        ObjectId[] dislikes,
+        String[] dislikes,
 
         @PastOrPresent(message="Creation date cannot be in the future")
         LocalDateTime createdAt

@@ -105,15 +105,18 @@ public class UserController {
         }
 
         Binary profilePictureBinary = null;
+        String profilePictureContentType = null;
+
         if (profilePicture != null && !profilePicture.isEmpty()) {
             try {
                 profilePictureBinary = new Binary(profilePicture.getBytes());
+                profilePictureContentType = profilePicture.getContentType();
             } catch (IOException e) {
                 return ResponseEntity.badRequest().build();
             }
         }
 
-        userService.updateProfile(currentUser.getId(), username, email, profilePictureBinary);
+        userService.updateProfile(currentUser.getId(), username, email, profilePictureBinary, profilePictureContentType);
         return ResponseEntity.noContent().build();
     }
 

@@ -5,16 +5,22 @@ info:
 
 http:
   method: POST
-  url: "{{URL}}/posts/pages/69cf68db0df9ea4aa8fc9d98"
+  url: "{{URL}}/posts/pages/69f0b92aef8051a5689be7c8"
+  headers:
+    - name: ""
+      value: ""
   body:
-    type: json
-    data: |-
-      {
-        "content": "Premier post dans un groupe",
-        "comments": [],
-        "likes": [],
-        "dislikes": []
-      }
+    type: multipart-form
+    data:
+      - name: content
+        type: text
+        value: Premier post dans un groupe
+        contentType: text
+      - name: image
+        type: file
+        value:
+          - /home/axel/Projects/sae/echoo/front-end-echoo/src/assets/logo.png
+        contentType: image/png
   auth:
     type: bearer
     token: "{{TOKEN}}"

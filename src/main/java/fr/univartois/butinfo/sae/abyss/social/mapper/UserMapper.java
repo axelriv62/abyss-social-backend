@@ -6,6 +6,7 @@ import fr.univartois.butinfo.sae.abyss.social.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -49,7 +50,6 @@ public interface UserMapper {
 
     /**
      * Converts a User entity to a UserResponseDTO. This method maps the fields of the User entity to the corresponding fields in the UserResponseDTO, allowing for data transfer between layers of the application while excluding sensitive information such as the password.
-     *
      * Uses a custom expression to access the actual username field directly, bypassing the getUsername() method which returns the email for authentication purposes.
      *
      * @param user The User entity to be converted to a UserResponseDTO. This method maps the fields of the User entity to the corresponding fields in the UserResponseDTO, while ignoring sensitive information such as the password, resulting in a UserResponseDTO that can be used for data transfer between layers of the application without exposing sensitive information.
@@ -57,17 +57,65 @@ public interface UserMapper {
      */
     @Mapping(target = "id", expression = "java(ObjectIdConverter.objectIdToString(user.getId()))")
     @Mapping(target = "username", expression = "java(user.getUsernameField())")
+    @Mapping(target = "profilePicture", expression = "java(toProfilePictureDataUrl(user))")
     UserResponseDTO toResponseDTO(User user);
 
     /**
      * Converts a list of User entities to a list of UserResponseDTOs. This method iterates over the list of User entities and converts each one to a UserResponseDTO using the toResponseDTO method, returning a list of UserResponseDTOs that can be used for data transfer between layers of the application while excluding sensitive information such as passwords.
-     *
      * Uses a custom expression to access the actual username field directly for each User entity, bypassing the getUsername() method which returns the email for authentication purposes, ensuring that the correct username is included in the UserResponseDTOs while still excluding sensitive information such as passwords.
      *
      * @param users The list of User entities to be converted to a list of UserResponseDTOs. Each User entity in the list is processed and converted to a UserResponseDTO using the toResponseDTO method, resulting in a list of UserResponseDTOs that can be used for data transfer between layers of the application while excluding sensitive information such as passwords.
      * @return A list of UserResponseDTO objects containing the data from the list of User entities, suitable for transfer between layers of the application while excluding sensitive information such as passwords
      */
     @Mapping(target = "username", expression = "java(user.getUsernameField())")
+    @Mapping(target = "profilePicture", expression = "java(toProfilePictureDataUrl(user))")
     List<UserResponseDTO> toResponseDTOs(List<User> users);
-}
 
+    default String toProfilePictureDataUrl(User user) {
+        if (user.getProfilePicture() == null || user.getProfilePicture().getData() == null) {
+            return null;
+        }
+
+        String mimeType = user.getProfilePictureContentType();
+        if (mimeType == null || mimeType.isBlank()) {
+            mimeType = inferMimeType(user.getProfilePicture().getData());
+        }
+
+        String base64 = Base64.getEncoder().encodeToString(user.getProfilePicture().getData());
+        return "data:" + mimeType + ";base64," + base64;
+    }
+
+    default String inferMimeType(byte[] bytes) {
+        if (bytes.length >= 8
+                && (bytes[0] & 0xFF) == 0x89
+                && bytes[1] == 0x50
+                && bytes[2] == 0x4E
+                && bytes[3] == 0x47) {
+            return "image/png";
+        }
+        if (bytes.length >= 3
+                && (bytes[0] & 0xFF) == 0xFF
+                && (bytes[1] & 0xFF) == 0xD8
+                && (bytes[2] & 0xFF) == 0xFF) {
+            return "image/jpeg";
+        }
+        if (bytes.length >= 6
+                && bytes[0] == 'G'
+                && bytes[1] == 'I'
+                && bytes[2] == 'F') {
+            return "image/gif";
+        }
+        if (bytes.length >= 12
+                && bytes[0] == 'R'
+                && bytes[1] == 'I'
+                && bytes[2] == 'F'
+                && bytes[3] == 'F'
+                && bytes[8] == 'W'
+                && bytes[9] == 'E'
+                && bytes[10] == 'B'
+                && bytes[11] == 'P') {
+            return "image/webp";
+        }
+        return "application/octet-stream";
+    }
+}
