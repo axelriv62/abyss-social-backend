@@ -3,6 +3,7 @@ package fr.univartois.butinfo.sae.abyss.social.dto;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record PostDTO (
         String id,
@@ -16,13 +17,13 @@ public record PostDTO (
         String image,
 
         @NotNull(message = "Comments tab cannot be null")
-        String[] comments,
+        List<CommentDTO> comments,
 
         @NotNull(message = "Likes tab cannot be null")
-        String[] likes,
+        List<UserResponseDTO> likes,
 
         @NotNull(message = "Dislikes tab cannot be null")
-        String[] dislikes,
+        List<UserResponseDTO> dislikes,
 
         @PastOrPresent(message="Creation date cannot be in the future")
         LocalDateTime createdAt
