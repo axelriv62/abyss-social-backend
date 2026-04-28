@@ -65,25 +65,42 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * Updates a user's profile information (username and profile picture).
+     * Updates a user's profile information (username, email and/or profile picture).
      * This method safely updates only non-sensitive user data.
-     * Verifies that the username is not already taken by another user.
+     * Only fields that are provided (non-null) will be updated.
+     * Verifies that the username and email are not already taken by another user if provided.
      *
      * @param userId The ID of the user to update
-     * @param username The new username (can be null)
-     * @param profilePicture The new profile picture (can be null)
-     * @throws ResponseStatusException if username is already in use or user not found
+     * @param username The new username (optional, can be null)
+     * @param email The new email (optional, can be null)
+     * @param profilePicture The new profile picture (optional, can be null)
+     * @throws ResponseStatusException if username or email is already in use or user not found
      */
-    public void updateProfile(ObjectId userId, String username, Binary profilePicture) {
+    public void updateProfile(ObjectId userId, String username, String email, Binary profilePicture) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
-        if (!user.getUsername().equals(username) && userRepository.findByUsername(username).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already in use");
+        // Update username only if provided and not empty
+        if (username != null && !username.trim().isEmpty()) {
+            if (!user.getUsername().equals(username) && userRepository.findByUsername(username).isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already in use");
+            }
+            user.setUsername(username);
         }
 
-        user.setUsername(username);
-        user.setProfilePicture(profilePicture);
+        // Update email only if provided and not empty
+        if (email != null && !email.trim().isEmpty()) {
+            if (!user.getEmail().equals(email) && userRepository.findByEmail(email).isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use");
+            }
+            user.setEmail(email);
+        }
+
+        // Update profile picture only if provided
+        if (profilePicture != null) {
+            user.setProfilePicture(profilePicture);
+        }
+
         userRepository.save(user);
     }
 

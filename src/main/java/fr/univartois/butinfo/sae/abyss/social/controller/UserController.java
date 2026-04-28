@@ -8,12 +8,16 @@ import fr.univartois.butinfo.sae.abyss.social.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -83,20 +87,33 @@ public class UserController {
      * Only these non-sensitive fields can be updated through this endpoint.
      *
      * @param currentUser The currently authenticated user
-     * @param updateDTO The DTO containing the new username and profile picture
      * @return ResponseEntity with the updated user information
      */
-    @PatchMapping
-    @Operation(summary = "Update current user profile", description = "Update username and profile picture of the authenticated user")
-    @ApiResponse(responseCode = "204", description = "Profile successfully updated, the user's profile information has been successfully updated in the database and will be reflected in subsequent requests")
-    @ApiResponse(responseCode = "400", description = "Username already in use or invalid data, that could mean that the new username is already taken by another user or that the provided data does not meet the validation requirements")
-    @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
-    public ResponseEntity<MessageResponseDTO> updateProfile(@AuthenticationPrincipal User currentUser, @Valid @RequestBody UserUpdateRequestDTO updateDTO) {
+    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Update current user profile", description = "Update username and/or email and/or profile picture of the authenticated user. Only provided fields will be updated")
+    @ApiResponse(responseCode = "204", description = "Profile successfully updated")
+    @ApiResponse(responseCode = "400", description = "Username or email already in use or invalid data")
+    @ApiResponse(responseCode = "401", description = "User not authenticated")
+    public ResponseEntity<MessageResponseDTO> updateProfile(
+            @AuthenticationPrincipal User currentUser,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) MultipartFile profilePicture) {
+
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        userService.updateProfile(currentUser.getId(), updateDTO.username(), updateDTO.profilePicture()
-        );
+
+        Binary profilePictureBinary = null;
+        if (profilePicture != null && !profilePicture.isEmpty()) {
+            try {
+                profilePictureBinary = new Binary(profilePicture.getBytes());
+            } catch (IOException e) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
+        userService.updateProfile(currentUser.getId(), username, email, profilePictureBinary);
         return ResponseEntity.noContent().build();
     }
 

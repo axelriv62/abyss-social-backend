@@ -1,0 +1,33 @@
+info:
+  name: Update user profile (with image)
+  type: http
+  seq: 3
+
+http:
+  method: PATCH
+  url: "{{URL}}/users"
+  headers:
+    - name: Content-Type
+      value: multipart/form-data
+  body:
+    type: multipart-form
+    data:
+      - name: username
+        type: text
+        value: newrobertducmoooool
+        contentType: text
+      - name: profilePicture
+        type: file
+        value:
+          - /home/axel/Projects/sae/echoo/front-end-echoo/src/assets/logo.png
+        contentType: image/png
+      - name: email
+        type: text
+        value: tresrobert@gmail.com
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
