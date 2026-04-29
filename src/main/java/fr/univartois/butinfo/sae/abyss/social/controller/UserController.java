@@ -100,6 +100,33 @@ public class UserController {
             @RequestParam(required = false) String email,
             @RequestParam(required = false) MultipartFile profilePicture) {
 
+        return handleProfileUpdate(currentUser, username, email, profilePicture);
+    }
+
+    /**
+     * Dedicated multipart endpoint for profile updates including file upload.
+     * Some servlet/container setups are unreliable with multipart PATCH requests, so this POST route provides a stable upload path.
+     */
+    @PostMapping(path = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Update current user profile with multipart upload", description = "Update username and/or email and/or profile picture of the authenticated user using multipart form data")
+    @ApiResponse(responseCode = "204", description = "Profile successfully updated")
+    @ApiResponse(responseCode = "400", description = "Username or email already in use or invalid data")
+    @ApiResponse(responseCode = "401", description = "User not authenticated")
+    public ResponseEntity<MessageResponseDTO> updateProfileMultipart(
+            @AuthenticationPrincipal User currentUser,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) MultipartFile profilePicture) {
+
+        return handleProfileUpdate(currentUser, username, email, profilePicture);
+    }
+
+    private ResponseEntity<MessageResponseDTO> handleProfileUpdate(
+            User currentUser,
+            String username,
+            String email,
+            MultipartFile profilePicture) {
+
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

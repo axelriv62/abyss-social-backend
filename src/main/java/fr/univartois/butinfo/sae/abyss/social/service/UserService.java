@@ -82,7 +82,7 @@ public class UserService implements UserDetailsService {
 
         // Update username only if provided and not empty
         if (username != null && !username.trim().isEmpty()) {
-            if (!user.getUsername().equals(username) && userRepository.findByUsername(username).isPresent()) {
+            if (!user.getUsernameField().equals(username) && userRepository.findByUsername(username).isPresent()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already in use");
             }
             user.setUsername(username);
