@@ -59,10 +59,10 @@ public class UserController {
     @Operation(summary = "Create a new user", description = "Create a new user with the provided data")
     @ApiResponse(responseCode = "200", description = "User successfully created and returned in the response")
     @ApiResponse(responseCode = "400", description = "Invalid data, that could mean that some data are already used (for email and username) or that don't meet the requirements")
-    public ResponseEntity<UserResponseDTO> create(@Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<UserDTO> create(@Valid @RequestBody UserDTO userDTO) {
         User user = userMapper.toEntity(userDTO);
         User savedUser = userService.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toResponseDTO(savedUser));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDTO(savedUser));
     }
 
     /**
@@ -131,12 +131,12 @@ public class UserController {
     @ApiResponse(responseCode = "400", description = "Username fragment invalid, that could mean that the provided username fragment is blank or does not meet the validation requirements")
     @ApiResponse(responseCode = "401", description = "Unauthorized, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
     @GetMapping("/search")
-    public ResponseEntity<List<UserResponseDTO>> searchUserByUsername(@RequestParam("username") String username, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<List<UserDTO>> searchUserByUsername(@RequestParam("username") String username, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         List<User> matches = userService.searchByUsername(username);
-        return ResponseEntity.ok(userMapper.toResponseDTOs(matches));
+        return ResponseEntity.ok(userMapper.toDTOs(matches));
     }
 
     /**
@@ -321,20 +321,20 @@ public class UserController {
      * This operation is restricted to admin users only.
      *
      * @param currentUser The currently authenticated user, whose role will be checked to ensure they have admin privileges
-     * @return ResponseEntity containing a list of UserResponseDTOs for all registered users with an HTTP status of 200 if successful, or 403 if the user doesn't have admin privileges
+     * @return ResponseEntity containing a list of UserDTOs for all registered users with an HTTP status of 200 if successful, or 403 if the user doesn't have admin privileges
      */
     @GetMapping("/all")
     @Operation(summary = "Get all registered users", description = "Retrieve a list of all registered users (admin only)")
     @ApiResponse(responseCode = "200", description = "Users retrieved successfully, a list of all registered users is returned in the response")
     @ApiResponse(responseCode = "403", description = "Forbidden: Only admins can view all users, that could mean that the user is not authenticated or that the user does not have admin privileges")
-    public ResponseEntity<List<UserResponseDTO>> getAllUsers(@AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<List<UserDTO>> getAllUsers(@AuthenticationPrincipal User currentUser) {
         if (currentUser == null || currentUser.getRole() != ROLES.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(List.of());
         }
 
         List<User> users = userService.getAllUsers();
-        List<UserResponseDTO> userDTOs = userMapper.toResponseDTOs(users);
+        List<UserDTO> userDTOs = userMapper.toDTOs(users);
         return ResponseEntity.ok(userDTOs);
     }
 
@@ -343,20 +343,20 @@ public class UserController {
      * This method is only accessible to authenticated users.
      *
      * @param currentUser The currently authenticated user
-     * @return ResponseEntity containing a list of UserResponseDTOs for all blocked users with an HTTP status of 200 if successful, or 401 if not authenticated
+     * @return ResponseEntity containing a list of UserDTOs for all blocked users with an HTTP status of 200 if successful, or 401 if not authenticated
      */
     @GetMapping("/blocked")
     @Operation(summary = "Get blocked users list", description = "Retrieve a list of all users blocked by the authenticated user")
     @ApiResponse(responseCode = "200", description = "Blocked users retrieved successfully, a list of all users blocked by the authenticated user is returned in the response")
     @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
-    public ResponseEntity<List<UserResponseDTO>> getBlockedUsers(@AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<List<UserDTO>> getBlockedUsers(@AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(List.of());
         }
 
         List<User> blockedUsers = userService.getBlockedUsers(currentUser.getId());
-        List<UserResponseDTO> blockedUserDTOs = userMapper.toResponseDTOs(blockedUsers);
+        List<UserDTO> blockedUserDTOs = userMapper.toDTOs(blockedUsers);
         return ResponseEntity.ok(blockedUserDTOs);
     }
 
@@ -365,7 +365,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User retrieved successfully, the user's information is returned in the response")
     @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
     @ApiResponse(responseCode = "404", description = "User not found, that could mean that the user with the specified ID does not exist in the database")
-    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<UserDTO> getUserById(@PathVariable ObjectId id, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -374,7 +374,7 @@ public class UserController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        return ResponseEntity.ok(userMapper.toResponseDTO(user));
+        return ResponseEntity.ok(userMapper.toDTO(user));
     }
 
 }

@@ -1,11 +1,21 @@
 package fr.univartois.butinfo.sae.abyss.social.mapper;
 
+import fr.univartois.butinfo.sae.abyss.social.dto.GroupDTO;
+import fr.univartois.butinfo.sae.abyss.social.dto.PageDTO;
 import fr.univartois.butinfo.sae.abyss.social.dto.UserDTO;
 import fr.univartois.butinfo.sae.abyss.social.dto.UserResponseDTO;
+import fr.univartois.butinfo.sae.abyss.social.model.Group;
+import fr.univartois.butinfo.sae.abyss.social.model.Page;
 import fr.univartois.butinfo.sae.abyss.social.model.User;
+import fr.univartois.butinfo.sae.abyss.social.repository.GroupRepository;
+import fr.univartois.butinfo.sae.abyss.social.repository.PageRepository;
+import fr.univartois.butinfo.sae.abyss.social.repository.UserRepository;
+import org.bson.types.ObjectId;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -13,18 +23,41 @@ import java.util.List;
  * Mapper interface for converting between User entities and UserDTOs.
  * This interface uses MapStruct to generate the implementation
  */
-@Mapper(componentModel = "spring")
-public interface UserMapper {
+@Mapper(componentModel = "spring", uses = {GroupMapper.class, PageMapper.class})
+public abstract class UserMapper {
+
+    @Autowired
+    protected UserRepository userRepository;
+
+    @Autowired
+    protected GroupRepository groupRepository;
+
+    @Autowired
+    protected PageRepository pageRepository;
 
     /**
-     * Converts a User entity to a UserDTO.
-     * This method maps the fields of the User entity to the corresponding fields in the UserDTO, allowing for data transfer between layers of the application.
-     * @param user The User entity to be converted to a UserDTO
-     * @return A UserDTO object containing the data from the User entity, suitable for transfer between layers of the application
+     * Converts a User entity to a full UserDTO with complete objects for friends, groups, and pages.
+     * This is a custom implementation that bypasses MapStruct partial mapping to handle complex conversions.
      */
-    @Mapping(target = "id", expression = "java(ObjectIdConverter.objectIdToString(user.getId()))")
-    @Mapping(target = "password", ignore = true)
-    UserDTO toDTO(User user);
+    public UserDTO toDTO(User user) {
+        if (user == null) {
+            return null;
+        }
+
+        return new UserDTO(
+                ObjectIdConverter.objectIdToString(user.getId()),
+                user.getUsernameField(),
+                user.getEmail(),
+                null,  // password is never included in DTOs
+                user.getRole(),
+                user.getProfilePicture(),  // Keep Binary as-is
+                mapFriendsToResponseDTOs(user.getFriends()),
+                mapBannedUsersToResponseDTOs(user.getUsersBanned()),
+                mapGroupIds(user.getGroups()),
+                mapPageIds(user.getPages()),
+                user.getCreatedAt()
+        );
+    }
 
     /**
      * Converts a UserDTO to a User entity.
@@ -34,19 +67,28 @@ public interface UserMapper {
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "role", defaultValue = "USER")
-    @Mapping(target = "friends", defaultExpression = "java(new java.util.ArrayList<>())")
-    @Mapping(target = "usersBanned", defaultExpression = "java(new java.util.ArrayList<>())")
-    @Mapping(target = "groups", defaultExpression = "java(new java.util.ArrayList<>())")
-    @Mapping(target = "pages", defaultExpression = "java(new java.util.ArrayList<>())")
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
-    User toEntity(UserDTO userDTO);
+    @Mapping(target = "profilePictureContentType", ignore = true)
+    @Mapping(target = "authorities", ignore = true)
+    @Mapping(target = "friends", expression = "java(mapResponseDTOsToUserIds(userDTO.friends()))")
+    @Mapping(target = "usersBanned", expression = "java(mapResponseDTOsToUserIds(userDTO.usersBanned()))")
+    @Mapping(target = "groups", expression = "java(mapGroupDTOsToIds(userDTO.groups()))")
+    @Mapping(target = "pages", expression = "java(mapPageDTOsToIds(userDTO.pages()))")
+    public abstract User toEntity(UserDTO userDTO);
 
     /**
      * Converts a list of User entities to a list of UserDTOs. This method iterates over the list of User entities and converts each one to a UserDTO using the toDTO method, returning a list of UserDTOs that can be used for data transfer between layers of the application.
      * @param users The list of User entities to be converted to a list of UserDTOs. Each User entity in the list is processed and converted to a UserDTO using the toDTO method, resulting in a list of UserDTOs that can be used for data transfer between layers of the application.
      * @return A list of UserDTO objects containing the data from the list of User entities, suitable for transfer between layers of the application
      */
-    List<UserDTO> toDTOs(List<User> users);
+    public List<UserDTO> toDTOs(List<User> users) {
+        if (users == null) {
+            return new ArrayList<>();
+        }
+        return users.stream()
+                .map(this::toDTO)
+                .toList();
+    }
 
     /**
      * Converts a User entity to a UserResponseDTO. This method maps the fields of the User entity to the corresponding fields in the UserResponseDTO, allowing for data transfer between layers of the application while excluding sensitive information such as the password.
@@ -58,7 +100,7 @@ public interface UserMapper {
     @Mapping(target = "id", expression = "java(ObjectIdConverter.objectIdToString(user.getId()))")
     @Mapping(target = "username", expression = "java(user.getUsernameField())")
     @Mapping(target = "profilePicture", expression = "java(toProfilePictureDataUrl(user))")
-    UserResponseDTO toResponseDTO(User user);
+    public abstract UserResponseDTO toResponseDTO(User user);
 
     /**
      * Converts a list of User entities to a list of UserResponseDTOs. This method iterates over the list of User entities and converts each one to a UserResponseDTO using the toResponseDTO method, returning a list of UserResponseDTOs that can be used for data transfer between layers of the application while excluding sensitive information such as passwords.
@@ -67,12 +109,152 @@ public interface UserMapper {
      * @param users The list of User entities to be converted to a list of UserResponseDTOs. Each User entity in the list is processed and converted to a UserResponseDTO using the toResponseDTO method, resulting in a list of UserResponseDTOs that can be used for data transfer between layers of the application while excluding sensitive information such as passwords.
      * @return A list of UserResponseDTO objects containing the data from the list of User entities, suitable for transfer between layers of the application while excluding sensitive information such as passwords
      */
-    @Mapping(target = "username", expression = "java(user.getUsernameField())")
-    @Mapping(target = "profilePicture", expression = "java(toProfilePictureDataUrl(user))")
-    List<UserResponseDTO> toResponseDTOs(List<User> users);
+    public List<UserResponseDTO> toResponseDTOs(List<User> users) {
+        if (users == null) {
+            return new ArrayList<>();
+        }
+        return users.stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
 
-    default String toProfilePictureDataUrl(User user) {
-        if (user.getProfilePicture() == null || user.getProfilePicture().getData() == null) {
+    /**
+     * Converts a list of friend ObjectIds to UserResponseDTOs.
+     * Fetches the actual User entities from the repository and converts them.
+     *
+     * @param friendIds the friend ObjectIds
+     * @return list of UserResponseDTO objects
+     */
+    public List<UserResponseDTO> mapFriendsToResponseDTOs(List<ObjectId> friendIds) {
+        if (friendIds == null || friendIds.isEmpty() || userRepository == null) {
+            return new ArrayList<>();
+        }
+        return friendIds.stream()
+                .map(userRepository::findById)
+                .filter(java.util.Optional::isPresent)
+                .map(java.util.Optional::get)
+                .map(this::toResponseDTO)
+                .toList();
+    }
+
+    /**
+     * Converts a list of banned user ObjectIds to UserResponseDTOs.
+     * Fetches the actual User entities from the repository and converts them.
+     *
+     * @param bannedIds the banned user ObjectIds
+     * @return list of UserResponseDTO objects
+     */
+    public List<UserResponseDTO> mapBannedUsersToResponseDTOs(List<ObjectId> bannedIds) {
+        if (bannedIds == null || bannedIds.isEmpty() || userRepository == null) {
+            return new ArrayList<>();
+        }
+        return bannedIds.stream()
+                .map(userRepository::findById)
+                .filter(java.util.Optional::isPresent)
+                .map(java.util.Optional::get)
+                .map(this::toResponseDTO)
+                .toList();
+    } // 69f1a8e737384a074b14ae5b
+
+    /**
+     * Converts a list of group ObjectIds to GroupDTOs.
+     * Fetches the actual Group entities from the repository and converts them.
+     *
+     * @param groupIds the group ObjectIds
+     * @return list of GroupDTO objects
+     */
+    public List<GroupDTO> mapGroupIds(List<ObjectId> groupIds) {
+        if (groupIds == null || groupIds.isEmpty() || groupRepository == null) {
+            return new ArrayList<>();
+        }
+
+        GroupMapper groupMapper = new GroupMapperImpl();
+        return groupIds.stream()
+                .map(groupRepository::findById)
+                .filter(java.util.Optional::isPresent)
+                .map(java.util.Optional::get)
+                .map(groupMapper::toDTO)
+                .toList();
+    }
+
+    /**
+     * Converts a list of page ObjectIds to PageDTOs.
+     * Fetches the actual Page entities from the repository and converts them.
+     *
+     * @param pageIds the page ObjectIds
+     * @return list of PageDTO objects
+     */
+    public List<PageDTO> mapPageIds(List<ObjectId> pageIds) {
+        if (pageIds == null || pageIds.isEmpty() || pageRepository == null) {
+            return new ArrayList<>();
+        }
+
+        PageMapper pageMapper = new PageMapperImpl();
+        return pageIds.stream()
+                .map(pageRepository::findById)
+                .filter(java.util.Optional::isPresent)
+                .map(java.util.Optional::get)
+                .map(pageMapper::toDTO)
+                .toList();
+    }
+
+    /**
+     * Converts UserResponseDTOs back to ObjectIds for persistence.
+     *
+     * @param userDTOs the user response DTOs
+     * @return list of ObjectIds
+     */
+    public List<ObjectId> mapResponseDTOsToUserIds(List<UserResponseDTO> userDTOs) {
+        if (userDTOs == null || userDTOs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return userDTOs.stream()
+                .map(dto -> ObjectIdConverter.stringToObjectId(dto.id()))
+                .filter(java.util.Objects::nonNull)
+                .toList();
+    }
+
+    /**
+     * Converts GroupDTOs back to ObjectIds for persistence.
+     *
+     * @param groupDTOs the group DTOs
+     * @return list of ObjectIds
+     */
+    public List<ObjectId> mapGroupDTOsToIds(List<GroupDTO> groupDTOs) {
+        if (groupDTOs == null || groupDTOs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return groupDTOs.stream()
+                .map(dto -> ObjectIdConverter.stringToObjectId(dto.id()))
+                .filter(java.util.Objects::nonNull)
+                .toList();
+    }
+
+    /**
+     * Converts PageDTOs back to ObjectIds for persistence.
+     *
+     * @param pageDTOs the page DTOs
+     * @return list of ObjectIds
+     */
+    public List<ObjectId> mapPageDTOsToIds(List<PageDTO> pageDTOs) {
+        if (pageDTOs == null || pageDTOs.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return pageDTOs.stream()
+                .map(dto -> ObjectIdConverter.stringToObjectId(dto.id()))
+                .filter(java.util.Objects::nonNull)
+                .toList();
+    }
+
+    /**
+     * Converts a User entity's profile picture to a data URL.
+     * Returns null if no profile picture is present.
+     *
+     * @param user the User entity
+     * @return the profile picture as a data URL (e.g., "data:image/png;base64,...") or null
+     */
+    public String toProfilePictureDataUrl(User user) {
+        if (user == null || user.getProfilePicture() == null || user.getProfilePicture().getData() == null) {
             return null;
         }
 
@@ -85,7 +267,13 @@ public interface UserMapper {
         return "data:" + mimeType + ";base64," + base64;
     }
 
-    default String inferMimeType(byte[] bytes) {
+    /**
+     * Infers the MIME type from binary data.
+     *
+     * @param bytes the binary data
+     * @return the inferred MIME type
+     */
+    public String inferMimeType(byte[] bytes) {
         if (bytes.length >= 8
                 && (bytes[0] & 0xFF) == 0x89
                 && bytes[1] == 0x50

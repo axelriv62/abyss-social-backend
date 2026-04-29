@@ -3,7 +3,6 @@ package fr.univartois.butinfo.sae.abyss.social.dto;
 import fr.univartois.butinfo.sae.abyss.social.model.ROLES;
 import jakarta.validation.constraints.*;
 import org.bson.types.Binary;
-import org.bson.types.ObjectId;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,20 +33,20 @@ public record UserDTO(
         // The role of the user
         ROLES role,
 
-        // The profile picture of the user, stored as binary data
+        // The profile picture of the user as binary data
         Binary profilePicture,
 
-        // List of friend ObjectIds as Strings
-        List<ObjectId> friends,
+        // List of friend UserResponseDTOs
+        List<UserResponseDTO> friends,
 
-        // List of banned user ObjectIds as Strings
-        List<ObjectId> usersBanned,
+        // List of banned user UserResponseDTOs
+        List<UserResponseDTO> usersBanned,
 
-        // List of group ObjectIds the user belongs to
-        List<ObjectId> groups,
+        // List of GroupDTOs the user belongs to
+        List<GroupDTO> groups,
 
-        // List of pages ObjectIds the user belongs to
-        List<ObjectId> pages,
+        // List of PageDTOs the user follows
+        List<PageDTO> pages,
 
         // The timestamp when the user was created
         @PastOrPresent(message = "Creation date cannot be in the future")

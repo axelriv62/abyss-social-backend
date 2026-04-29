@@ -88,11 +88,12 @@ public class AuthController {
     @Operation(summary = "Get current user profile", description = "Get the profile information of the authenticated user")
     @ApiResponse(responseCode = "200", description = "Profile retrieved successfully, the profile information of the authenticated user is returned in the response")
     @ApiResponse(responseCode = "401", description = "User not authenticated, that could mean that the user is not authenticated or that the authentication token is missing or invalid")
-    public ResponseEntity<UserResponseDTO> getMe(@AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<UserDTO> getMe(@AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.ok(userMapper.toResponseDTO(currentUser));
+
+        return ResponseEntity.ok(userMapper.toDTO(currentUser));
     }
 
     /**
