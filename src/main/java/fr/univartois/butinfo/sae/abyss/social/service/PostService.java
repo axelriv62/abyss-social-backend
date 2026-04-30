@@ -577,4 +577,14 @@ public class PostService {
         updated[source.length] = postId;
         return updated;
     }
+
+    public List<Post> findAll(Integer size) {
+        if (size == null || size <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "size must be greater than 0");
+        }
+        return postRepository.findAll().stream()
+                .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
+                .limit(size)
+                .toList();
+    }
 }

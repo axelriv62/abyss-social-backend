@@ -365,4 +365,20 @@ public class PostController {
         return ResponseEntity.ok(postDTOs);
     }
 
+
+    @GetMapping("/all")
+    @Operation(summary = "Get all posts", description = "Retrieves a list of all posts in the system, sorted by creation date (most recent first).")
+    @ApiResponse(responseCode = "200", description = "Posts retrieved successfully")
+    @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
+    public ResponseEntity<List<PostDTO>> getAllPosts(@AuthenticationPrincipal User currentUser, @RequestParam(defaultValue = "50") int size) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<Post> posts = postService.findAll(size);
+        List<PostDTO> postDTOs = posts.stream()
+                .map(postMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(postDTOs);
+    }
+
 }
