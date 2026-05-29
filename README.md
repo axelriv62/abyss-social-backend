@@ -3,6 +3,8 @@
 
 ---
 
+Développement de l'architecture Backend d'un réseau social à l'aide de l'écosystème Spring, conçu pour alimenter l'interface d'une équipe frontend partenaire.
+
 ### Build the container image
 ```bash
 podman build -t abyss-social-api:1.0 --arch=amd64 -f Containerfile .
